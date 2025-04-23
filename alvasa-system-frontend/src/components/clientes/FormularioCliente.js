@@ -29,9 +29,9 @@ const FormularioCliente = ({ onClienteAgregado }) => {
   };
 
   return (
-    <Card>
+    <Card className="card-formulario">
       <Card.Body>
-        <Card.Title>Agregar Cliente</Card.Title>
+        <Card.Title className="title-formulario">Agregar Cliente</Card.Title>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Nombre</Form.Label>
@@ -49,7 +49,7 @@ const FormularioCliente = ({ onClienteAgregado }) => {
             <Form.Label>Email</Form.Label>
             <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} required />
           </Form.Group>
-          <Button type="submit" variant="primary">Agregar</Button>
+          <Button type="submit" variant="success">Agregar</Button>
         </Form>
       </Card.Body>
     </Card>

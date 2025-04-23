@@ -10,7 +10,7 @@ const Clientes = () => {
 
   return (
     <Container fluid>
-      <Row className="mt-4">
+      <Row className="mt-1">
         <Col md={4}>
           <FormularioCliente onClienteAgregado={toggleRefrescar} />
         </Col>

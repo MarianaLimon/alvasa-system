@@ -39,7 +39,7 @@ const ListaClientes = () => {
 
   return (
     <>
-      <InputGroup className="mb-3">
+      <InputGroup className="mb-3 buscador-clientes">
         <Form.Control
           placeholder="Buscar cliente..."
           value={filtro}
@@ -47,7 +47,7 @@ const ListaClientes = () => {
         />
       </InputGroup>
 
-      <Table striped bordered hover responsive>
+      <Table striped bordered hover responsive className="tabla-clientes">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -65,8 +65,10 @@ const ListaClientes = () => {
               <td>{cliente.telefono}</td>
               <td>{cliente.email}</td>
               <td>
-                <Button variant="warning" size="sm" onClick={() => setClienteEditando(cliente)}>Editar</Button>{' '}
-                <Button variant="danger" size="sm" onClick={() => eliminarCliente(cliente.id)}>Eliminar</Button>
+                <div className="botones-acciones">
+                  <Button variant="warning" size="sm" onClick={() => setClienteEditando(cliente)}>Editar</Button>
+                  <Button variant="danger" size="sm" onClick={() => eliminarCliente(cliente.id)}>Eliminar</Button>
+                </div>
               </td>
             </tr>
           ))}
