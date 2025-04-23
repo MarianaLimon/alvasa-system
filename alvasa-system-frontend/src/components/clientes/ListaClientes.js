@@ -1,46 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button } from 'react-bootstrap';
+import { Table, Button, Form, InputGroup } from 'react-bootstrap';
+import ModalEditarCliente from './ModalEditarCliente';
 
-const ListaClientes = ({ setClienteAEditar }) => {
+const ListaClientes = () => {
   const [clientes, setClientes] = useState([]);
+  const [filtro, setFiltro] = useState('');
+  const [clienteEditando, setClienteEditando] = useState(null);
 
-  useEffect(() => {
-    // Definir la función obtenerClientes dentro de useEffect
-    const obtenerClientes = async () => {
-      try {
-        const respuesta = await axios.get('http://localhost:5000/clientes'); // Asegúrate de que la URL sea correcta
-        setClientes(respuesta.data);
-      } catch (error) {
-        console.error('Error al obtener los clientes', error);
-      }
-    };
-
-    obtenerClientes(); // Llamar a la función dentro del useEffect
-  }, []); // Se ejecuta una vez al montar el componente
-
-  const eliminarCliente = async (id) => {
+  const obtenerClientes = async () => {
     try {
-      await axios.delete(`http://localhost:5000/clientes/${id}`);
-      setClientes(clientes.filter(cliente => cliente.id !== id)); // Actualiza la lista
-      alert('Cliente eliminado');
+      const respuesta = await axios.get('http://localhost:5000/clientes');
+      setClientes(respuesta.data);
     } catch (error) {
-      console.error('Error al eliminar el cliente', error);
-      alert('Error al eliminar el cliente');
+      console.error('Error al obtener clientes:', error);
     }
   };
 
-  const editarCliente = (cliente) => {
-    setClienteAEditar(cliente);
+  useEffect(() => {
+    obtenerClientes();
+  }, []);
+
+  const eliminarCliente = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este cliente?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/clientes/${id}`);
+      obtenerClientes(); // refrescar la lista
+    } catch (error) {
+      console.error('Error al eliminar cliente:', error);
+    }
   };
 
+  const clientesFiltrados = clientes.filter((cliente) =>
+    Object.values(cliente).some((valor) =>
+      valor?.toString().toLowerCase().includes(filtro.toLowerCase())
+    )
+  );
+
   return (
-    <div>
-      <h3>Lista de Clientes</h3>
-      <table className="table table-bordered">
+    <>
+      <InputGroup className="mb-3">
+        <Form.Control
+          placeholder="Buscar cliente..."
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value)}
+        />
+      </InputGroup>
+
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nombre</th>
             <th>Dirección</th>
             <th>Teléfono</th>
@@ -49,22 +58,32 @@ const ListaClientes = ({ setClienteAEditar }) => {
           </tr>
         </thead>
         <tbody>
-          {clientes.map((cliente) => (
+          {clientesFiltrados.map((cliente) => (
             <tr key={cliente.id}>
-              <td>{cliente.id}</td>
               <td>{cliente.nombre}</td>
               <td>{cliente.direccion}</td>
               <td>{cliente.telefono}</td>
               <td>{cliente.email}</td>
               <td>
-                <Button variant="warning" onClick={() => editarCliente(cliente)}>Editar</Button>{' '}
-                <Button variant="danger" onClick={() => eliminarCliente(cliente.id)}>Eliminar</Button>
+                <Button variant="warning" size="sm" onClick={() => setClienteEditando(cliente)}>Editar</Button>{' '}
+                <Button variant="danger" size="sm" onClick={() => eliminarCliente(cliente.id)}>Eliminar</Button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+
+      {clienteEditando && (
+        <ModalEditarCliente
+          cliente={clienteEditando}
+          onClose={() => setClienteEditando(null)}
+          onSave={() => {
+            setClienteEditando(null);
+            obtenerClientes();
+          }}
+        />
+      )}
+    </>
   );
 };
 

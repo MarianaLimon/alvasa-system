@@ -1,92 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { Form, Button, Card } from 'react-bootstrap';
 
-const FormularioCliente = ({ clienteAEditar }) => {
-  const [nombre, setNombre] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [email, setEmail] = useState('');
+const FormularioCliente = ({ onClienteAgregado }) => {
+  const [cliente, setCliente] = useState({
+    nombre: '',
+    direccion: '',
+    telefono: '',
+    email: '',
+  });
 
-  // Cargar datos del cliente a editar en el formulario
-  useEffect(() => {
-    if (clienteAEditar) {
-      setNombre(clienteAEditar.nombre);
-      setDireccion(clienteAEditar.direccion);
-      setTelefono(clienteAEditar.telefono);
-      setEmail(clienteAEditar.email);
-    }
-  }, [clienteAEditar]);
+  const handleChange = (e) => {
+    setCliente({
+      ...cliente,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-  // Manejar el envío del formulario (crear o actualizar cliente)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const cliente = { nombre, direccion, telefono, email };
-
     try {
-      if (clienteAEditar) {
-        // Actualizar cliente
-        await axios.put(`http://localhost:5000/clientes/${clienteAEditar.id}`, cliente);
-        alert('Cliente actualizado');
-      } else {
-        // Crear nuevo cliente
-        await axios.post('http://localhost:5000/clientes', cliente);
-        alert('Cliente creado');
-      }
+      await axios.post('http://localhost:5000/clientes', cliente);
+      setCliente({ nombre: '', direccion: '', telefono: '', email: '' });
+      if (onClienteAgregado) onClienteAgregado(); // Llamada para refrescar la tabla
     } catch (error) {
-      console.error('Error al guardar el cliente', error);
-      alert('Error al guardar el cliente');
+      console.error('Error al agregar cliente:', error);
     }
   };
 
   return (
-    <div>
-      <h3>{clienteAEditar ? 'Editar Cliente' : 'Agregar Cliente'}</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Nombre</label>
-          <input
-            type="text"
-            className="form-control"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Dirección</label>
-          <input
-            type="text"
-            className="form-control"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Teléfono</label>
-          <input
-            type="text"
-            className="form-control"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">
-          {clienteAEditar ? 'Actualizar Cliente' : 'Agregar Cliente'}
-        </button>
-      </form>
-    </div>
+    <Card>
+      <Card.Body>
+        <Card.Title>Agregar Cliente</Card.Title>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Nombre</Form.Label>
+            <Form.Control type="text" name="nombre" value={cliente.nombre} onChange={handleChange} required />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Dirección</Form.Label>
+            <Form.Control type="text" name="direccion" value={cliente.direccion} onChange={handleChange} required />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Teléfono</Form.Label>
+            <Form.Control type="text" name="telefono" value={cliente.telefono} onChange={handleChange} required />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Email</Form.Label>
+            <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} required />
+          </Form.Group>
+          <Button type="submit" variant="primary">Agregar</Button>
+        </Form>
+      </Card.Body>
+    </Card>
   );
 };
 

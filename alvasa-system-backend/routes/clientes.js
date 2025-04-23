@@ -1,38 +1,10 @@
-import React from 'react';
-import FormularioCliente from './FormularioCliente';
-import ListaClientes from './ListaClientes';
-import DetallesCliente from './DetallesCliente';
+const express = require('express');
+const router = express.Router();
+const clientesController = require('../controllers/clientesController');
 
-const Clientes = ({ clientes }) => {
-  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
-  const [mensajeCargados, setMensajeCargados] = useState('');
+router.get('/', clientesController.getClientes);
+router.post('/', clientesController.createCliente);
+router.put('/:id', clientesController.updateCliente);
+router.delete('/:id', clientesController.deleteCliente);
 
-  // Seleccionar un cliente
-  const seleccionarCliente = (cliente) => {
-    setClienteSeleccionado(cliente);
-  };
-
-  return (
-    <div className="container">
-      <h1 className="my-4">Gestión de Clientes</h1>
-
-      <div className="row">
-        {/* Columna del formulario */}
-        <div className="col-md-6">
-          <FormularioCliente onSubmit={agregarCliente} />
-        </div>
-
-        {/* Columna de la lista de clientes */}
-        <div className="col-md-6">
-          {mensajeCargados && <div className="alert alert-success mt-3">{mensajeCargados}</div>}
-          <ListaClientes clientes={clientes} />
-        </div>
-      </div>
-
-      {/* Mostrar detalles del cliente seleccionado */}
-      {clienteSeleccionado && <DetallesCliente cliente={clienteSeleccionado} />}
-    </div>
-  );
-};
-
-export default Clientes;
+module.exports = router;
