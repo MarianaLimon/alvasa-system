@@ -7,7 +7,10 @@ const itemsCotizacionRoutes = require('./routes/itemsCotizacion');
 const costosAdicionalesRoutes = require('./routes/costosAdicionales');
 
 const app = express();
-const port = 3000;
+const port = 5000;
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
 
 app.use(express.json());
 app.use(cors());

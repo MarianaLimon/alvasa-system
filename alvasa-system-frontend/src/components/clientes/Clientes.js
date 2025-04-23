@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import FormularioCliente from './FormularioCliente';
 import ListaClientes from './ListaClientes';
+import axios from 'axios';
 import DetallesCliente from './DetallesCliente';
 
-const Clientes = ({ clientes }) => {
+const Clientes = () => {
+  const [clientes, setClientes] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [mensajeCargados, setMensajeCargados] = useState('');
+
+  // Traer los clientes al cargar el componente
+  useEffect(() => {
+    const obtenerClientes = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/clientes'); // Ajusta la URL si es necesario
+        setClientes(response.data);
+      } catch (error) {
+        console.error('Error al obtener clientes:', error);
+      }
+    };
+    obtenerClientes();
+  }, []);
+
+  // Agregar un nuevo cliente
+  const agregarCliente = async (nuevoCliente) => {
+    try {
+      const response = await axios.post('http://localhost:5000/clientes', nuevoCliente);
+      setClientes([...clientes, response.data]);
+      setMensajeCargados('Cliente agregado correctamente');
+      setTimeout(() => setMensajeCargados(''), 3000); // Mensaje desaparece después de 3 segundos
+    } catch (error) {
+      console.error('Error al agregar cliente:', error);
+    }
+  };
 
   // Seleccionar un cliente
   const seleccionarCliente = (cliente) => {
