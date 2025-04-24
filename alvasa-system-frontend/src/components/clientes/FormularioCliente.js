@@ -49,7 +49,11 @@ const FormularioCliente = ({ onClienteAgregado }) => {
             <Form.Label>Email</Form.Label>
             <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} required />
           </Form.Group>
-          <Button type="submit" variant="success">Agregar</Button>
+          <div className="d-flex justify-content-center mt-3">
+            <Button type="submit" variant="success">
+                Agregar
+            </Button>
+            </div>
         </Form>
       </Card.Body>
     </Card>

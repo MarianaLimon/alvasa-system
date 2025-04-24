@@ -45,6 +45,9 @@ const ListaClientes = () => {
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
+        <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+          <i className="bi bi-search"></i>
+        </InputGroup.Text>
       </InputGroup>
 
       <Table striped bordered hover responsive className="tabla-clientes">
