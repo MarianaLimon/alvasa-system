@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Form, Button, Card, Row, Col } from 'react-bootstrap';
 import { BsSave, BsPrinter } from 'react-icons/bs';
 import FleteInternacional from './FleteInternacional';
@@ -14,7 +15,7 @@ import { Accordion } from 'react-bootstrap';
 const FormularioCotizacion = ({ onCotizacionGuardada }) => {
   const [form, setForm] = useState({
     folio: '',
-    cliente: '',
+    cliente_id: '',
     empresa: '',
     fecha: '',
     mercancia: '',
@@ -24,6 +25,8 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     cantidad: '',
     estatus: '',
   });
+
+  const [clientes, setClientes] = useState([]);
 
   const [flete, setFlete] = useState({});
   const [cargos, setCargos] = useState({});
@@ -63,6 +66,19 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
   };
 
+  useEffect(() => {
+    const obtenerClientes = async () => {
+      try {
+        const respuesta = await axios.get('http://localhost:5000/clientes'); // Ajusta la URL si es diferente
+        setClientes(respuesta.data);
+      } catch (error) {
+        console.error('Error al obtener clientes:', error);
+      }
+    };
+  
+    obtenerClientes();
+  }, []);
+
   return (
     <Card className="container-cotizaciones">
       <Card.Body>
@@ -83,10 +99,17 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
 
           <Row>
             <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Cliente</Form.Label>
-                <Form.Control type="text" name="cliente" value={form.cliente} onChange={handleChange} required />
-              </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Cliente</Form.Label>
+              <Form.Select name="cliente_id" value={form.cliente_id} onChange={handleChange} required>
+                <option value="">Seleccionar cliente...</option>
+                {clientes.map(cliente => (
+                  <option key={cliente.id} value={cliente.id}>
+                    {cliente.nombre}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
               <Form.Group className="mb-3">
               <Form.Label>Empresa</Form.Label>
               <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} placeholder=""/>
