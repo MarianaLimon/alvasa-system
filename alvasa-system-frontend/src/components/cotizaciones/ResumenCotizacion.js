@@ -3,7 +3,7 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
   const [propuesta, setPropuesta] = useState('');
-  const [fraxion, setFraxion] = useState('');
+  const [Fraccion, setFraccion] = useState('');
   const [montoComisionista, setMontoComisionista] = useState('');
   const [notas, setNotas] = useState('');
   const [ahorro, setAhorro] = useState(0);
@@ -24,9 +24,9 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
     const nuevoAhorro = totalGeneral - parseNumber(propuesta);
     setAhorro(nuevoAhorro);
     if (onResumenChange) {
-      onResumenChange({ propuesta, ahorro: nuevoAhorro, fraxion, montoComisionista, notas });
+      onResumenChange({ propuesta, ahorro: nuevoAhorro, Fraccion, montoComisionista, notas });
     }
-  }, [totalGeneral, propuesta, fraxion, montoComisionista, notas, onResumenChange]);
+  }, [totalGeneral, propuesta, Fraccion, montoComisionista, notas, onResumenChange]);
 
   const soloNumeros = (e) => {
     if (!/[0-9.]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
@@ -36,7 +36,7 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
 
   return (
     <div className="p-3 mt-4 rounded">
-      <h5 className="mb-3">Resumen Cotización</h5>
+      <h5 className="mb-3 title-resumen">Resumen Cotización</h5>
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
@@ -63,8 +63,8 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
-            <Form.Label>Fraxion / %IGI</Form.Label>
-            <Form.Control as="textarea" rows={1} placeholder="Escribe aquí..." value={fraxion} onChange={(e) => setFraxion(e.target.value)} />
+            <Form.Label>Fraccion / %IGI</Form.Label>
+            <Form.Control as="textarea" rows={1} placeholder="Escribe aquí..." value={Fraccion} onChange={(e) => setFraccion(e.target.value)} />
           </Form.Group>
         </Col>
         <Col md={4}>

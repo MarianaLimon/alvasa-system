@@ -31,7 +31,7 @@ const FormularioCliente = ({ onClienteAgregado }) => {
   return (
     <Card className="card-formulario">
       <Card.Body>
-        <Card.Title className="title-formulario">Agregar Cliente</Card.Title>
+        <Card.Title className="title-formulario-addcliente">Agregar Cliente</Card.Title>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Nombre</Form.Label>

@@ -8,19 +8,26 @@ body {
 }
 
 .titulo-principal {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
   text-align: center;
-  color: rgb(0, 0, 0);
+  color: #2b6aa1;
   margin-bottom: 0;
+  margin-top: 2rem;
 }
 
 .subtitulo {
   font-size: 2rem;
   font-weight: normal;
-  color: #3e3f42;
+  color: #2b6aa1;
   margin-bottom: 2rem;
   text-align: center;
+}
+.card-title {
+  margin-bottom: .1rem;
+  color: #2b6aa1;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
 .card-formulario {
@@ -31,6 +38,18 @@ body {
   padding: 1rem 2rem;
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.card-title {
+  margin-bottom: .1rem;
+  color: #2b6aa1;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.title-formulario-addcliente{
+  color: white;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .title-formulario{
@@ -65,56 +84,35 @@ body {
   border-radius: 20px;
 }
 
-.accordion-button.custom-acordion-header{
-  background-color: green !important; /* Gris oscuro */
-  color: white !important;
-  font-weight: bold;
-}
-
 .accordion-button {
   background: linear-gradient(90deg, #111333, #2b6aa1) !important;
   color: white !important;
   font-weight: bold;
 }
 
-
-/* .accordion-item:nth-child(1) .accordion-button {
-  background: linear-gradient(90deg, #000428, #004e92) !important; 
-  color: white !important;
-}
-
-.accordion-item:nth-child(2) .accordion-button {
-  background: linear-gradient(90deg, #111333, #2b6aa1) !important;
-  color: white !important;
-}
-
-.accordion-item:nth-child(3) .accordion-button {
-  background: linear-gradient(90deg, #111333, #3f74a1) !important;
-  color: white !important;
-}
-
-.accordion-item:nth-child(4) .accordion-button {
-  background: linear-gradient(90deg, #111333, #316da1) !important;
-  color: white !important;
-}
-
-.accordion-item:nth-child(5) .accordion-button {
-  background: linear-gradient(90deg, #111333, #316da1) !important;
-  color: white !important;
-}
-
-.accordion-item:nth-child(6) .accordion-button {
-  background: linear-gradient(90deg, #111333, #316da1) !important;
-  color: white !important;
-}
-
-.accordion-item:nth-child(7) .accordion-button {
-  background: linear-gradient(90deg, #111333, #316da1) !important;
-  color: white !important;
-}
- */
-
 .container-subform{
   background: rgb(67, 69, 96);
   color: white;
+}
+
+.text-end, .total-servicios, .total-cargos-extra {
+  text-align: right !important;
+  font-size: 1.6rem;
+  color: #68c768;
+}
+
+.subform-title{
+  font-weight: bold !important;
+  font-size: 1.5rem;
+}
+
+.container-subform{
+  padding: 2rem 4rem;
+  background: #3a3f44;
+  color: white;
+  border-radius: 20px;
+}
+
+.title-resumen{
+  font-size: 2rem;
 }

@@ -37,8 +37,8 @@ const Servicios = ({ onServiciosChange }) => {
   };
 
   return (
-    <div className="p-3 mt-4 rounded" style={{ backgroundColor: '#3a3f44', color: 'white' }}>
-      <h5 className="mb-3">Servicios</h5>
+    <div className="container-subform">
+      <h5 className="mb-3 subform-title">Servicios</h5>
 
       <Row className="mb-3">
         <Col md={4}>
@@ -146,7 +146,7 @@ const Servicios = ({ onServiciosChange }) => {
             />
           </Form.Group>
         </Col>
-        <Col md={6} className="d-flex align-items-end justify-content-end">
+        <Col md={6} className="d-flex align-items-end justify-content-end total-servicios">
           <strong>Total Servicios: ${total.toFixed(2)} USD</strong>
         </Col>
       </Row>

@@ -28,8 +28,8 @@ const CargosTraslados = ({ onCargosChange }) => {
   };
 
   return (
-    <div className="p-3 mt-4 rounded" style={{ backgroundColor: '#3a3f44', color: 'white' }}>
-      <h5 className="mb-3">Cargos de Traslados</h5>
+    <div className="container-subform">
+      <h5 className="mb-3 subform-title">Cargos de Traslados</h5>
 
       <Row className="mb-3">
         <Col md={4}>
