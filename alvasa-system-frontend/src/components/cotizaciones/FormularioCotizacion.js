@@ -8,6 +8,7 @@ import Servicios from './Servicios';
 import CuentaGastos from './CuentaGastos';
 import Pedimento from './Pedimento';
 import ResumenCotizacion from './ResumenCotizacion';
+import { Accordion } from 'react-bootstrap';
 
 
 const FormularioCotizacion = ({ onCotizacionGuardada }) => {
@@ -73,7 +74,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
   };
   return (
-    <Card className="mb-4">
+    <Card className="container-cotizaciones">
       <Card.Body>
         <Card.Title>Registrar Cotización</Card.Title>
         <Form onSubmit={handleSubmit}>
@@ -135,28 +136,62 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
               </Form.Group>
             </Col>
           </Row>
+
+          
           {/* Subformularios */}
-          <div className="mt-4">
-            <FleteInternacional onFleteChange={handleFleteChange} />
-          </div>
-          <div className="mt-4">
-            <CargosTraslados onCargosChange={handleCargosChange} />
-          </div>
-          <div className="mt-4">
-            <DesgloseImpuestos onImpuestosChange={handleImpuestosChange} />
-          </div>
-          <div className="mt-4">
-            <CargosExtra onCargosExtraChange={handleCargosExtraChange} />
-          </div>
-          <div className="mt-4">
-            <Servicios onServiciosChange={handleServiciosChange} />
-          </div>
-          <div className="mt-4">
-            <CuentaGastos onCuentaChange={handleCuentaGastosChange} />
-         </div>
-         <div className="mt-4">
-            <Pedimento onPedimentoChange={handlePedimentoChange} />
-        </div>
+          
+        <Accordion defaultActiveKey="0" className="mt-4">
+
+            <Accordion.Item eventKey="0">
+                <Accordion.Header className="accordion-header-custom">Flete Internacional</Accordion.Header>
+                <Accordion.Body>
+                <FleteInternacional onFleteChange={handleFleteChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="1">
+                <Accordion.Header>Cargos de Traslados</Accordion.Header>
+                <Accordion.Body>
+                <CargosTraslados onCargosChange={handleCargosChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="2">
+                <Accordion.Header>Desglose de Impuestos</Accordion.Header>
+                <Accordion.Body>
+                <DesgloseImpuestos onImpuestosChange={handleImpuestosChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="3">
+                <Accordion.Header>Cargos Extra</Accordion.Header>
+                <Accordion.Body>
+                <CargosExtra onCargosExtraChange={handleCargosExtraChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="4">
+                <Accordion.Header>Servicios</Accordion.Header>
+                <Accordion.Body>
+                <Servicios onServiciosChange={handleServiciosChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="5">
+                <Accordion.Header>Cuenta de Gastos</Accordion.Header>
+                <Accordion.Body>
+                <CuentaGastos onCuentaChange={handleCuentaGastosChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="6">
+                <Accordion.Header>Pedimento</Accordion.Header>
+                <Accordion.Body>
+                <Pedimento onPedimentoChange={handlePedimentoChange} />
+                </Accordion.Body>
+            </Accordion.Item>
+
+        </Accordion>
 
 
         <ResumenCotizacion

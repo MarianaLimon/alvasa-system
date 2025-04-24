@@ -57,3 +57,64 @@ body {
   display: flex;
   gap: 0.5rem;
 }
+
+/*  Tabla cotizaciones  */
+.container-cotizaciones{
+  margin: 0 5rem;
+  padding: 4rem;
+  border-radius: 20px;
+}
+
+.accordion-button.custom-acordion-header{
+  background-color: green !important; /* Gris oscuro */
+  color: white !important;
+  font-weight: bold;
+}
+
+.accordion-button {
+  background: linear-gradient(90deg, #111333, #2b6aa1) !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+
+/* .accordion-item:nth-child(1) .accordion-button {
+  background: linear-gradient(90deg, #000428, #004e92) !important; 
+  color: white !important;
+}
+
+.accordion-item:nth-child(2) .accordion-button {
+  background: linear-gradient(90deg, #111333, #2b6aa1) !important;
+  color: white !important;
+}
+
+.accordion-item:nth-child(3) .accordion-button {
+  background: linear-gradient(90deg, #111333, #3f74a1) !important;
+  color: white !important;
+}
+
+.accordion-item:nth-child(4) .accordion-button {
+  background: linear-gradient(90deg, #111333, #316da1) !important;
+  color: white !important;
+}
+
+.accordion-item:nth-child(5) .accordion-button {
+  background: linear-gradient(90deg, #111333, #316da1) !important;
+  color: white !important;
+}
+
+.accordion-item:nth-child(6) .accordion-button {
+  background: linear-gradient(90deg, #111333, #316da1) !important;
+  color: white !important;
+}
+
+.accordion-item:nth-child(7) .accordion-button {
+  background: linear-gradient(90deg, #111333, #316da1) !important;
+  color: white !important;
+}
+ */
+
+.container-subform{
+  background: rgb(67, 69, 96);
+  color: white;
+}
