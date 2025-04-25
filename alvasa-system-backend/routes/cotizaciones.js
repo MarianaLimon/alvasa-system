@@ -4,7 +4,6 @@ const db = require('../config/db');
 
 // Crear una cotización
 router.post('/', (req, res) => {
-  console.log('REQ.BODY recibido:', req.body);
   const {
     folio,
     cliente_id,
@@ -21,14 +20,24 @@ router.post('/', (req, res) => {
     notas,
     propuesta,
     total,
-    ahorro
+    ahorro,
+    flete_origen_destino,
+    flete_concepto_1,
+    flete_valor_1,
+    flete_concepto_2,
+    flete_valor_2,
+    flete_concepto_3,
+    flete_valor_3,
+    flete_total,
   } = req.body;
 
   const sql = `
     INSERT INTO cotizaciones 
     (folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio, cantidad, estatus,
-     fraccion_igi, monto_comisionista, notas, propuesta, total, ahorro) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     fraccion_igi, monto_comisionista, notas, propuesta, total, ahorro,
+     flete_origen_destino, flete_concepto_1, flete_valor_1, flete_concepto_2, flete_valor_2,
+     flete_concepto_3, flete_valor_3, flete_total)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(sql, [
@@ -47,7 +56,15 @@ router.post('/', (req, res) => {
     notas,
     propuesta,
     total,
-    ahorro
+    ahorro,
+    flete_origen_destino,
+    flete_concepto_1,
+    flete_valor_1,
+    flete_concepto_2,
+    flete_valor_2,
+    flete_concepto_3,
+    flete_valor_3,
+    flete_total
   ], (err, result) => {
     if (err) {
       console.error('Error al insertar cotización:', err);

@@ -59,6 +59,15 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       fraccion_igi: resumen.fraccion_igi,
       monto_comisionista: resumen.monto_comisionista || 0,
       notas: resumen.notas,
+      // Data Flete Int
+      flete_origen_destino: flete.origenDestino,
+      flete_concepto_1: flete.concepto1,
+      flete_valor_1: flete.valor1,
+      flete_concepto_2: flete.concepto2,
+      flete_valor_2: flete.valor2,
+      flete_concepto_3: flete.concepto3,
+      flete_valor_3: flete.valor3,
+      flete_total: flete.total,
     };
 
     console.log('Resumen antes de enviar:', resumen);

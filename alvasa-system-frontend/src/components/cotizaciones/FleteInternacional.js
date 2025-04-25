@@ -3,23 +3,25 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 const FleteInternacional = ({ onFleteChange }) => {
   const [flete, setFlete] = useState({
-    origenDestino: 'China - México',
-    opcion1: '',
-    monto1: '',
-    opcion2: '',
-    monto2: '',
-    opcion3: '',
-    monto3: '',
+    origenDestino: '',
+    concepto1: '',
+    valor1: '',
+    concepto2: '',
+    valor2: '',
+    concepto3: '',
+    valor3: '',
     total: 0,
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const actualizado = { ...flete, [name]: value };
+
     actualizado.total =
-      parseFloat(actualizado.monto1 || 0) +
-      parseFloat(actualizado.monto2 || 0) +
-      parseFloat(actualizado.monto3 || 0);
+      parseFloat(actualizado.valor1 || 0) +
+      parseFloat(actualizado.valor2 || 0) +
+      parseFloat(actualizado.valor3 || 0);
+
     setFlete(actualizado);
     if (onFleteChange) onFleteChange(actualizado);
   };
@@ -37,6 +39,7 @@ const FleteInternacional = ({ onFleteChange }) => {
       <Form.Group className="mb-3">
         <Form.Label>Origen - Destino</Form.Label>
         <Form.Select name="origenDestino" value={flete.origenDestino} onChange={handleChange}>
+          <option value="">Seleccionar destino...</option>
           <option>China - México</option>
           <option>Corea - Long Beach</option>
           <option>EU - México</option>
@@ -50,27 +53,29 @@ const FleteInternacional = ({ onFleteChange }) => {
         <Row className="mb-3" key={i}>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>{`Opción ${i}`}</Form.Label>
-              <Form.Select name={`opcion${i}`} value={flete[`opcion${i}`]} onChange={handleChange}>
+              <Form.Label>{`Concepto ${i}`}</Form.Label>
+              <Form.Select
+                name={`concepto${i}`}
+                value={flete[`concepto${i}`]}
+                onChange={handleChange}
+              >
+                <option value="">Selecciona</option>
                 {i === 1 && (
                   <>
-                    <option value="">Selecciona</option>
-                    <option>Flete marino</option>
-                    <option>20DS</option>
+                    <option value="Flete marino">Flete marino</option>
+                    <option value="20DS">20DS</option>
                   </>
                 )}
                 {i === 2 && (
                   <>
-                    <option value="">Selecciona</option>
-                    <option>Cargos locales</option>
-                    <option>40HQ</option>
+                    <option value="Cargos locales">Cargos locales</option>
+                    <option value="40HQ">40HQ</option>
                   </>
                 )}
                 {i === 3 && (
                   <>
-                    <option value="">Selecciona</option>
-                    <option>Liberación</option>
-                    <option>Seguro de mercancía</option>
+                    <option value="Liberación">Liberación</option>
+                    <option value="Seguro de mercancía">Seguro de mercancía</option>
                   </>
                 )}
               </Form.Select>
@@ -81,8 +86,8 @@ const FleteInternacional = ({ onFleteChange }) => {
               <Form.Label>Monto (USD)</Form.Label>
               <Form.Control
                 type="number"
-                name={`monto${i}`}
-                value={flete[`monto${i}`]}
+                name={`valor${i}`}
+                value={flete[`valor${i}`]}
                 onChange={handleChange}
                 onKeyDown={soloNumeros}
               />
