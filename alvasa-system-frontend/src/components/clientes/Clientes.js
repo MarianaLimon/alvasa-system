@@ -16,11 +16,18 @@ const Clientes = () => {
         <Col md={4}>
           <FormularioCliente onClienteAgregado={toggleRefrescar} />
 
-          {/* Botón debajo del formulario */}
+          {/* Botón formulario cotizaciones */}
           <div className="d-grid mt-3">
-          <Button variant="success" onClick={() => navigate('/cotizaciones/nueva')}>
+          <Button variant="success" onClick={() => navigate('/nuevacotizacion')}>
             <i className="bi bi-plus-circle me-2"></i>
             Nueva Cotización
+          </Button>
+          </div>
+          {/* Botón lista cotizaciones */}
+          <div className="d-grid mt-3">
+          <Button variant="warning" onClick={() => navigate('/cotizaciones')}>
+            <i className="bi bi-plus-circle me-2"></i>
+            Ver todas las cotizaciones
           </Button>
           </div>
         </Col>

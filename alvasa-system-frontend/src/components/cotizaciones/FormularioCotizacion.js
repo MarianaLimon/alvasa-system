@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Card, Row, Col } from 'react-bootstrap';
-import { BsSave, BsPrinter } from 'react-icons/bs';
+import { BsSave, BsPrinter, BsListUl } from 'react-icons/bs';
 import FleteInternacional from './FleteInternacional';
 import CargosTraslados from './CargosTraslados';
 import DesgloseImpuestos from './DesgloseImpuestos';
@@ -22,12 +22,11 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     regimen: '',
     aduana: '',
     tipoEnvio: '',
-    cantidad: '',
+    cantidad: 0,
     estatus: '',
   });
 
   const [clientes, setClientes] = useState([]);
-
   const [flete, setFlete] = useState({});
   const [cargos, setCargos] = useState({});
   const [impuestos, setImpuestos] = useState({});
@@ -39,8 +38,9 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm({ ...form, [name]: name === 'cantidad' ? parseInt(value, 10) || 0 : value });
   };
+
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);
   const handleCargosChange = (datosCargos) => setCargos(datosCargos);
   const handleImpuestosChange = (datosImpuestos) => setImpuestos(datosImpuestos);
@@ -49,40 +49,61 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
   const handleCuentaGastosChange = (datos) => setCuentaGastos(datos);
   const handlePedimentoChange = (datos) => setPedimento(datos);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const cotizacionCompleta = {
       ...form,
-      flete,
-      cargos,
-      impuestos,
-      cargosExtra,
-      servicios,
-      cuentaGastos,
-      pedimento,
-      ...resumen,
+      propuesta: resumen.propuesta,
+      total: resumen.total,
+      ahorro: resumen.diferencia,
+      fraccion_igi: resumen.fraccion_igi,
+      monto_comisionista: resumen.monto_comisionista,
+      notas: resumen.notas,
     };
-    console.log('Cotización enviada:', cotizacionCompleta);
-    if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
+
+    try {
+      const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
+      console.log('Cotización guardada:', response.data);
+      if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
+      alert('Cotización guardada exitosamente ✅');
+    } catch (error) {
+      console.error('Error al guardar cotización:', error);
+      alert('Hubo un error al guardar la cotización ❌');
+    }
   };
 
   useEffect(() => {
     const obtenerClientes = async () => {
       try {
-        const respuesta = await axios.get('http://localhost:5000/clientes'); // Ajusta la URL si es diferente
+        const respuesta = await axios.get('http://localhost:5000/clientes');
         setClientes(respuesta.data);
       } catch (error) {
         console.error('Error al obtener clientes:', error);
       }
     };
-  
     obtenerClientes();
   }, []);
+
+  const renderBadgeEstatus = (estatus) => {
+    const clases = {
+      'Autorizada': 'bg-success',
+      'En negociación': 'bg-warning text-dark',
+      'Entregado a cliente': 'bg-info text-dark',
+      'Declinada': 'bg-danger'
+    };
+    return (
+      <span className={`badge px-4 py-2 fs-6 ${clases[estatus] || ''}`}>{estatus}</span>
+    );
+  };
 
   return (
     <Card className="container-cotizaciones">
       <Card.Body>
-        <Card.Title>Registrar Cotización</Card.Title>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <Card.Title className="mb-0">Registrar Cotización</Card.Title>
+          {form.estatus && renderBadgeEstatus(form.estatus)}
+        </div>
+
         <Form onSubmit={handleSubmit}>
           <div className="d-flex justify-content-end mb-3">
             <div className="form-group" style={{ width: '200px' }}>
@@ -99,21 +120,21 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
 
           <Row>
             <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Cliente</Form.Label>
-              <Form.Select name="cliente_id" value={form.cliente_id} onChange={handleChange} required>
-                <option value="">Seleccionar cliente...</option>
-                {clientes.map(cliente => (
-                  <option key={cliente.id} value={cliente.id}>
-                    {cliente.nombre}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
               <Form.Group className="mb-3">
-              <Form.Label>Empresa</Form.Label>
-              <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} placeholder=""/>
-            </Form.Group>
+                <Form.Label>Cliente</Form.Label>
+                <Form.Select name="cliente_id" value={form.cliente_id} onChange={handleChange} required>
+                  <option value="">Seleccionar cliente...</option>
+                  {clientes.map(cliente => (
+                    <option key={cliente.id} value={cliente.id}>
+                      {cliente.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Empresa</Form.Label>
+                <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} />
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Fecha</Form.Label>
                 <Form.Control type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
@@ -124,7 +145,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
               </Form.Group>
             </Col>
             <Col md={6}>
-            <Form.Group className="mb-3">
+              <Form.Group className="mb-3">
                 <Form.Label>Régimen</Form.Label>
                 <Form.Select name="regimen" value={form.regimen} onChange={handleChange}>
                   <option value="">Seleccionar...</option>
@@ -146,6 +167,17 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
+                <Form.Label>Cantidad</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="cantidad"
+                  value={form.cantidad}
+                  onChange={handleChange}
+                  min={0}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
                 <Form.Label>Estatus</Form.Label>
                 <Form.Select name="estatus" value={form.estatus} onChange={handleChange} required>
                   <option value="">Seleccionar...</option>
@@ -154,26 +186,10 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
                   <option value="Entregado a cliente">Entregado a cliente</option>
                   <option value="Declinada">Declinada</option>
                 </Form.Select>
-
-                {form.estatus && (
-                  <div className="mt-2">
-                    <span
-                      className={`badge px-4 py-2 fs-6 ${
-                        form.estatus === 'Autorizada' ? 'bg-success' :
-                        form.estatus === 'En negociación' ? 'bg-warning text-dark' :
-                        form.estatus === 'Entregado a cliente' ? 'bg-info text-dark' :
-                        form.estatus === 'Declinada' ? 'bg-danger' : ''
-                      }`}
-                    >
-                      {form.estatus}
-                    </span>
-                  </div>
-                )}
               </Form.Group>
             </Col>
           </Row>
 
-          {/* Subformularios */}
           <Accordion defaultActiveKey="0" className="mt-4">
             <Accordion.Item eventKey="0">
               <Accordion.Header className="accordion-header-custom">Flete Internacional</Accordion.Header>
@@ -229,14 +245,18 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
               <BsSave className="me-2" />
               Guardar Cotización
             </Button>
-
             <Button variant="primary" onClick={() => window.print()}>
               <BsPrinter className="me-2" />
               Imprimir Cotización
             </Button>
           </div>
 
-
+          <div className="d-flex justify-content-center mt-3">
+            <Button variant="warning" onClick={() => window.location.href = '/cotizaciones'}>
+              <BsListUl className="me-2" />
+              Ver todas las cotizaciones
+            </Button>
+          </div>
         </Form>
       </Card.Body>
     </Card>
