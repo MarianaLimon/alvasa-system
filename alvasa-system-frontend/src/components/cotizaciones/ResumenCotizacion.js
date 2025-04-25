@@ -3,8 +3,8 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
   const [propuesta, setPropuesta] = useState('');
-  const [Fraccion, setFraccion] = useState('');
-  const [montoComisionista, setMontoComisionista] = useState('');
+  const [fraccion_igi, setFraccionIgi] = useState('');
+  const [monto_comisionista, setMontoComisionista] = useState('');
   const [notas, setNotas] = useState('');
   const [ahorro, setAhorro] = useState(0);
 
@@ -23,10 +23,18 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
   useEffect(() => {
     const nuevoAhorro = totalGeneral - parseNumber(propuesta);
     setAhorro(nuevoAhorro);
+
     if (onResumenChange) {
-      onResumenChange({ propuesta, ahorro: nuevoAhorro, Fraccion, montoComisionista, notas });
+      onResumenChange({
+        propuesta,
+        total: totalGeneral,  // 👈 ahora sí mandamos el total
+        ahorro: nuevoAhorro,
+        fraccion_igi,
+        monto_comisionista,
+        notas
+      });
     }
-  }, [totalGeneral, propuesta, Fraccion, montoComisionista, notas, onResumenChange]);
+  }, [totalGeneral, propuesta, fraccion_igi, monto_comisionista, notas, onResumenChange]);
 
   const soloNumeros = (e) => {
     if (!/[0-9.]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
@@ -63,20 +71,38 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange }) => {
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
-            <Form.Label>Fraccion / %IGI</Form.Label>
-            <Form.Control as="textarea" rows={1} placeholder="Escribe aquí..." value={Fraccion} onChange={(e) => setFraccion(e.target.value)} />
+            <Form.Label>Fracción / %IGI</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={1}
+              placeholder="Escribe aquí..."
+              value={fraccion_igi}
+              onChange={(e) => setFraccionIgi(e.target.value)}
+            />
           </Form.Group>
         </Col>
         <Col md={4}>
           <Form.Group>
             <Form.Label>Monto del comisionista</Form.Label>
-            <Form.Control type="number" placeholder="$" value={montoComisionista} onChange={(e) => setMontoComisionista(e.target.value)} onKeyDown={soloNumeros} />
+            <Form.Control
+              type="number"
+              placeholder="$"
+              value={monto_comisionista}
+              onChange={(e) => setMontoComisionista(e.target.value)}
+              onKeyDown={soloNumeros}
+            />
           </Form.Group>
         </Col>
         <Col md={4}>
           <Form.Group>
             <Form.Label>Notas</Form.Label>
-            <Form.Control as="textarea" rows={1} placeholder="Notas adicionales..." value={notas} onChange={(e) => setNotas(e.target.value)} />
+            <Form.Control
+              as="textarea"
+              rows={1}
+              placeholder="Notas adicionales..."
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+            />
           </Form.Group>
         </Col>
       </Row>

@@ -35,11 +35,25 @@ const VerCotizacion = () => {
         <p><strong>Empresa:</strong> {cotizacion.empresa}</p>
         <p><strong>Fecha:</strong> {cotizacion.fecha}</p>
         <p><strong>Mercancía:</strong> {cotizacion.mercancia}</p>
+        <p><strong>Régimen:</strong> {cotizacion.regimen}</p>
+        <p><strong>Aduana:</strong> {cotizacion.aduana}</p>
+        <p><strong>Tipo de Envío:</strong> {cotizacion.tipo_envio}</p>
+        <p><strong>Cantidad:</strong> {cotizacion.cantidad}</p>
         <p><strong>Propuesta:</strong> ${Number(cotizacion.propuesta).toFixed(2)}</p>
         <p><strong>Total:</strong> ${Number(cotizacion.total).toFixed(2)}</p>
         <p><strong>Ahorro:</strong> ${Number(cotizacion.ahorro).toFixed(2)}</p>
         <p><strong>Estatus:</strong> {cotizacion.estatus}</p>
+        <p><strong>Fracción IGI:</strong> {cotizacion.fraccion_igi}</p>
+        <p><strong>Monto Comisionista:</strong> ${Number(cotizacion.monto_comisionista || 0).toFixed(2)}</p>
         <p><strong>Notas:</strong> {cotizacion.notas}</p>
+
+        <hr />
+        <h5>Flete Internacional</h5>
+        <p><strong>Origen - Destino:</strong> {cotizacion.flete_origen_destino}</p>
+        <p><strong>Concepto 1:</strong> {cotizacion.flete_concepto_1} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_1 || 0).toFixed(2)}</p>
+        <p><strong>Concepto 2:</strong> {cotizacion.flete_concepto_2} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_2 || 0).toFixed(2)}</p>
+        <p><strong>Concepto 3:</strong> {cotizacion.flete_concepto_3} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_3 || 0).toFixed(2)}</p>
+        <p><strong>Total Flete:</strong> ${Number(cotizacion.flete_total || 0).toFixed(2)}</p>
 
         <div className="d-flex justify-content-center gap-3 mt-4">
           <Button variant="secondary" onClick={() => navigate('/cotizaciones')}>

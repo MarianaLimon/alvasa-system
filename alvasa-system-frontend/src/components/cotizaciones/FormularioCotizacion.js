@@ -21,7 +21,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     mercancia: '',
     regimen: '',
     aduana: '',
-    tipoEnvio: '',
+    tipo_envio: '',
     cantidad: 0,
     estatus: '',
   });
@@ -55,11 +55,13 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       ...form,
       propuesta: resumen.propuesta,
       total: resumen.total,
-      ahorro: resumen.diferencia,
+      ahorro: resumen.ahorro,
       fraccion_igi: resumen.fraccion_igi,
-      monto_comisionista: resumen.monto_comisionista,
+      monto_comisionista: resumen.monto_comisionista || 0,
       notas: resumen.notas,
     };
+
+    console.log('Resumen antes de enviar:', resumen);
 
     try {
       const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
@@ -119,7 +121,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
           </div>
 
           <Row>
-            <Col md={6}>
+            <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Cliente</Form.Label>
                 <Form.Select name="cliente_id" value={form.cliente_id} onChange={handleChange} required>
@@ -139,12 +141,12 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
                 <Form.Label>Fecha</Form.Label>
                 <Form.Control type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
               </Form.Group>
+            </Col>
+            <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Mercancía</Form.Label>
                 <Form.Control type="text" name="mercancia" value={form.mercancia} onChange={handleChange} required />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
+              </Form.Group>   
               <Form.Group className="mb-3">
                 <Form.Label>Régimen</Form.Label>
                 <Form.Select name="regimen" value={form.regimen} onChange={handleChange}>
@@ -164,6 +166,17 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
                   <option value="Progreso">Progreso</option>
                   <option value="San Diego">San Diego</option>
                   <option value="Veracruz">Veracruz</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label>Tipo de Envío</Form.Label>
+                <Form.Select name="tipo_envio" value={form.tipo_envio || ''}onChange={handleChange}>
+                  <option value="">Selecciona tipo de envío</option>
+                  <option value="Pallets">Pallets</option>
+                  <option value="Cajas">Cajas</option>
+                  <option value="Contenedor">Contenedor</option>
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">

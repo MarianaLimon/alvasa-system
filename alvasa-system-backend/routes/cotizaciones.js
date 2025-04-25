@@ -4,6 +4,7 @@ const db = require('../config/db');
 
 // Crear una cotización
 router.post('/', (req, res) => {
+  console.log('REQ.BODY recibido:', req.body);
   const {
     folio,
     cliente_id,
@@ -12,7 +13,7 @@ router.post('/', (req, res) => {
     mercancia,
     regimen,
     aduana,
-    tipoEnvio,
+    tipo_envio,
     cantidad,
     estatus,
     fraccion_igi,
@@ -38,7 +39,7 @@ router.post('/', (req, res) => {
     mercancia,
     regimen,
     aduana,
-    tipoEnvio,
+    tipo_envio,
     cantidad,
     estatus,
     fraccion_igi,
@@ -92,7 +93,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// ✅ Esta es la ruta correcta y debe estar FUERA de cualquier otra
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   const sql = `
