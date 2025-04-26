@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Form, Button, Card, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Row, Col, Accordion } from 'react-bootstrap';
 import { BsSave, BsPrinter, BsListUl } from 'react-icons/bs';
 import FleteInternacional from './FleteInternacional';
 import CargosTraslados from './CargosTraslados';
@@ -10,7 +10,6 @@ import Servicios from './Servicios';
 import CuentaGastos from './CuentaGastos';
 import Pedimento from './Pedimento';
 import ResumenCotizacion from './ResumenCotizacion';
-import { Accordion } from 'react-bootstrap';
 
 const FormularioCotizacion = ({ onCotizacionGuardada }) => {
   const [form, setForm] = useState({
@@ -41,14 +40,6 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     setForm({ ...form, [name]: name === 'cantidad' ? parseInt(value, 10) || 0 : value });
   };
 
-  const handleFleteChange = (datosFlete) => setFlete(datosFlete);
-  const handleCargosChange = (datosCargos) => setCargos(datosCargos);
-  const handleImpuestosChange = (datosImpuestos) => setImpuestos(datosImpuestos);
-  const handleCargosExtraChange = (datosExtra) => setCargosExtra(datosExtra);
-  const handleServiciosChange = (datosServicios) => setServicios(datosServicios);
-  const handleCuentaGastosChange = (datos) => setCuentaGastos(datos);
-  const handlePedimentoChange = (datos) => setPedimento(datos);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const cotizacionCompleta = {
@@ -59,7 +50,6 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       fraccion_igi: resumen.fraccion_igi,
       monto_comisionista: resumen.monto_comisionista || 0,
       notas: resumen.notas,
-      // Data Flete Int
       flete_origen_destino: flete.origenDestino,
       flete_concepto_1: flete.concepto1,
       flete_valor_1: flete.valor1,
@@ -70,11 +60,70 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       flete_total: flete.total,
     };
 
-    console.log('Resumen antes de enviar:', resumen);
-
     try {
       const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
       console.log('Cotización guardada:', response.data);
+  
+      const idCotizacion = response.data.id;
+  
+      // Guardar cargos
+      try {
+        await axios.post('http://localhost:5000/cargos', {
+          cotizacion_id: idCotizacion,
+          terrestre: cargos.terrestre || 0,
+          aereo: cargos.aereo || 0,
+          custodia: cargos.custodia || 0,
+          total_cargos: cargos.total || 0,
+          almacenajes: cargosExtra.almacenajes || 0,
+          demoras: cargosExtra.demoras || 0,
+          pernocta: cargosExtra.pernocta || 0,
+          burreo: cargosExtra.burreo || 0,
+          flete_falso: cargosExtra.fleteFalso || 0,
+          servicio_no_realizado: cargosExtra.servicioNoRealizado || 0,
+          seguro: cargosExtra.seguro || 0,
+          total_cargos_extra: cargosExtra.total || 0
+        });
+      } catch (errorCargos) {
+        console.error('Error al guardar cargos:', errorCargos);
+        alert('Cotización guardada, pero hubo un error al guardar los cargos ❗');
+      }
+
+      // Guardar servicios
+    try {
+      await axios.post('http://localhost:5000/servicios', {
+        cotizacion_id: idCotizacion,
+        maniobras: servicios.maniobras || 0,
+        revalidacion: servicios.revalidacion || 0,
+        gestionDestino: servicios.gestionDestino || 0,
+        inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
+        documentacionImportacion: servicios.documentacionImportacion || 0,
+        garantiaContenedores: servicios.garantiaContenedores || 0,
+        distribucion: servicios.distribucion || 0,
+        serentyPremium: servicios.serentyPremium || 0,
+        total: servicios.total || 0
+      });
+    } catch (errorServicios) {
+      console.error('Error al guardar servicios:', errorServicios);
+      alert('Cotización guardada, pero hubo un error al guardar los servicios ❗');
+    }
+
+    // Guardar cuenta de gastos
+    try {
+      await axios.post('http://localhost:5000/cuenta-gastos', {
+        cotizacion_id: idCotizacion,
+        honorarios: cuentaGastos.honorarios || 0,
+        padron: cuentaGastos.padron || 0,
+        serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
+        manejoCarga: cuentaGastos.manejoCarga || 0,
+        subtotal: cuentaGastos.subtotal || 0,
+        iva: 0.16,
+        total: cuentaGastos.total || 0
+      });
+    } catch (errorCuentaGastos) {
+      console.error('Error al guardar cuenta de gastos:', errorCuentaGastos);
+      alert('Cotización guardada, pero hubo un error al guardar la cuenta de gastos ❗');
+    }
+  
       if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
       alert('Cotización guardada exitosamente ✅');
     } catch (error) {
@@ -94,6 +143,14 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     };
     obtenerClientes();
   }, []);
+
+  const handleFleteChange = (datosFlete) => setFlete(datosFlete);
+  const handleCargosChange = (datosCargos) => setCargos(datosCargos);
+  const handleImpuestosChange = (datosImpuestos) => setImpuestos(datosImpuestos);
+  const handleCargosExtraChange = (datosExtra) => setCargosExtra(datosExtra);
+  const handleServiciosChange = (datosServicios) => setServicios(datosServicios);
+  const handleCuentaGastosChange = (datos) => setCuentaGastos(datos);
+  const handlePedimentoChange = (datos) => setPedimento(datos);
 
   const renderBadgeEstatus = (estatus) => {
     const clases = {
@@ -155,7 +212,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
               <Form.Group className="mb-3">
                 <Form.Label>Mercancía</Form.Label>
                 <Form.Control type="text" name="mercancia" value={form.mercancia} onChange={handleChange} required />
-              </Form.Group>   
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Régimen</Form.Label>
                 <Form.Select name="regimen" value={form.regimen} onChange={handleChange}>
@@ -181,7 +238,11 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
             <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Tipo de Envío</Form.Label>
-                <Form.Select name="tipo_envio" value={form.tipo_envio || ''}onChange={handleChange}>
+                <Form.Select
+                  name="tipo_envio"
+                  value={form.tipo_envio || ''}
+                  onChange={(e) => setForm({ ...form, tipo_envio: e.target.value })}
+                >
                   <option value="">Selecciona tipo de envío</option>
                   <option value="Pallets">Pallets</option>
                   <option value="Cajas">Cajas</option>
@@ -214,7 +275,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
 
           <Accordion defaultActiveKey="0" className="mt-4">
             <Accordion.Item eventKey="0">
-              <Accordion.Header className="accordion-header-custom">Flete Internacional</Accordion.Header>
+              <Accordion.Header>Flete Internacional</Accordion.Header>
               <Accordion.Body>
                 <FleteInternacional onFleteChange={handleFleteChange} />
               </Accordion.Body>

@@ -110,9 +110,11 @@ router.get('/', (req, res) => {
   });
 });
 
+// Obtener una cotización específica (con cargos)
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  const sql = `
+
+  const sqlCotizacion = `
     SELECT 
       cot.*,
       cli.nombre AS cliente
@@ -120,14 +122,59 @@ router.get('/:id', (req, res) => {
     LEFT JOIN clientes cli ON cot.cliente_id = cli.id
     WHERE cot.id = ?
   `;
-  db.query(sql, [id], (err, results) => {
+
+  const sqlCargos = `
+    SELECT * FROM cargos_cotizacion WHERE cotizacion_id = ?
+  `;
+
+  const sqlServicios = `
+    SELECT * FROM servicios_cotizacion WHERE cotizacion_id = ?
+  `;
+
+  const sqlCuentaGastos = `
+  SELECT * FROM cuenta_gastos_cotizacion WHERE cotizacion_id = ?
+  `;
+
+   //  Obtener cotización
+  db.query(sqlCotizacion, [id], (err, cotizacionResult) => {
     if (err) {
       console.error('Error al obtener cotización:', err);
       return res.status(500).json({ error: 'Error al obtener cotización' });
     }
-    if (results.length === 0) return res.status(404).json({ error: 'Cotización no encontrada' });
-    res.status(200).json(results[0]);
-  });
+
+    if (cotizacionResult.length === 0) {
+      return res.status(404).json({ error: 'Cotización no encontrada' });
+    }
+
+    const cotizacion = cotizacionResult[0];
+
+    db.query(sqlCargos, [id], (err, cargosResult) => {
+      if (err) {
+        console.error('Error al obtener cargos:', err);
+        return res.status(500).json({ error: 'Error al obtener cargos' });
+      }
+
+      db.query(sqlServicios, [id], (err, serviciosResult) => {
+        if (err) {
+          console.error('Error al obtener servicios:', err);
+          return res.status(500).json({ error: 'Error al obtener servicios' });
+        }
+        db.query(sqlCuentaGastos, [id], (err, cuentaGastosResult) => {
+          if (err) {
+            console.error('Error al obtener cuenta de gastos:', err);
+            return res.status(500).json({ error: 'Error al obtener cuenta de gastos' });
+          }
+
+        // Agregamos cargos y servicios al objeto cotizacion
+        cotizacion.cargos = cargosResult;
+        cotizacion.servicios = serviciosResult;
+        cotizacion.cuentaGastos = cuentaGastosResult;
+
+        res.status(200).json(cotizacion);
+        }); 
+      });   
+    });     
+  });       
 });
 
 module.exports = router;

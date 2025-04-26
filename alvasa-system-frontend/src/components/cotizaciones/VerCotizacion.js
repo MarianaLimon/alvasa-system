@@ -72,8 +72,18 @@ const VerCotizacion = () => {
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Cargos de Traslados</Accordion.Header>
                 <Accordion.Body>
-                  <p>Aquí se mostrarán los cargos de traslados.</p>
-                  {/* Después llenamos los datos reales aquí */}
+                  {cotizacion.cargos && cotizacion.cargos.length > 0 ? (
+                    cotizacion.cargos.map((cargo, index) => (
+                      <div key={index}>
+                        <p><strong>Terrestre:</strong> ${Number(cargo.terrestre || 0).toFixed(2)}</p>
+                        <p><strong>Aéreo:</strong> ${Number(cargo.aereo || 0).toFixed(2)}</p>
+                        <p><strong>Custodia:</strong> ${Number(cargo.custodia || 0).toFixed(2)}</p>
+                        <p><strong>Total Cargos:</strong> ${Number(cargo.total_cargos || 0).toFixed(2)}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay cargos de traslado registrados.</p>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
 
@@ -88,24 +98,66 @@ const VerCotizacion = () => {
               <Accordion.Item eventKey="3">
                 <Accordion.Header>Cargos Extra</Accordion.Header>
                 <Accordion.Body>
-                  <p>Aquí se mostrarán los cargos extra.</p>
-                  {/* Después llenamos los datos reales aquí */}
+                  {cotizacion.cargos && cotizacion.cargos.length > 0 ? (
+                    cotizacion.cargos.map((cargo, index) => (
+                      <div key={index}>
+                        <p><strong>Almacenajes:</strong> ${Number(cargo.almacenajes || 0).toFixed(2)}</p>
+                        <p><strong>Demoras:</strong> ${Number(cargo.demoras || 0).toFixed(2)}</p>
+                        <p><strong>Pernocta:</strong> ${Number(cargo.pernocta || 0).toFixed(2)}</p>
+                        <p><strong>Burreo:</strong> ${Number(cargo.burreo || 0).toFixed(2)}</p>
+                        <p><strong>Flete Falso:</strong> ${Number(cargo.flete_falso || 0).toFixed(2)}</p>
+                        <p><strong>Servicio No Realizado:</strong> ${Number(cargo.servicio_no_realizado || 0).toFixed(2)}</p>
+                        <p><strong>Seguro:</strong> ${Number(cargo.seguro || 0).toFixed(2)}</p>
+                        <p><strong>Total Cargos Extra:</strong> ${Number(cargo.total_cargos_extra || 0).toFixed(2)}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay cargos extra registrados.</p>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
 
               <Accordion.Item eventKey="4">
                 <Accordion.Header>Servicios</Accordion.Header>
                 <Accordion.Body>
-                  <p>Aquí se mostrarán los servicios.</p>
-                  {/* Después llenamos los datos reales aquí */}
+                  {cotizacion.servicios && cotizacion.servicios.length > 0 ? (
+                    cotizacion.servicios.map((servicio, index) => (
+                      <div key={index}>
+                        <p><strong>Maniobras:</strong> ${Number(servicio.maniobras || 0).toFixed(2)}</p>
+                        <p><strong>Revalidación:</strong> ${Number(servicio.revalidacion || 0).toFixed(2)}</p>
+                        <p><strong>Gestión Contenedores Destino:</strong> ${Number(servicio.gestion_destino || 0).toFixed(2)}</p>
+                        <p><strong>Inspección y Peritaje:</strong> ${Number(servicio.inspeccion_peritaje || 0).toFixed(2)}</p>
+                        <p><strong>Documentación de Importación:</strong> ${Number(servicio.documentacion_importacion || 0).toFixed(2)}</p>
+                        <p><strong>Garantía de Contenedores:</strong> ${Number(servicio.garantia_contenedores || 0).toFixed(2)}</p>
+                        <p><strong>Distribución:</strong> ${Number(servicio.distribucion || 0).toFixed(2)}</p>
+                        <p><strong>Serenty PREMIUM:</strong> ${Number(servicio.serenty_premium || 0).toFixed(2)}</p>
+                        <p><strong>Total Servicios:</strong> <u>${Number(servicio.total_servicios || 0).toFixed(2)}</u></p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay servicios registrados.</p>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
 
               <Accordion.Item eventKey="5">
                 <Accordion.Header>Cuenta de Gastos</Accordion.Header>
                 <Accordion.Body>
-                  <p>Aquí se mostrará la cuenta de gastos.</p>
-                  {/* Después llenamos los datos reales aquí */}
+                  {cotizacion.cuentaGastos && cotizacion.cuentaGastos.length > 0 ? (
+                    cotizacion.cuentaGastos.map((gasto, index) => (
+                      <div key={index}>
+                        <p><strong>Honorarios:</strong> ${Number(gasto.honorarios || 0).toFixed(2)}</p>
+                        <p><strong>Padrón:</strong> ${Number(gasto.padron || 0).toFixed(2)}</p>
+                        <p><strong>Servicios Complementarios:</strong> ${Number(gasto.servicios_complementarios || 0).toFixed(2)}</p>
+                        <p><strong>Manejo de Carga:</strong> ${Number(gasto.manejo_carga || 0).toFixed(2)}</p>
+                        <p><strong>Subtotal:</strong> ${Number(gasto.subtotal || 0).toFixed(2)}</p>
+                        <p><strong>IVA (16%):</strong> ${(Number(gasto.subtotal || 0) * 0.16).toFixed(2)}</p>
+                        <p><strong>Total:</strong> <u>${Number(gasto.total || 0).toFixed(2)}</u></p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay cuenta de gastos registrada.</p>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
 
@@ -115,7 +167,7 @@ const VerCotizacion = () => {
                   <p>Aquí se mostrarán los datos del pedimento.</p>
                   {/* Después llenamos los datos reales aquí */}
                 </Accordion.Body>
-  </Accordion.Item>
+              </Accordion.Item>
             </Accordion>
           </Col>
         </Row>

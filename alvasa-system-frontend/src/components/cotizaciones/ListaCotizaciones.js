@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Spinner, Button } from 'react-bootstrap';
+import { Table, Spinner, Button, Form, Badge } from 'react-bootstrap';
 import { BsEye, BsPencil, BsTrash, BsPrinter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 const ListaCotizaciones = () => {
-  console.log('Renderizando ListaCotizaciones');
   const [cotizaciones, setCotizaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,6 @@ const ListaCotizaciones = () => {
       try {
         const response = await axios.get('http://localhost:5000/cotizaciones');
         setCotizaciones(response.data);
-        console.log('Cotizaciones:', response.data); // <--- Aquí se agrega para inspección
         setLoading(false);
       } catch (error) {
         console.error('Error al obtener cotizaciones:', error);
@@ -42,11 +41,53 @@ const ListaCotizaciones = () => {
     }
   };
 
+  const cotizacionesFiltradas = cotizaciones.filter(cot =>
+    cot.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
+    cot.folio?.toLowerCase().includes(busqueda.toLowerCase()) ||
+    cot.empresa?.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
+  const renderBadgeEstatus = (estatus) => {
+    const clases = {
+      'Autorizada': 'success',
+      'En negociación': 'warning',
+      'Entregado a cliente': 'info',
+      'Declinada': 'danger'
+    };
+    return (
+      <Badge bg={clases[estatus] || 'secondary'}>
+        {estatus}
+      </Badge>
+    );
+  };
+
+  const formatoFechaBonita = (fechaStr) => {
+    const fecha = new Date(fechaStr);
+    const dia = fecha.getDate();
+    const mesNombres = [
+      "enero", "febrero", "marzo", "abril", "mayo", "junio",
+      "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ];
+    const mesNombre = mesNombres[fecha.getMonth()];
+    const año = fecha.getFullYear();
+    return `${dia} ${mesNombre} ${año}`;
+  };
+
   if (loading) return <div className="text-center my-4"><Spinner animation="border" /></div>;
 
   return (
     <div className="container mt-4">
-      <h3>Lista de Cotizaciones</h3>
+      <h3 className="title-listacot">Lista de Cotizaciones</h3>
+
+      <Form className="mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Buscar por cliente, folio o empresa..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+      </Form>
+
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -55,23 +96,25 @@ const ListaCotizaciones = () => {
             <th>Empresa</th>
             <th>Fecha</th>
             <th>Mercancía</th>
-            <th>Comisionista</th>
+            <th>Comisión</th>
+            <th>Estatus</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {cotizaciones.map(cot => (
+          {cotizacionesFiltradas.map(cot => (
             <tr key={cot.id}>
               <td>{cot.folio}</td>
               <td>{cot.cliente}</td>
               <td>{cot.empresa}</td>
-              <td>{cot.fecha}</td>
+              <td>{formatoFechaBonita(cot.fecha)}</td>
               <td>{cot.mercancia}</td>
               <td>{
                 typeof cot.monto_comisionista === 'number'
                   ? `$${cot.monto_comisionista.toFixed(2)}`
                   : cot.monto_comisionista || '—'
               }</td>
+              <td>{renderBadgeEstatus(cot.estatus)}</td>
               <td className="text-center">
                 <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(cot.id)}>
                   <BsEye />

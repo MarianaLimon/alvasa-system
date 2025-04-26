@@ -1,26 +1,34 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./config/db');
+
+// Importar rutas
 const clientesRoutes = require('./routes/clientes');
 const cotizacionesRoutes = require('./routes/cotizaciones');
+const cargosRoutes = require('./routes/cargos'); 
+const serviciosRoutes = require('./routes/servicios');
+const cuentaGastosRoutes = require('./routes/cuentaGastos');
 
 const app = express();
 const port = 5000;
 
-// Middleware
-app.use(express.json());
+// Middlewares
 app.use(cors());
+app.use(express.json());
 
-// Rutas
+// Usar rutas
 app.use('/clientes', clientesRoutes);
 app.use('/cotizaciones', cotizacionesRoutes);
+app.use('/cargos', cargosRoutes); 
+app.use('/servicios', serviciosRoutes);
+app.use('/cuenta-gastos', cuentaGastosRoutes);
 
-// Ruta básica
+// Ruta básica de prueba
 app.get('/', (req, res) => {
   res.send('¡Hola desde el backend de ALVASA-SYSTEM!');
 });
 
-// Iniciar servidor (solo una vez)
+// Iniciar servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
