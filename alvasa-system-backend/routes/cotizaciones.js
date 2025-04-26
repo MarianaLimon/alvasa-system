@@ -110,7 +110,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// Obtener una cotización específica (con cargos)
+// Obtener una cotización específica (con todos sus datos)
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
@@ -123,19 +123,12 @@ router.get('/:id', (req, res) => {
     WHERE cot.id = ?
   `;
 
-  const sqlCargos = `
-    SELECT * FROM cargos_cotizacion WHERE cotizacion_id = ?
-  `;
+  const sqlCargos = `SELECT * FROM cargos_cotizacion WHERE cotizacion_id = ?`;
+  const sqlServicios = `SELECT * FROM servicios_cotizacion WHERE cotizacion_id = ?`;
+  const sqlCuentaGastos = `SELECT * FROM cuenta_gastos_cotizacion WHERE cotizacion_id = ?`;
+  const sqlPedimento = `SELECT * FROM pedimentos_cotizacion WHERE cotizacion_id = ?`;
+  const sqlDesgloseImpuestos = `SELECT * FROM desglose_impuestos_cotizacion WHERE cotizacion_id = ?`;
 
-  const sqlServicios = `
-    SELECT * FROM servicios_cotizacion WHERE cotizacion_id = ?
-  `;
-
-  const sqlCuentaGastos = `
-  SELECT * FROM cuenta_gastos_cotizacion WHERE cotizacion_id = ?
-  `;
-
-   //  Obtener cotización
   db.query(sqlCotizacion, [id], (err, cotizacionResult) => {
     if (err) {
       console.error('Error al obtener cotización:', err);
@@ -148,6 +141,7 @@ router.get('/:id', (req, res) => {
 
     const cotizacion = cotizacionResult[0];
 
+    // Obtener todos los datos relacionados
     db.query(sqlCargos, [id], (err, cargosResult) => {
       if (err) {
         console.error('Error al obtener cargos:', err);
@@ -159,22 +153,39 @@ router.get('/:id', (req, res) => {
           console.error('Error al obtener servicios:', err);
           return res.status(500).json({ error: 'Error al obtener servicios' });
         }
+
         db.query(sqlCuentaGastos, [id], (err, cuentaGastosResult) => {
           if (err) {
             console.error('Error al obtener cuenta de gastos:', err);
             return res.status(500).json({ error: 'Error al obtener cuenta de gastos' });
           }
 
-        // Agregamos cargos y servicios al objeto cotizacion
-        cotizacion.cargos = cargosResult;
-        cotizacion.servicios = serviciosResult;
-        cotizacion.cuentaGastos = cuentaGastosResult;
+          db.query(sqlPedimento, [id], (err, pedimentoResult) => {
+            if (err) {
+              console.error('Error al obtener pedimento:', err);
+              return res.status(500).json({ error: 'Error al obtener pedimento' });
+            }
 
-        res.status(200).json(cotizacion);
-        }); 
-      });   
-    });     
-  });       
+            db.query(sqlDesgloseImpuestos, [id], (err, desgloseImpuestosResult) => {
+              if (err) {
+                console.error('Error al obtener desglose de impuestos:', err);
+                return res.status(500).json({ error: 'Error al obtener desglose de impuestos' });
+              }
+
+            // Agregamos todos los datos a la cotización
+            cotizacion.cargos = cargosResult;
+            cotizacion.servicios = serviciosResult;
+            cotizacion.cuentaGastos = cuentaGastosResult;
+            cotizacion.pedimento = pedimentoResult.length > 0 ? pedimentoResult[0] : null;
+            cotizacion.desgloseImpuestos = desgloseImpuestosResult;
+
+            res.status(200).json(cotizacion);
+          });
+        });
+      });
+    });
+  });
+});
 });
 
 module.exports = router;

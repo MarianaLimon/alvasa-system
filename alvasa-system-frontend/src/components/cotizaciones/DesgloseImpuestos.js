@@ -20,6 +20,20 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
   const parseNumber = (val) => parseFloat(val) || 0;
 
   useEffect(() => {
+    const obtenerTipoCambio = async () => {
+      try {
+        const response = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await response.json();
+        const tipoCambioActual = data.rates.MXN;
+        setData(prev => ({ ...prev, tipoCambio: tipoCambioActual.toFixed(2) }));
+      } catch (error) {
+        console.error('Error al obtener tipo de cambio:', error);
+      }
+    };
+    obtenerTipoCambio();
+  }, []);
+
+  useEffect(() => {
     const valorFactura = parseNumber(data.valorFactura);
     const flete = parseNumber(data.flete);
     const tipoCambio = parseNumber(data.tipoCambio);

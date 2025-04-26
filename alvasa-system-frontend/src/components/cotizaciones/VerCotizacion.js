@@ -88,10 +88,25 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="2">
-                <Accordion.Header>Desglose de Impuestos</Accordion.Header>
+              <Accordion.Header>Desglose de Impuestos</Accordion.Header>
                 <Accordion.Body>
-                  <p>Aquí se mostrará el desglose de impuestos.</p>
-                  {/* Después llenamos los datos reales aquí */}
+                  {cotizacion.desgloseImpuestos && cotizacion.desgloseImpuestos.length > 0 ? (
+                    cotizacion.desgloseImpuestos.map((item, index) => (
+                      <div key={index}>
+                        <p><strong>Valor Factura:</strong> ${Number(item.valor_factura || 0).toFixed(2)}</p>
+                        <p><strong>Flete:</strong> ${Number(item.flete || 0).toFixed(2)}</p>
+                        <p><strong>Tipo de Cambio:</strong> {Number(item.tipo_cambio || 0).toFixed(2)}</p>
+                        <p><strong>DTA:</strong> ${Number(item.dta || 0).toFixed(2)}</p>
+                        <p><strong>IGI:</strong> ${Number(item.igi || 0).toFixed(2)}</p>
+                        <p><strong>IVA:</strong> ${Number(item.iva || 0).toFixed(2)}</p>
+                        <p><strong>PRV:</strong> {item.prv}</p>
+                        <p><strong>IVA / PRV:</strong> {item.iva_prv}</p>
+                        <p><strong>Total:</strong> <u>${Number(item.total || 0).toFixed(2)}</u></p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay desglose de impuestos registrado.</p>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
 
@@ -162,11 +177,24 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="6">
-                <Accordion.Header>Pedimento</Accordion.Header>
-                <Accordion.Body>
-                  <p>Aquí se mostrarán los datos del pedimento.</p>
-                  {/* Después llenamos los datos reales aquí */}
-                </Accordion.Body>
+              <Accordion.Header>Pedimento</Accordion.Header>
+              <Accordion.Body>
+                {cotizacion.pedimento ? (
+                  <div>
+                    <p><strong>Tipo de Cambio:</strong> ${Number(cotizacion.pedimento.tipo_cambio || 0).toFixed(2)}</p>
+                    <p><strong>Peso Bruto:</strong> {Number(cotizacion.pedimento.peso_bruto || 0).toFixed(2)} kg</p>
+                    <p><strong>Valor Aduana:</strong> ${Number(cotizacion.pedimento.valor_aduana || 0).toFixed(2)}</p>
+                    <p><strong>DTA:</strong> ${Number(cotizacion.pedimento.dta || 0).toFixed(2)}</p>
+                    <p><strong>IVA-PRV:</strong> ${Number(cotizacion.pedimento.iva_prv || 0).toFixed(2)}</p>
+                    <p><strong>IGI-IGE:</strong> ${Number(cotizacion.pedimento.igi_ige || 0).toFixed(2)}</p>
+                    <p><strong>PRV:</strong> ${Number(cotizacion.pedimento.prv || 0).toFixed(2)}</p>
+                    <p><strong>IVA:</strong> ${Number(cotizacion.pedimento.iva || 0).toFixed(2)}</p>
+                    <p><strong><u>Total:</u></strong> <u>${Number(cotizacion.pedimento.total || 0).toFixed(2)}</u></p>
+                  </div>
+                ) : (
+                  <p>No hay pedimento registrado.</p>
+                )}
+              </Accordion.Body>
               </Accordion.Item>
             </Accordion>
           </Col>

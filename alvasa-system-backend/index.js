@@ -8,6 +8,8 @@ const cotizacionesRoutes = require('./routes/cotizaciones');
 const cargosRoutes = require('./routes/cargos'); 
 const serviciosRoutes = require('./routes/servicios');
 const cuentaGastosRoutes = require('./routes/cuentaGastos');
+const pedimentosRoutes = require('./routes/pedimentos');
+const desgloseImpuestosRoutes = require('./routes/desgloseImpuestos');
 
 const app = express();
 const port = 5000;
@@ -22,6 +24,9 @@ app.use('/cotizaciones', cotizacionesRoutes);
 app.use('/cargos', cargosRoutes); 
 app.use('/servicios', serviciosRoutes);
 app.use('/cuenta-gastos', cuentaGastosRoutes);
+app.use('/pedimentos', pedimentosRoutes);
+app.use('/desglose-impuestos', desgloseImpuestosRoutes);
+
 
 // Ruta básica de prueba
 app.get('/', (req, res) => {

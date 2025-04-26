@@ -123,6 +123,44 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       console.error('Error al guardar cuenta de gastos:', errorCuentaGastos);
       alert('Cotización guardada, pero hubo un error al guardar la cuenta de gastos ❗');
     }
+
+    // Guardar pedimento
+    try {
+      await axios.post('http://localhost:5000/pedimentos', {
+        cotizacion_id: idCotizacion,
+        tipoCambio: pedimento.tipoCambio || 0,
+        pesoBruto: pedimento.pesoBruto || 0,
+        valorAduana: pedimento.valorAduana || 0,
+        dta: pedimento.dta || 0,
+        ivaPrv: pedimento.ivaPrv || 0,
+        igiIge: pedimento.igiIge || 0,
+        prv: pedimento.prv || 0,
+        iva: pedimento.iva || 0,
+        total: pedimento.total || 0
+      });
+    } catch (errorPedimento) {
+      console.error('Error al guardar pedimento:', errorPedimento);
+      alert('Cotización guardada, pero hubo un error al guardar el pedimento ❗');
+    }
+
+    // Guardar desglose de impuestos
+    try {
+      await axios.post('http://localhost:5000/desglose-impuestos', {
+        cotizacion_id: idCotizacion,
+        valorFactura: impuestos.valorFactura || 0,
+        flete: impuestos.flete || 0,
+        tipoCambio: impuestos.tipoCambio || 0,
+        dta: impuestos.dta || 0,
+        igi: impuestos.igi || 0,
+        iva: impuestos.iva || 0,
+        prv: impuestos.prv || 'No aplica',
+        ivaPrv: impuestos.ivaPrv || 'No aplica',
+        total: impuestos.total || 0
+      });
+    } catch (errorDesgloseImpuestos) {
+      console.error('Error al guardar desglose de impuestos:', errorDesgloseImpuestos);
+      alert('Cotización guardada, pero hubo un error al guardar el desglose de impuestos ❗');
+    }
   
       if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
       alert('Cotización guardada exitosamente ✅');
