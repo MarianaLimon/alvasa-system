@@ -12,17 +12,18 @@ import Pedimento from './Pedimento';
 import ResumenCotizacion from './ResumenCotizacion';
 
 const FormularioCotizacion = ({ onCotizacionGuardada }) => {
+  // Estado inicial del formulario
   const [form, setForm] = useState({
     folio: '',
     cliente_id: '',
     empresa: '',
-    fecha: '',
+    fecha: new Date().toISOString().split('T')[0],
     mercancia: '',
     regimen: '',
     aduana: '',
     tipo_envio: '',
     cantidad: 0,
-    estatus: '',
+    estatus: 'En negociación',
   });
 
   const [clientes, setClientes] = useState([]);
@@ -35,11 +36,14 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
   const [pedimento, setPedimento] = useState({});
   const [resumen, setResumen] = useState({});
 
+  // Función para actualizar los valores del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: name === 'cantidad' ? parseInt(value, 10) || 0 : value });
   };
 
+  
+  // Función para guardar la cotización
   const handleSubmit = async (e) => {
     e.preventDefault();
     const cotizacionCompleta = {
@@ -63,9 +67,8 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     try {
       const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
       console.log('Cotización guardada:', response.data);
-  
       const idCotizacion = response.data.id;
-  
+
       // Guardar cargos
       try {
         await axios.post('http://localhost:5000/cargos', {
@@ -89,87 +92,90 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
       }
 
       // Guardar servicios
-    try {
-      await axios.post('http://localhost:5000/servicios', {
-        cotizacion_id: idCotizacion,
-        maniobras: servicios.maniobras || 0,
-        revalidacion: servicios.revalidacion || 0,
-        gestionDestino: servicios.gestionDestino || 0,
-        inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
-        documentacionImportacion: servicios.documentacionImportacion || 0,
-        garantiaContenedores: servicios.garantiaContenedores || 0,
-        distribucion: servicios.distribucion || 0,
-        serentyPremium: servicios.serentyPremium || 0,
-        total: servicios.total || 0
-      });
-    } catch (errorServicios) {
-      console.error('Error al guardar servicios:', errorServicios);
-      alert('Cotización guardada, pero hubo un error al guardar los servicios ❗');
-    }
+      try {
+        await axios.post('http://localhost:5000/servicios', {
+          cotizacion_id: idCotizacion,
+          maniobras: servicios.maniobras || 0,
+          revalidacion: servicios.revalidacion || 0,
+          gestionDestino: servicios.gestionDestino || 0,
+          inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
+          documentacionImportacion: servicios.documentacionImportacion || 0,
+          garantiaContenedores: servicios.garantiaContenedores || 0,
+          distribucion: servicios.distribucion || 0,
+          serentyPremium: servicios.serentyPremium || 0,
+          total: servicios.total || 0
+        });
+      } catch (errorServicios) {
+        console.error('Error al guardar servicios:', errorServicios);
+        alert('Cotización guardada, pero hubo un error al guardar los servicios ❗');
+      }
 
-    // Guardar cuenta de gastos
-    try {
-      await axios.post('http://localhost:5000/cuenta-gastos', {
-        cotizacion_id: idCotizacion,
-        honorarios: cuentaGastos.honorarios || 0,
-        padron: cuentaGastos.padron || 0,
-        serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
-        manejoCarga: cuentaGastos.manejoCarga || 0,
-        subtotal: cuentaGastos.subtotal || 0,
-        iva: 0.16,
-        total: cuentaGastos.total || 0
-      });
-    } catch (errorCuentaGastos) {
-      console.error('Error al guardar cuenta de gastos:', errorCuentaGastos);
-      alert('Cotización guardada, pero hubo un error al guardar la cuenta de gastos ❗');
-    }
+      // Guardar cuenta de gastos
+      try {
+        await axios.post('http://localhost:5000/cuenta-gastos', {
+          cotizacion_id: idCotizacion,
+          honorarios: cuentaGastos.honorarios || 0,
+          padron: cuentaGastos.padron || 0,
+          serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
+          manejoCarga: cuentaGastos.manejoCarga || 0,
+          subtotal: cuentaGastos.subtotal || 0,
+          iva: 0.16,
+          total: cuentaGastos.total || 0
+        });
+      } catch (errorCuentaGastos) {
+        console.error('Error al guardar cuenta de gastos:', errorCuentaGastos);
+        alert('Cotización guardada, pero hubo un error al guardar la cuenta de gastos ❗');
+      }
 
-    // Guardar pedimento
-    try {
-      await axios.post('http://localhost:5000/pedimentos', {
-        cotizacion_id: idCotizacion,
-        tipoCambio: pedimento.tipoCambio || 0,
-        pesoBruto: pedimento.pesoBruto || 0,
-        valorAduana: pedimento.valorAduana || 0,
-        dta: pedimento.dta || 0,
-        ivaPrv: pedimento.ivaPrv || 0,
-        igiIge: pedimento.igiIge || 0,
-        prv: pedimento.prv || 0,
-        iva: pedimento.iva || 0,
-        total: pedimento.total || 0
-      });
-    } catch (errorPedimento) {
-      console.error('Error al guardar pedimento:', errorPedimento);
-      alert('Cotización guardada, pero hubo un error al guardar el pedimento ❗');
-    }
+      // Guardar pedimento
+      try {
+        await axios.post('http://localhost:5000/pedimentos', {
+          cotizacion_id: idCotizacion,
+          tipoCambio: pedimento.tipoCambio || 0,
+          pesoBruto: pedimento.pesoBruto || 0,
+          valorAduana: pedimento.valorAduana || 0,
+          dta: pedimento.dta || 0,
+          ivaPrv: pedimento.ivaPrv || 0,
+          igiIge: pedimento.igiIge || 0,
+          prv: pedimento.prv || 0,
+          iva: pedimento.iva || 0,
+          total: pedimento.total || 0
+        });
+      } catch (errorPedimento) {
+        console.error('Error al guardar pedimento:', errorPedimento);
+        alert('Cotización guardada, pero hubo un error al guardar el pedimento ❗');
+      }
 
-    // Guardar desglose de impuestos
-    try {
-      await axios.post('http://localhost:5000/desglose-impuestos', {
-        cotizacion_id: idCotizacion,
-        valorFactura: impuestos.valorFactura || 0,
-        flete: impuestos.flete || 0,
-        tipoCambio: impuestos.tipoCambio || 0,
-        dta: impuestos.dta || 0,
-        igi: impuestos.igi || 0,
-        iva: impuestos.iva || 0,
-        prv: impuestos.prv || 'No aplica',
-        ivaPrv: impuestos.ivaPrv || 'No aplica',
-        total: impuestos.total || 0
-      });
-    } catch (errorDesgloseImpuestos) {
-      console.error('Error al guardar desglose de impuestos:', errorDesgloseImpuestos);
-      alert('Cotización guardada, pero hubo un error al guardar el desglose de impuestos ❗');
-    }
-  
+      // Guardar desglose de impuestos
+      try {
+        await axios.post('http://localhost:5000/desglose-impuestos', {
+          cotizacion_id: idCotizacion,
+          valorFactura: impuestos.valorFactura || 0,
+          flete: impuestos.flete || 0,
+          tipoCambio: impuestos.tipoCambio || 0,
+          dta: impuestos.dta || 0,
+          igi: impuestos.igi || 0,
+          iva: impuestos.iva || 0,
+          prv: impuestos.prv || 'No aplica',
+          ivaPrv: impuestos.ivaPrv || 'No aplica',
+          total: impuestos.total || 0
+        });
+      } catch (errorDesgloseImpuestos) {
+        console.error('Error al guardar desglose de impuestos:', errorDesgloseImpuestos);
+        alert('Cotización guardada, pero hubo un error al guardar el desglose de impuestos ❗');
+      }
+
       if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
       alert('Cotización guardada exitosamente ✅');
+      window.location.reload(); //
+      
     } catch (error) {
       console.error('Error al guardar cotización:', error);
       alert('Hubo un error al guardar la cotización ❌');
     }
   };
 
+  // Función para obtener clientes
   useEffect(() => {
     const obtenerClientes = async () => {
       try {
@@ -182,6 +188,33 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     obtenerClientes();
   }, []);
 
+  // Obtener último folio
+  useEffect(() => {
+    const obtenerUltimoFolio = async () => {
+      try {
+        const respuesta = await axios.get('http://localhost:5000/cotizaciones');
+        const cotizaciones = respuesta.data;
+        
+        if (cotizaciones.length > 0) {
+          const folios = cotizaciones.map(c => c.folio);
+          const numeros = folios.map(folio => parseInt(folio.split('-')[1], 10));
+          const maxNumero = Math.max(...numeros);
+          const nuevoNumero = maxNumero + 1;
+          const nuevoFolio = `COT-${nuevoNumero.toString().padStart(4, '0')}`; // Rellenar con ceros
+          setForm(prevForm => ({ ...prevForm, folio: nuevoFolio }));
+        } else {
+          // Si no hay ninguna cotización aún
+          setForm(prevForm => ({ ...prevForm, folio: 'COT-0001' }));
+        }
+      } catch (error) {
+        console.error('Error al obtener el último folio:', error);
+      }
+    };
+  
+    obtenerUltimoFolio();
+  }, []);
+
+  // Funciones para manejar cambios de subformularios
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);
   const handleCargosChange = (datosCargos) => setCargos(datosCargos);
   const handleImpuestosChange = (datosImpuestos) => setImpuestos(datosImpuestos);
@@ -190,6 +223,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
   const handleCuentaGastosChange = (datos) => setCuentaGastos(datos);
   const handlePedimentoChange = (datos) => setPedimento(datos);
 
+  // Función para renderizar el badge del estatus
   const renderBadgeEstatus = (estatus) => {
     const clases = {
       'Autorizada': 'bg-success',
@@ -200,7 +234,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada }) => {
     return (
       <span className={`badge px-4 py-2 fs-6 ${clases[estatus] || ''}`}>{estatus}</span>
     );
-  };
+  }
 
   return (
     <Card className="container-cotizaciones">
