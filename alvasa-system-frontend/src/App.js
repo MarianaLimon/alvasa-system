@@ -22,6 +22,7 @@ function App() {
             <Route path="/cotizaciones" element={<ListaCotizaciones />} />
             <Route path="/nuevacotizacion" element={<FormularioCotizacion />} />
             <Route path="/cotizaciones/:id" element={<VerCotizacion />} />
+            <Route path="/cotizaciones/editar/:id" element={<FormularioCotizacion modo="editar" />} />
           </Routes>
         </div>
       </div>

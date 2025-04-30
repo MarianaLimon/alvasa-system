@@ -1,110 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Form, Button, Card, Spinner } from 'react-bootstrap';
+import FormularioCotizacion from './FormularioCotizacion';
 
 const EditarCotizacion = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [form, setForm] = useState({
-    folio: '',
-    cliente: '',
-    empresa: '',
-    fecha: '',
-    mercancia: '',
-    monto_comisionista: 0,
-    estatus: ''
-  });
+  const [datosIniciales, setDatosIniciales] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const obtenerCotizacion = async () => {
+    const cargarCotizacion = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
-        setForm(response.data);
+        const cot = response.data;
+
+        setDatosIniciales({
+          form: {
+            id: cot.id,
+            folio: cot.folio,
+            cliente_id: cot.cliente_id,
+            empresa: cot.empresa,
+            fecha: cot.fecha ? cot.fecha.split('T')[0] : '',
+            mercancia: cot.mercancia,
+            regimen: cot.regimen,
+            aduana: cot.aduana,
+            tipo_envio: cot.tipo_envio,
+            cantidad: cot.cantidad,
+            estatus: cot.estatus,
+          },
+          flete: {
+            origenDestino: cot.flete_origen_destino,
+            concepto1: cot.flete_concepto_1,
+            valor1: cot.flete_valor_1,
+            concepto2: cot.flete_concepto_2,
+            valor2: cot.flete_valor_2,
+            concepto3: cot.flete_concepto_3,
+            valor3: cot.flete_valor_3,
+            total: cot.flete_total,
+          },
+          cargos: cot.cargos?.[0] || {},
+          cargosExtra: cot.cargos?.[0] || {},
+          servicios: cot.servicios?.[0] || {},
+          cuentaGastos: cot.cuentaGastos?.[0] || {},
+          pedimento: cot.pedimento || {},
+          impuestos: cot.desgloseImpuestos?.[0] || {},
+          resumen: {
+            propuesta: cot.propuesta,
+            total: cot.total,
+            ahorro: cot.ahorro,
+            fraccion_igi: cot.fraccion_igi,
+            monto_comisionista: cot.monto_comisionista,
+            notas: cot.notas,
+          }
+        });
+
         setLoading(false);
       } catch (error) {
-        console.error('Error al obtener cotización:', error);
+        console.error('Error cargando cotización para editar:', error);
         setLoading(false);
       }
     };
-    obtenerCotizacion();
+
+    cargarCotizacion();
   }, [id]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: name === 'monto_comisionista' ? parseFloat(value) : value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.put(`http://localhost:5000/cotizaciones/${id}`, form);
-      alert('Cotización actualizada exitosamente ✅');
-      navigate('/cotizaciones');
-    } catch (error) {
-      console.error('Error al actualizar cotización:', error);
-      alert('Hubo un error al actualizar la cotización ❌');
-    }
-  };
-
-  if (loading) return <div className="text-center my-4"><Spinner animation="border" /></div>;
+  if (loading) return <div className="text-center mt-5">Cargando cotización para editar...</div>;
 
   return (
-    <Card className="container mt-4">
-      <Card.Body>
-        <h3 className="mb-4">Editar Cotización</h3>
-
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Folio</Form.Label>
-            <Form.Control type="text" name="folio" value={form.folio} disabled />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Cliente</Form.Label>
-            <Form.Control type="text" name="cliente" value={form.cliente} onChange={handleChange} />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Empresa</Form.Label>
-            <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Fecha</Form.Label>
-            <Form.Control type="date" name="fecha" value={form.fecha.split('T')[0]} onChange={handleChange} />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Mercancía</Form.Label>
-            <Form.Control type="text" name="mercancia" value={form.mercancia} onChange={handleChange} />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Comisión</Form.Label>
-            <Form.Control type="number" step="0.01" name="monto_comisionista" value={form.monto_comisionista} onChange={handleChange} />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Estatus</Form.Label>
-            <Form.Select name="estatus" value={form.estatus} onChange={handleChange}>
-              <option value="">Seleccionar...</option>
-              <option value="Autorizada">Autorizada</option>
-              <option value="En negociación">En negociación</option>
-              <option value="Entregado a cliente">Entregado a cliente</option>
-              <option value="Declinada">Declinada</option>
-            </Form.Select>
-          </Form.Group>
-
-          <div className="d-flex justify-content-center mt-4">
-            <Button type="submit" variant="success">
-              Actualizar Cotización
-            </Button>
-          </div>
-        </Form>
-      </Card.Body>
-    </Card>
+    <FormularioCotizacion modo="editar" datosIniciales={datosIniciales} />
   );
 };
 

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Card, Row, Col, Accordion } from 'react-bootstrap';
 import { BsSave, BsPrinter, BsListUl } from 'react-icons/bs';
-import { useParams, useNavigate } from 'react-router-dom';
-
 import FleteInternacional from './FleteInternacional';
 import CargosTraslados from './CargosTraslados';
 import DesgloseImpuestos from './DesgloseImpuestos';
@@ -14,9 +12,6 @@ import Pedimento from './Pedimento';
 import ResumenCotizacion from './ResumenCotizacion';
 
 const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosIniciales = null }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
   const [form, setForm] = useState(datosIniciales || {
     folio: '',
     cliente_id: '',
@@ -45,18 +40,6 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     setForm({ ...form, [name]: name === 'cantidad' ? parseInt(value, 10) || 0 : value });
   };
 
-  const renderBadgeEstatus = (estatus) => {
-    const clases = {
-      'Autorizada': 'bg-success',
-      'En negociación': 'bg-warning text-dark',
-      'Entregado a cliente': 'bg-info text-dark',
-      'Declinada': 'bg-danger'
-    };
-    return (
-      <span className={`badge px-4 py-2 fs-6 ${clases[estatus] || ''}`}>{estatus}</span>
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const cotizacionCompleta = {
@@ -78,7 +61,8 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     };
 
     try {
-      let idCotizacion = form.id || id;
+      let idCotizacion = form.id;
+
       if (modo === 'crear') {
         const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
         idCotizacion = response.data.id;
@@ -149,33 +133,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: impuestos.total || 0
         });
       } else {
-        await axios.put(`http://localhost:5000/cotizaciones/${id}`, cotizacionCompleta);
-
-
-        // ---- Agregado
-
-        await axios.put(`http://localhost:5000/cuenta-gastos/${idCotizacion}`, {
-          honorarios: cuentaGastos.honorarios || 0,
-          padron: cuentaGastos.padron || 0,
-          serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
-          manejoCarga: cuentaGastos.manejoCarga || 0,
-          subtotal: cuentaGastos.subtotal || 0,
-          iva: 0.16,
-          total: cuentaGastos.total || 0
-        });
-        
-        await axios.put(`http://localhost:5000/servicios/${idCotizacion}`, {
-          maniobras: servicios.maniobras || 0,
-          revalidacion: servicios.revalidacion || 0,
-          gestionDestino: servicios.gestionDestino || 0,
-          inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
-          documentacionImportacion: servicios.documentacionImportacion || 0,
-          garantiaContenedores: servicios.garantiaContenedores || 0,
-          distribucion: servicios.distribucion || 0,
-          serentyPremium: servicios.serentyPremium || 0,
-          total: servicios.total || 0
-        });
-
+        await axios.put(`http://localhost:5000/cotizaciones/${form.id}`, cotizacionCompleta);
       }
 
       if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
@@ -205,6 +163,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
         try {
           const respuesta = await axios.get('http://localhost:5000/cotizaciones');
           const cotizaciones = respuesta.data;
+
           if (cotizaciones.length > 0) {
             const folios = cotizaciones.map(c => c.folio);
             const numeros = folios.map(folio => parseInt(folio.split('-')[1], 10));
@@ -220,69 +179,8 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
         }
       };
       obtenerUltimoFolio();
-    } else if (modo === 'editar' && id) {
-      const obtenerDatos = async () => {
-        try {
-          const respuesta = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
-          const cot = respuesta.data;
-  
-          setForm({
-            id: cot.id,
-            folio: cot.folio,
-            cliente_id: cot.cliente_id,
-            empresa: cot.empresa,
-            fecha: cot.fecha.split('T')[0],
-            mercancia: cot.mercancia,
-            regimen: cot.regimen,
-            aduana: cot.aduana,
-            tipo_envio: cot.tipo_envio,
-            cantidad: cot.cantidad,
-            estatus: cot.estatus,
-            propuesta: cot.propuesta || '',
-            total: cot.total || 0,
-            ahorro: cot.ahorro || 0,
-            fraccion_igi: cot.fraccion_igi || '',
-            monto_comisionista: cot.monto_comisionista || '',
-            notas: cot.notas || ''
-          });
-  
-          setFlete({
-            origenDestino: cot.flete_origen_destino,
-            concepto1: cot.flete_concepto_1,
-            valor1: cot.flete_valor_1,
-            concepto2: cot.flete_concepto_2,
-            valor2: cot.flete_valor_2,
-            concepto3: cot.flete_concepto_3,
-            valor3: cot.flete_valor_3,
-            total: cot.flete_total
-          });
-  
-          setCargos(cot.cargos?.[0] || {});
-          setCargosExtra(cot.cargos?.[0] || {});
-          setServicios(cot.servicios?.[0] || {});
-          setCuentaGastos(cot.cuentaGastos?.[0] || {});
-          setPedimento(cot.pedimento || {});
-  
-          const imp = cot.desgloseImpuestos?.[0] || {};
-          setImpuestos({
-            valorFactura: imp.valor_factura ?? '',
-            flete: imp.flete ?? '',
-            tipoCambio: imp.tipo_cambio ?? '',
-            dta: imp.dta ?? 0,
-            igi: imp.igi ?? '',
-            iva: imp.iva ?? 0,
-            prv: imp.prv ?? 'No aplica',
-            ivaPrv: imp.iva_prv ?? 'No aplica',
-            total: imp.total ?? 0
-          });
-  
-        } catch (error) {
-          console.error('Error al cargar datos para edición:', error);
-        }
-      };
-      obtenerDatos();
     }
-  }, [modo, id]);
+  }, [modo]);
 
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);
   const handleCargosChange = (datosCargos) => setCargos(datosCargos);
@@ -292,13 +190,23 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
   const handleCuentaGastosChange = (datos) => setCuentaGastos(datos);
   const handlePedimentoChange = (datos) => setPedimento(datos);
 
+  const renderBadgeEstatus = (estatus) => {
+    const clases = {
+      'Autorizada': 'bg-success',
+      'En negociación': 'bg-warning text-dark',
+      'Entregado a cliente': 'bg-info text-dark',
+      'Declinada': 'bg-danger'
+    };
+    return (
+      <span className={`badge px-4 py-2 fs-6 ${clases[estatus] || ''}`}>{estatus}</span>
+    );
+  }
+
   return (
     <Card className="container-cotizaciones">
       <Card.Body>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <Card.Title className="mb-0">
-            {modo === 'crear' ? 'Registrar Cotización' : `Editar Cotización: ${form.folio}`}
-          </Card.Title>
+          <Card.Title className="mb-0">Registrar Cotización</Card.Title>
           {form.estatus && renderBadgeEstatus(form.estatus)}
         </div>
 
@@ -407,56 +315,56 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
             <Accordion.Item eventKey="0">
               <Accordion.Header>Flete Internacional</Accordion.Header>
               <Accordion.Body>
-                <FleteInternacional onFleteChange={handleFleteChange} datos={flete} />
+                <FleteInternacional onFleteChange={handleFleteChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>Cargos de Traslados</Accordion.Header>
               <Accordion.Body>
-                <CargosTraslados onCargosChange={handleCargosChange} datos={cargos} />
+                <CargosTraslados onCargosChange={handleCargosChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="2">
               <Accordion.Header>Desglose de Impuestos</Accordion.Header>
               <Accordion.Body>
-                <DesgloseImpuestos onImpuestosChange={handleImpuestosChange} datos={impuestos} />
+                <DesgloseImpuestos onImpuestosChange={handleImpuestosChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="3">
               <Accordion.Header>Cargos Extra</Accordion.Header>
               <Accordion.Body>
-                <CargosExtra onCargosExtraChange={handleCargosExtraChange} datos={cargosExtra} />
+                <CargosExtra onCargosExtraChange={handleCargosExtraChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="4">
               <Accordion.Header>Servicios</Accordion.Header>
               <Accordion.Body>
-                <Servicios onServiciosChange={handleServiciosChange} datos={servicios} />
+                <Servicios onServiciosChange={handleServiciosChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="5">
               <Accordion.Header>Cuenta de Gastos</Accordion.Header>
               <Accordion.Body>
-                <CuentaGastos onCuentaChange={handleCuentaGastosChange} datos={cuentaGastos} />
+                <CuentaGastos onCuentaChange={handleCuentaGastosChange} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="6">
               <Accordion.Header>Pedimento</Accordion.Header>
               <Accordion.Body>
-                <Pedimento onPedimentoChange={handlePedimentoChange} datos={pedimento} />
+                <Pedimento onPedimentoChange={handlePedimentoChange} />
               </Accordion.Body>
             </Accordion.Item>
           </Accordion>
 
           <ResumenCotizacion
             datosTotales={{ flete, cargos, impuestos, cargosExtra, servicios, cuentaGastos, pedimento }}
-            datos={form}
             onResumenChange={setResumen}
           />
+
           <div className="d-flex justify-content-center gap-3 mt-4">
             <Button type="submit" variant="success">
               <BsSave className="me-2" />
-              {modo === 'crear' ? 'Guardar Cotización' : 'Actualizar Cotización'}
+              Guardar Cotización
             </Button>
             <Button variant="primary" onClick={() => window.print()}>
               <BsPrinter className="me-2" />
@@ -465,7 +373,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           </div>
 
           <div className="d-flex justify-content-center mt-3">
-            <Button variant="warning" onClick={() => navigate('/cotizaciones')}>
+            <Button variant="warning" onClick={() => window.location.href = '/cotizaciones'}>
               <BsListUl className="me-2" />
               Ver todas las cotizaciones
             </Button>

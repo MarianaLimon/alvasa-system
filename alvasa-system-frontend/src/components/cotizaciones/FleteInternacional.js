@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const FleteInternacional = ({ onFleteChange }) => {
+const FleteInternacional = ({ onFleteChange, datos = {} }) => {
   const [flete, setFlete] = useState({
     origenDestino: '',
     concepto1: '',
@@ -12,6 +12,21 @@ const FleteInternacional = ({ onFleteChange }) => {
     valor3: '',
     total: 0,
   });
+
+  // Precargar datos si los recibe desde el padre
+  useEffect(() => {
+    if (datos && Object.keys(datos).length > 0) {
+      const cargado = {
+        ...datos,
+        total:
+          parseFloat(datos.valor1 || 0) +
+          parseFloat(datos.valor2 || 0) +
+          parseFloat(datos.valor3 || 0),
+      };
+      setFlete(cargado);
+      if (onFleteChange) onFleteChange(cargado);
+    }
+  }, [datos, onFleteChange]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,7 +112,7 @@ const FleteInternacional = ({ onFleteChange }) => {
       ))}
 
       <div className="text-end mt-3">
-        <strong>Total Flete: ${flete.total.toFixed(2)} USD</strong>
+        <strong>Total Flete: ${Number(flete.total || 0).toFixed(2)} USD</strong>
       </div>
     </div>
   );

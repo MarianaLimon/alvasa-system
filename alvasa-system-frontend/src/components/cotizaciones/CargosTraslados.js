@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const CargosTraslados = ({ onCargosChange }) => {
+const CargosTraslados = ({ onCargosChange, datos = {} }) => {
   const [cargos, setCargos] = useState({
     terrestre: '',
     aereo: '',
     custodia: '',
     total: 0,
   });
+
+  useEffect(() => {
+    if (datos && Object.keys(datos).length > 0) {
+      const cargado = {
+        ...datos,
+        total:
+          parseFloat(datos.terrestre || 0) +
+          parseFloat(datos.aereo || 0) +
+          parseFloat(datos.custodia || 0),
+      };
+      setCargos(cargado);
+      if (onCargosChange) onCargosChange(cargado);
+    }
+  }, [datos, onCargosChange]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,7 +85,7 @@ const CargosTraslados = ({ onCargosChange }) => {
       </Row>
 
       <div className="text-end mt-3">
-        <strong>Total Cargos: ${cargos.total.toFixed(2)} USD</strong>
+        <strong>Total Cargos: ${Number(cargos.total || 0).toFixed(2)} USD</strong>
       </div>
     </div>
   );

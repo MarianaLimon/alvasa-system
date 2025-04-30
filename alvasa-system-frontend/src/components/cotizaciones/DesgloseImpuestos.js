@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const DesgloseImpuestos = ({ onImpuestosChange }) => {
+const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
   const [data, setData] = useState({
     valorFactura: '',
     flete: '',
@@ -9,9 +9,6 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
     igi: '',
     prv: 'No aplica',
     ivaPrv: 'No aplica',
-  });
-
-  const [resultados, setResultados] = useState({
     dta: 0,
     iva: 0,
     total: 0,
@@ -20,39 +17,67 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
   const parseNumber = (val) => parseFloat(val) || 0;
 
   useEffect(() => {
-    const obtenerTipoCambio = async () => {
-      try {
-        const response = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await response.json();
-        const tipoCambioActual = data.rates.MXN;
-        setData(prev => ({ ...prev, tipoCambio: tipoCambioActual.toFixed(2) }));
-      } catch (error) {
-        console.error('Error al obtener tipo de cambio:', error);
-      }
-    };
-    obtenerTipoCambio();
-  }, []);
+    if (datos && Object.keys(datos).length > 0) {
+      setData({
+        valorFactura: datos.valorFactura ?? datos.valor_factura ?? '',
+        flete: datos.flete ?? '',
+        tipoCambio: datos.tipoCambio ?? datos.tipo_cambio ?? '',
+        igi: datos.igi ?? '',
+        prv: datos.prv ?? 'No aplica',
+        ivaPrv: datos.ivaPrv ?? 'No aplica',
+        dta: parseFloat(datos.dta ?? 0),
+        iva: parseFloat(datos.iva ?? 0),
+        total: parseFloat(datos.total ?? 0),
+      });
+    }
+  }, [datos]);
+
+  const {
+    valorFactura,
+    flete,
+    tipoCambio,
+    igi,
+    prv,
+    ivaPrv,
+    dta: dtaActual,
+    iva: ivaActual,
+    total: totalActual,
+  } = data;
 
   useEffect(() => {
-    const valorFactura = parseNumber(data.valorFactura);
-    const flete = parseNumber(data.flete);
-    const tipoCambio = parseNumber(data.tipoCambio);
-    const igi = parseNumber(data.igi);
-    const prv = data.prv === '290 pesos mexicanos' ? 290 : 0;
-    const ivaPrv = data.ivaPrv === '46 pesos mexicanos' ? 46 : 0;
+    const dta = (parseNumber(valorFactura) + parseNumber(flete)) * parseNumber(tipoCambio);
+    const iva = (parseNumber(valorFactura) + dta + parseNumber(igi)) * 0.16;
+    const total =
+      dta +
+      parseNumber(igi) +
+      iva +
+      (prv === '290 pesos mexicanos' ? 290 : 0) +
+      (ivaPrv === '46 pesos mexicanos' ? 46 : 0);
 
-    const dta = (valorFactura + flete) * tipoCambio;
-    const iva = (valorFactura + dta + igi) * 0.16;
-    const total = dta + igi + iva + prv + ivaPrv;
+    // Solo actualiza si los valores cambiaron
+    if (
+      dta.toFixed(2) !== dtaActual.toFixed(2) ||
+      iva.toFixed(2) !== ivaActual.toFixed(2) ||
+      total.toFixed(2) !== totalActual.toFixed(2)
+    ) {
+      const resultados = { dta, iva, total };
+      setData((prev) => ({ ...prev, ...resultados }));
 
-    const nuevosResultados = { dta, iva, total };
-    setResultados(nuevosResultados);
-
-    if (onImpuestosChange) {
-      onImpuestosChange({ ...data, ...nuevosResultados });
+      if (onImpuestosChange) {
+        onImpuestosChange({
+          valorFactura,
+          flete,
+          tipoCambio,
+          igi,
+          prv,
+          ivaPrv,
+          dta,
+          iva,
+          total,
+        });
+      }
     }
-  }, [data, onImpuestosChange]);
-
+  }, [valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dtaActual, ivaActual, totalActual, onImpuestosChange]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));
@@ -75,7 +100,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
             <Form.Control
               type="number"
               name="valorFactura"
-              value={data.valorFactura}
+              value={valorFactura}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -87,7 +112,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
             <Form.Control
               type="number"
               name="flete"
-              value={data.flete}
+              value={flete}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -99,7 +124,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
             <Form.Control
               type="number"
               name="tipoCambio"
-              value={data.tipoCambio}
+              value={tipoCambio}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -111,7 +136,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
         <Col md={4}>
           <Form.Group>
             <Form.Label>DTA (calculado)</Form.Label>
-            <Form.Control value={`$${resultados.dta.toFixed(2)} MXN`} disabled />
+            <Form.Control value={`$${dtaActual.toFixed(2)} MXN`} disabled />
           </Form.Group>
         </Col>
         <Col md={4}>
@@ -120,7 +145,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
             <Form.Control
               type="number"
               name="igi"
-              value={data.igi}
+              value={igi}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -129,7 +154,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
         <Col md={4}>
           <Form.Group>
             <Form.Label>IVA (calculado)</Form.Label>
-            <Form.Control value={`$${resultados.iva.toFixed(2)} MXN`} disabled />
+            <Form.Control value={`$${ivaActual.toFixed(2)} MXN`} disabled />
           </Form.Group>
         </Col>
       </Row>
@@ -138,7 +163,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
         <Col md={6}>
           <Form.Group>
             <Form.Label>PRV</Form.Label>
-            <Form.Select name="prv" value={data.prv} onChange={handleChange}>
+            <Form.Select name="prv" value={prv} onChange={handleChange}>
               <option>No aplica</option>
               <option>290 pesos mexicanos</option>
             </Form.Select>
@@ -147,7 +172,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
         <Col md={6}>
           <Form.Group>
             <Form.Label>IVA / PRV</Form.Label>
-            <Form.Select name="ivaPrv" value={data.ivaPrv} onChange={handleChange}>
+            <Form.Select name="ivaPrv" value={ivaPrv} onChange={handleChange}>
               <option>No aplica</option>
               <option>46 pesos mexicanos</option>
             </Form.Select>
@@ -156,7 +181,7 @@ const DesgloseImpuestos = ({ onImpuestosChange }) => {
       </Row>
 
       <div className="text-end mt-3">
-        <strong>Total Impuestos: ${resultados.total.toFixed(2)} MXN</strong>
+        <strong>Total Impuestos: ${totalActual.toFixed(2)} MXN</strong>
       </div>
     </div>
   );

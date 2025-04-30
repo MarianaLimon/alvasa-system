@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const CuentaGastos = ({ onCuentaChange }) => {
+const CuentaGastos = ({ onCuentaChange, datos = {} }) => {
   const [data, setData] = useState({
     honorarios: '',
     padron: '',
@@ -10,6 +10,7 @@ const CuentaGastos = ({ onCuentaChange }) => {
   });
 
   const iva = 0.16;
+
   const [resultados, setResultados] = useState({
     subtotal: 0,
     total: 0,
@@ -17,19 +18,69 @@ const CuentaGastos = ({ onCuentaChange }) => {
 
   const parseNumber = (val) => parseFloat(val) || 0;
 
+  // Precargar datos en modo edición
+  useEffect(() => {
+    if (datos && Object.keys(datos).length > 0) {
+      setData({
+        honorarios: datos.honorarios ?? '',
+        padron: datos.padron ?? '',
+        serviciosComplementarios: datos.serviciosComplementarios ?? datos.servicios_complementarios ?? '',
+        manejoCarga: datos.manejoCarga ?? datos.manejo_carga ?? '',
+      });
+      const subtotal =
+        parseNumber(datos.honorarios) +
+        parseNumber(datos.padron) +
+        parseNumber(datos.serviciosComplementarios ?? datos.servicios_complementarios) +
+        parseNumber(datos.manejoCarga ?? datos.manejo_carga);
+
+      const total = subtotal * (1 + iva);
+      setResultados({ subtotal, total });
+    }
+  }, [datos]);
+
+  const {
+    honorarios,
+    padron,
+    serviciosComplementarios,
+    manejoCarga,
+  } = data;
+
   useEffect(() => {
     const subtotal =
-      parseNumber(data.honorarios) +
-      parseNumber(data.padron) +
-      parseNumber(data.serviciosComplementarios) +
-      parseNumber(data.manejoCarga);
+      parseNumber(honorarios) +
+      parseNumber(padron) +
+      parseNumber(serviciosComplementarios) +
+      parseNumber(manejoCarga);
 
     const total = subtotal * (1 + iva);
-    const nuevosResultados = { subtotal, total };
 
-    setResultados(nuevosResultados);
-    if (onCuentaChange) onCuentaChange({ ...data, subtotal, iva, total });
-  }, [data, onCuentaChange]);
+    if (
+      subtotal.toFixed(2) !== resultados.subtotal.toFixed(2) ||
+      total.toFixed(2) !== resultados.total.toFixed(2)
+    ) {
+      const nuevosResultados = { subtotal, total };
+      setResultados(nuevosResultados);
+
+      if (onCuentaChange) {
+        onCuentaChange({
+          honorarios,
+          padron,
+          serviciosComplementarios,
+          manejoCarga,
+          subtotal,
+          iva,
+          total,
+        });
+      }
+    }
+  }, [
+    honorarios,
+    padron,
+    serviciosComplementarios,
+    manejoCarga,
+    resultados,
+    onCuentaChange,
+  ]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +104,7 @@ const CuentaGastos = ({ onCuentaChange }) => {
             <Form.Control
               type="number"
               name="honorarios"
-              value={data.honorarios}
+              value={honorarios}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -65,7 +116,7 @@ const CuentaGastos = ({ onCuentaChange }) => {
             <Form.Control
               type="number"
               name="padron"
-              value={data.padron}
+              value={padron}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -77,7 +128,7 @@ const CuentaGastos = ({ onCuentaChange }) => {
             <Form.Control
               type="number"
               name="serviciosComplementarios"
-              value={data.serviciosComplementarios}
+              value={serviciosComplementarios}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -89,7 +140,7 @@ const CuentaGastos = ({ onCuentaChange }) => {
             <Form.Control
               type="number"
               name="manejoCarga"
-              value={data.manejoCarga}
+              value={manejoCarga}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />

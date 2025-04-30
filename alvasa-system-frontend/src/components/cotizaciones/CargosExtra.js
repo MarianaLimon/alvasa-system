@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const CargosExtra = ({ onCargosExtraChange }) => {
+const CargosExtra = ({ onCargosExtraChange, datos = {} }) => {
   const [data, setData] = useState({
     almacenajes: '',
     demoras: '',
@@ -16,13 +16,69 @@ const CargosExtra = ({ onCargosExtraChange }) => {
 
   const parseNumber = (val) => parseFloat(val) || 0;
 
+  // Precargar datos en modo edición
   useEffect(() => {
-    const suma = Object.values(data).reduce((acc, val) => acc + parseNumber(val), 0);
-    setTotal(suma);
-    if (onCargosExtraChange) {
-      onCargosExtraChange({ ...data, total: suma });
+    if (datos && Object.keys(datos).length > 0) {
+      setData({
+        almacenajes: datos.almacenajes ?? '',
+        demoras: datos.demoras ?? '',
+        pernocta: datos.pernocta ?? '',
+        burreo: datos.burreo ?? '',
+        fleteFalso: datos.fleteFalso ?? datos.flete_falso ?? '',
+        servicioNoRealizado: datos.servicioNoRealizado ?? datos.servicio_no_realizado ?? '',
+        seguro: datos.seguro ?? '',
+      });
+      setTotal(parseFloat(datos.total ?? 0));
     }
-  }, [data, onCargosExtraChange]);
+  }, [datos]);
+
+  const {
+    almacenajes,
+    demoras,
+    pernocta,
+    burreo,
+    fleteFalso,
+    servicioNoRealizado,
+    seguro,
+  } = data;
+
+  useEffect(() => {
+    const suma = [
+      parseNumber(almacenajes),
+      parseNumber(demoras),
+      parseNumber(pernocta),
+      parseNumber(burreo),
+      parseNumber(fleteFalso),
+      parseNumber(servicioNoRealizado),
+      parseNumber(seguro),
+    ].reduce((acc, val) => acc + val, 0);
+
+    if (suma.toFixed(2) !== total.toFixed(2)) {
+      setTotal(suma);
+      if (onCargosExtraChange) {
+        onCargosExtraChange({
+          almacenajes,
+          demoras,
+          pernocta,
+          burreo,
+          fleteFalso,
+          servicioNoRealizado,
+          seguro,
+          total: suma,
+        });
+      }
+    }
+  }, [
+    almacenajes,
+    demoras,
+    pernocta,
+    burreo,
+    fleteFalso,
+    servicioNoRealizado,
+    seguro,
+    total,
+    onCargosExtraChange,
+  ]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,7 +101,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="almacenajes"
-              value={data.almacenajes}
+              value={almacenajes}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -57,7 +113,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="demoras"
-              value={data.demoras}
+              value={demoras}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -69,7 +125,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="pernocta"
-              value={data.pernocta}
+              value={pernocta}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -84,7 +140,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="burreo"
-              value={data.burreo}
+              value={burreo}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -96,7 +152,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="fleteFalso"
-              value={data.fleteFalso}
+              value={fleteFalso}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -108,7 +164,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="servicioNoRealizado"
-              value={data.servicioNoRealizado}
+              value={servicioNoRealizado}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -123,7 +179,7 @@ const CargosExtra = ({ onCargosExtraChange }) => {
             <Form.Control
               type="number"
               name="seguro"
-              value={data.seguro}
+              value={seguro}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />

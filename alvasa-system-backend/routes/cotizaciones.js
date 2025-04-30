@@ -2,79 +2,42 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Crear una cotización
+// ------------------------------
+// CREAR COTIZACIÓN
+// ------------------------------
 router.post('/', (req, res) => {
   const {
-    folio,
-    cliente_id,
-    empresa,
-    fecha,
-    mercancia,
-    regimen,
-    aduana,
-    tipo_envio,
-    cantidad,
-    estatus,
-    fraccion_igi,
-    monto_comisionista,
-    notas,
-    propuesta,
-    total,
-    ahorro,
-    flete_origen_destino,
-    flete_concepto_1,
-    flete_valor_1,
-    flete_concepto_2,
-    flete_valor_2,
-    flete_concepto_3,
-    flete_valor_3,
-    flete_total,
+    folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
+    cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta, total,
+    ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
   } = req.body;
 
   const sql = `
-    INSERT INTO cotizaciones 
-    (folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio, cantidad, estatus,
-     fraccion_igi, monto_comisionista, notas, propuesta, total, ahorro,
-     flete_origen_destino, flete_concepto_1, flete_valor_1, flete_concepto_2, flete_valor_2,
-     flete_concepto_3, flete_valor_3, flete_total)
+    INSERT INTO cotizaciones (
+      folio, cliente_id, empresa, fecha, mercancia, regimen, aduana,
+      tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista,
+      notas, propuesta, total, ahorro,
+      flete_origen_destino, flete_concepto_1, flete_valor_1,
+      flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+    )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(sql, [
-    folio,
-    cliente_id,
-    empresa,
-    fecha,
-    mercancia,
-    regimen,
-    aduana,
-    tipo_envio,
-    cantidad,
-    estatus,
-    fraccion_igi,
-    monto_comisionista,
-    notas,
-    propuesta,
-    total,
-    ahorro,
-    flete_origen_destino,
-    flete_concepto_1,
-    flete_valor_1,
-    flete_concepto_2,
-    flete_valor_2,
-    flete_concepto_3,
-    flete_valor_3,
-    flete_total
+    folio, cliente_id, empresa, fecha, mercancia, regimen, aduana,
+    tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta,
+    total, ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
   ], (err, result) => {
-    if (err) {
-      console.error('Error al insertar cotización:', err);
-      return res.status(500).json({ error: 'Error al guardar cotización' });
-    }
+    if (err) return res.status(500).json({ error: 'Error al guardar cotización' });
     res.status(201).json({ message: 'Cotización guardada', id: result.insertId });
   });
 });
 
-// Obtener todas las cotizaciones
+// ------------------------------
+// OBTENER TODAS LAS COTIZACIONES
+// ------------------------------
 router.get('/', (req, res) => {
   const sql = `
     SELECT 
@@ -110,14 +73,14 @@ router.get('/', (req, res) => {
   });
 });
 
-// Obtener una cotización específica (con todos sus datos)
+// ------------------------------
+// OBTENER UNA COTIZACIÓN COMPLETA POR ID
+// ------------------------------
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
   const sqlCotizacion = `
-    SELECT 
-      cot.*,
-      cli.nombre AS cliente
+    SELECT cot.*, cli.nombre AS cliente
     FROM cotizaciones cot
     LEFT JOIN clientes cli ON cot.cliente_id = cli.id
     WHERE cot.id = ?
@@ -130,62 +93,200 @@ router.get('/:id', (req, res) => {
   const sqlDesgloseImpuestos = `SELECT * FROM desglose_impuestos_cotizacion WHERE cotizacion_id = ?`;
 
   db.query(sqlCotizacion, [id], (err, cotizacionResult) => {
-    if (err) {
-      console.error('Error al obtener cotización:', err);
-      return res.status(500).json({ error: 'Error al obtener cotización' });
-    }
-
-    if (cotizacionResult.length === 0) {
-      return res.status(404).json({ error: 'Cotización no encontrada' });
-    }
+    if (err) return res.status(500).json({ error: 'Error al obtener cotización' });
+    if (cotizacionResult.length === 0) return res.status(404).json({ error: 'Cotización no encontrada' });
 
     const cotizacion = cotizacionResult[0];
 
-    // Obtener todos los datos relacionados
     db.query(sqlCargos, [id], (err, cargosResult) => {
-      if (err) {
-        console.error('Error al obtener cargos:', err);
-        return res.status(500).json({ error: 'Error al obtener cargos' });
-      }
+      if (err) return res.status(500).json({ error: 'Error al obtener cargos' });
 
       db.query(sqlServicios, [id], (err, serviciosResult) => {
-        if (err) {
-          console.error('Error al obtener servicios:', err);
-          return res.status(500).json({ error: 'Error al obtener servicios' });
-        }
+        if (err) return res.status(500).json({ error: 'Error al obtener servicios' });
 
         db.query(sqlCuentaGastos, [id], (err, cuentaGastosResult) => {
-          if (err) {
-            console.error('Error al obtener cuenta de gastos:', err);
-            return res.status(500).json({ error: 'Error al obtener cuenta de gastos' });
-          }
+          if (err) return res.status(500).json({ error: 'Error al obtener cuenta de gastos' });
 
           db.query(sqlPedimento, [id], (err, pedimentoResult) => {
-            if (err) {
-              console.error('Error al obtener pedimento:', err);
-              return res.status(500).json({ error: 'Error al obtener pedimento' });
-            }
+            if (err) return res.status(500).json({ error: 'Error al obtener pedimento' });
 
             db.query(sqlDesgloseImpuestos, [id], (err, desgloseImpuestosResult) => {
-              if (err) {
-                console.error('Error al obtener desglose de impuestos:', err);
-                return res.status(500).json({ error: 'Error al obtener desglose de impuestos' });
-              }
+              if (err) return res.status(500).json({ error: 'Error al obtener desglose de impuestos' });
 
-            // Agregamos todos los datos a la cotización
-            cotizacion.cargos = cargosResult;
-            cotizacion.servicios = serviciosResult;
-            cotizacion.cuentaGastos = cuentaGastosResult;
-            cotizacion.pedimento = pedimentoResult.length > 0 ? pedimentoResult[0] : null;
-            cotizacion.desgloseImpuestos = desgloseImpuestosResult;
+              cotizacion.cargos = cargosResult;
+              cotizacion.servicios = serviciosResult;
+              cotizacion.cuentaGastos = cuentaGastosResult;
+              cotizacion.pedimento = pedimentoResult.length > 0 ? pedimentoResult[0] : null;
+              cotizacion.desgloseImpuestos = desgloseImpuestosResult;
 
-            res.status(200).json(cotizacion);
+              res.status(200).json(cotizacion);
+            });
           });
         });
       });
     });
   });
 });
+
+// ------------------------------
+// ACTUALIZAR COTIZACIÓN PRINCIPAL
+// ------------------------------
+router.put('/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
+    cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta, total,
+    ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+  } = req.body;
+
+  const sql = `
+    UPDATE cotizaciones SET
+      folio = ?, cliente_id = ?, empresa = ?, fecha = ?, mercancia = ?, regimen = ?, aduana = ?, tipo_envio = ?,
+      cantidad = ?, estatus = ?, fraccion_igi = ?, monto_comisionista = ?, notas = ?, propuesta = ?, total = ?, ahorro = ?,
+      flete_origen_destino = ?, flete_concepto_1 = ?, flete_valor_1 = ?,
+      flete_concepto_2 = ?, flete_valor_2 = ?, flete_concepto_3 = ?, flete_valor_3 = ?, flete_total = ?
+    WHERE id = ?
+  `;
+
+  db.query(sql, [
+    folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
+    cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta,
+    total, ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+    id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar cotización' });
+    res.json({ message: 'Cotización actualizada correctamente' });
+  });
 });
 
+// ------------------------------
+// ACTUALIZAR SUBFORMULARIOS
+// ------------------------------
+router.put('/cargos/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    terrestre, aereo, custodia, total_cargos,
+    almacenajes, demoras, pernocta, burreo,
+    flete_falso, servicio_no_realizado, seguro, total_cargos_extra
+  } = req.body;
+
+  const sql = `
+    UPDATE cargos_cotizacion SET
+      terrestre = ?, aereo = ?, custodia = ?, total_cargos = ?,
+      almacenajes = ?, demoras = ?, pernocta = ?, burreo = ?,
+      flete_falso = ?, servicio_no_realizado = ?, seguro = ?, total_cargos_extra = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    terrestre, aereo, custodia, total_cargos,
+    almacenajes, demoras, pernocta, burreo,
+    flete_falso, servicio_no_realizado, seguro, total_cargos_extra,
+    id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar cargos' });
+    res.json({ message: 'Cargos actualizados correctamente' });
+  });
+});
+
+router.put('/servicios/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    maniobras, revalidacion, gestionDestino, inspeccionPeritaje,
+    documentacionImportacion, garantiaContenedores, distribucion,
+    serentyPremium, total
+  } = req.body;
+
+  const sql = `
+    UPDATE servicios_cotizacion SET
+      maniobras = ?, revalidacion = ?, gestionDestino = ?, inspeccionPeritaje = ?,
+      documentacionImportacion = ?, garantiaContenedores = ?, distribucion = ?,
+      serentyPremium = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    maniobras, revalidacion, gestionDestino, inspeccionPeritaje,
+    documentacionImportacion, garantiaContenedores, distribucion,
+    serentyPremium, total, id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar servicios' });
+    res.json({ message: 'Servicios actualizados correctamente' });
+  });
+});
+
+router.put('/cuenta-gastos/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    honorarios, padron, serviciosComplementarios,
+    manejoCarga, subtotal, iva, total
+  } = req.body;
+
+  const sql = `
+    UPDATE cuenta_gastos_cotizacion SET
+      honorarios = ?, padron = ?, serviciosComplementarios = ?,
+      manejoCarga = ?, subtotal = ?, iva = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    honorarios, padron, serviciosComplementarios,
+    manejoCarga, subtotal, iva, total, id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar cuenta de gastos' });
+    res.json({ message: 'Cuenta de gastos actualizada correctamente' });
+  });
+});
+
+router.put('/pedimentos/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    tipoCambio, pesoBruto, valorAduana, dta,
+    ivaPrv, igiIge, prv, iva, total
+  } = req.body;
+
+  const sql = `
+    UPDATE pedimentos_cotizacion SET
+      tipoCambio = ?, pesoBruto = ?, valorAduana = ?, dta = ?,
+      ivaPrv = ?, igiIge = ?, prv = ?, iva = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    tipoCambio, pesoBruto, valorAduana, dta,
+    ivaPrv, igiIge, prv, iva, total, id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar pedimento' });
+    res.json({ message: 'Pedimento actualizado correctamente' });
+  });
+});
+
+router.put('/desglose-impuestos/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    valorFactura, flete, tipoCambio, dta,
+    igi, iva, prv, ivaPrv, total
+  } = req.body;
+
+  const sql = `
+    UPDATE desglose_impuestos_cotizacion SET
+      valorFactura = ?, flete = ?, tipoCambio = ?, dta = ?,
+      igi = ?, iva = ?, prv = ?, ivaPrv = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    valorFactura, flete, tipoCambio, dta,
+    igi, iva, prv, ivaPrv, total, id
+  ], (err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar desglose de impuestos' });
+    res.json({ message: 'Desglose de impuestos actualizado correctamente' });
+  });
+});
+
+// ------------------------------
+// EXPORTAR
+// ------------------------------
 module.exports = router;
