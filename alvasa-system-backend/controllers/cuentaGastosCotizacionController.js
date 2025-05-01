@@ -37,4 +37,42 @@ const crearCuentaGastos = (req, res) => {
   });
 };
 
-module.exports = { crearCuentaGastos };
+// Función para actualizar cuenta de gastos
+const actualizarCuentaGastos = (req, res) => {
+  const { id } = req.params;
+  const {
+    honorarios,
+    padron,
+    serviciosComplementarios,
+    manejoCarga,
+    subtotal,
+    iva,
+    total
+  } = req.body;
+
+  const sql = `
+    UPDATE cuenta_gastos_cotizacion SET
+      honorarios = ?, padron = ?, servicios_complementarios = ?,
+      manejo_carga = ?, subtotal = ?, iva = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    honorarios,
+    padron,
+    serviciosComplementarios,
+    manejoCarga,
+    subtotal,
+    iva,
+    total,
+    id
+  ], (err) => {
+    if (err) {
+      console.error('Error al actualizar cuenta de gastos:', err);
+      return res.status(500).json({ error: 'Error al actualizar cuenta de gastos' });
+    }
+    res.status(200).json({ message: 'Cuenta de gastos actualizada correctamente' });
+  });
+};
+
+module.exports = { crearCuentaGastos, actualizarCuentaGastos };

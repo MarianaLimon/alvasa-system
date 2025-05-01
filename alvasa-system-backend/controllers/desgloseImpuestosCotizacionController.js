@@ -41,4 +41,49 @@ const crearDesgloseImpuestos = (req, res) => {
   });
 };
 
-module.exports = { crearDesgloseImpuestos };
+// Función para actualizar desglose de impuestos
+const actualizarDesgloseImpuestos = (req, res) => {
+  const { id } = req.params;
+  const {
+    valorFactura,
+    flete,
+    tipoCambio,
+    dta,
+    igi,
+    iva,
+    prv,
+    ivaPrv,
+    total
+  } = req.body;
+
+  const sql = `
+    UPDATE desglose_impuestos_cotizacion SET
+      valor_factura = ?, flete = ?, tipo_cambio = ?, dta = ?,
+      igi = ?, iva = ?, prv = ?, iva_prv = ?, total = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    valorFactura,
+    flete,
+    tipoCambio,
+    dta,
+    igi,
+    iva,
+    prv,
+    ivaPrv,
+    total,
+    id
+  ], (err) => {
+    if (err) {
+      console.error('Error al actualizar desglose de impuestos:', err);
+      return res.status(500).json({ error: 'Error al actualizar desglose de impuestos' });
+    }
+    res.json({ message: 'Desglose de impuestos actualizado correctamente' });
+  });
+};
+
+module.exports = {
+  crearDesgloseImpuestos,
+  actualizarDesgloseImpuestos
+};

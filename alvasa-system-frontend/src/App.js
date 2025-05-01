@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import Sidebar from './components/Sidebar';
 import Clientes from './components/clientes/Clientes';
 import FormularioCotizacion from './components/cotizaciones/FormularioCotizacion';
@@ -23,9 +26,12 @@ function App() {
             <Route path="/nuevacotizacion" element={<FormularioCotizacion />} />
             <Route path="/cotizaciones/:id" element={<VerCotizacion />} />
             <Route path="/cotizaciones/editar/:id" element={<FormularioCotizacion modo="editar" />} />
-          </Routes>
+            </Routes>
         </div>
       </div>
+
+      {/* Notificaciones Toastify */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </Router>
   );
 }

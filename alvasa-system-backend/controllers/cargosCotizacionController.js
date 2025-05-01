@@ -51,5 +51,63 @@ const crearCargo = (req, res) => {
   });
 };
 
-// Exportar la función
-module.exports = { crearCargo };
+// Función para actualizar un cargo
+const actualizarCargo = (req, res) => {
+  const { id } = req.params;
+  const {
+    terrestre,
+    aereo,
+    custodia,
+    total_cargos,
+    almacenajes,
+    demoras,
+    pernocta,
+    burreo,
+    flete_falso,
+    servicio_no_realizado,
+    seguro,
+    total_cargos_extra
+  } = req.body;
+
+  const sql = `
+    UPDATE cargos_cotizacion SET
+      terrestre = ?,
+      aereo = ?,
+      custodia = ?,
+      total_cargos = ?,
+      almacenajes = ?,
+      demoras = ?,
+      pernocta = ?,
+      burreo = ?,
+      flete_falso = ?,
+      servicio_no_realizado = ?,
+      seguro = ?,
+      total_cargos_extra = ?
+    WHERE cotizacion_id = ?
+  `;
+
+  db.query(sql, [
+    terrestre,
+    aereo,
+    custodia,
+    total_cargos,
+    almacenajes,
+    demoras,
+    pernocta,
+    burreo,
+    flete_falso,
+    servicio_no_realizado,
+    seguro,
+    total_cargos_extra,
+    id
+  ], (err) => {
+    if (err) {
+      console.error('Error al actualizar cargos:', err);
+      return res.status(500).json({ error: 'Error al actualizar cargos' });
+    }
+    res.status(200).json({ message: 'Cargos actualizados correctamente' });
+  });
+};
+
+// Exportar funciones
+module.exports = { crearCargo, actualizarCargo };

@@ -3,30 +3,36 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 const FleteInternacional = ({ onFleteChange, datos = {} }) => {
   const [flete, setFlete] = useState({
-    origenDestino: '',
-    concepto1: '',
-    valor1: '',
-    concepto2: '',
-    valor2: '',
-    concepto3: '',
-    valor3: '',
-    total: 0,
+    origenDestino: datos.origenDestino || '',
+    concepto1: datos.concepto1 || '',
+    valor1: datos.valor1 || '',
+    concepto2: datos.concepto2 || '',
+    valor2: datos.valor2 || '',
+    concepto3: datos.concepto3 || '',
+    valor3: datos.valor3 || '',
+    total:
+      parseFloat(datos.valor1 || 0) +
+      parseFloat(datos.valor2 || 0) +
+      parseFloat(datos.valor3 || 0),
   });
 
-  // Precargar datos si los recibe desde el padre
+  // 🔄 Actualizar los campos cuando datos cambian (modo edición)
   useEffect(() => {
-    if (datos && Object.keys(datos).length > 0) {
-      const cargado = {
-        ...datos,
-        total:
-          parseFloat(datos.valor1 || 0) +
-          parseFloat(datos.valor2 || 0) +
-          parseFloat(datos.valor3 || 0),
-      };
-      setFlete(cargado);
-      if (onFleteChange) onFleteChange(cargado);
-    }
-  }, [datos, onFleteChange]);
+    const actualizado = {
+      origenDestino: datos.origenDestino || '',
+      concepto1: datos.concepto1 || '',
+      valor1: datos.valor1 || '',
+      concepto2: datos.concepto2 || '',
+      valor2: datos.valor2 || '',
+      concepto3: datos.concepto3 || '',
+      valor3: datos.valor3 || '',
+      total:
+        parseFloat(datos.valor1 || 0) +
+        parseFloat(datos.valor2 || 0) +
+        parseFloat(datos.valor3 || 0),
+    };
+    setFlete(actualizado);
+  }, [datos]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,19 +47,17 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
     if (onFleteChange) onFleteChange(actualizado);
   };
 
-  const soloNumeros = (e) => {
-    if (!/[0-9.]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
-      e.preventDefault();
-    }
-  };
-
   return (
     <div className="container-subform">
       <h5 className="mb-3 subform-title">Flete Internacional</h5>
 
       <Form.Group className="mb-3">
         <Form.Label>Origen - Destino</Form.Label>
-        <Form.Select name="origenDestino" value={flete.origenDestino} onChange={handleChange}>
+        <Form.Select
+          name="origenDestino"
+          value={flete.origenDestino}
+          onChange={handleChange}
+        >
           <option value="">Seleccionar destino...</option>
           <option>China - México</option>
           <option>Corea - Long Beach</option>
@@ -104,7 +108,6 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                 name={`valor${i}`}
                 value={flete[`valor${i}`]}
                 onChange={handleChange}
-                onKeyDown={soloNumeros}
               />
             </Form.Group>
           </Col>

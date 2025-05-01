@@ -10,18 +10,19 @@ const CargosTraslados = ({ onCargosChange, datos = {} }) => {
   });
 
   useEffect(() => {
-    if (datos && Object.keys(datos).length > 0) {
-      const cargado = {
-        ...datos,
+    const tieneDatos = Object.keys(datos).length > 0;
+    if (tieneDatos) {
+      setCargos({
+        terrestre: datos.terrestre ?? '',
+        aereo: datos.aereo ?? '',
+        custodia: datos.custodia ?? '',
         total:
           parseFloat(datos.terrestre || 0) +
           parseFloat(datos.aereo || 0) +
           parseFloat(datos.custodia || 0),
-      };
-      setCargos(cargado);
-      if (onCargosChange) onCargosChange(cargado);
+      });
     }
-  }, [datos, onCargosChange]);
+  }, [datos]); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +33,7 @@ const CargosTraslados = ({ onCargosChange, datos = {} }) => {
       parseFloat(actualizados.custodia || 0);
 
     setCargos(actualizados);
-    if (onCargosChange) onCargosChange(actualizados);
+    onCargosChange?.(actualizados);
   };
 
   const soloNumeros = (e) => {

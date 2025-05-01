@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const cargosCotizacionController = require('../controllers/cargosCotizacionController');
+const { crearCargo, actualizarCargo } = require('../controllers/cargosCotizacionController');
 
+// Ruta para crear cargos
+router.post('/', crearCargo);
 
-router.post('/', cargosCotizacionController.crearCargo);
+// Ruta para actualizar cargos
+router.put('/:id', actualizarCargo);
 
 module.exports = router;
