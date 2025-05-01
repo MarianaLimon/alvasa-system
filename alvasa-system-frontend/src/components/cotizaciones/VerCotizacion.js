@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, Spinner, Button, Row, Col, Accordion } from 'react-bootstrap';
-import { BsArrowLeft, BsPencil } from 'react-icons/bs';
+import { Card, Spinner, Button, Row, Col, Accordion, Badge } from 'react-bootstrap';
+import { BsArrowLeft, BsPencil, BsPrinter } from 'react-icons/bs';
 
 const VerCotizacion = () => {
   const { id } = useParams();
@@ -27,15 +27,40 @@ const VerCotizacion = () => {
   if (loading) return <div className="text-center mt-4"><Spinner animation="border" /></div>;
   if (!cotizacion) return <div className="text-center mt-4">No se encontró la cotización.</div>;
 
-  return (
-    <Card className="m-4">
-      <Card.Body>
-        <Card.Title className="text-center mb-4">Cotización {cotizacion.folio}</Card.Title>
+  // Función para Bandage Status
+  const renderBadgeEstatus = (estatus) => {
+    const clases = {
+      'Autorizada': 'success',
+      'En negociación': 'warning',
+      'Entregado a cliente': 'info',
+      'Declinada': 'danger'
+    };
+    return <Badge bg={clases[estatus] || 'secondary'}>{estatus}</Badge>;
+  };
 
+  // Función para imprimir la cotización
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <Card className="detalle-card">
+      <Card.Body>
+        <Card.Title>
+          <Row>
+            <Col md={6}>
+              <p className="detalle-title">Folio de cotización: {cotizacion.folio}</p>
+            </Col>
+            <Col md={6}>
+              {renderBadgeEstatus(cotizacion.estatus)}
+            </Col>
+          </Row>
+        </Card.Title>
+        
         <Row>
           {/* Columna izquierda - Información general */}
           <Col md={4}>
-            <h5>Datos Generales</h5>
+            <h5 className='detalle-title-datosgenerales'>Datos Generales</h5>
             <p><strong>Cliente:</strong> {cotizacion.cliente}</p>
             <p><strong>Empresa:</strong> {cotizacion.empresa}</p>
             <p><strong>Fecha:</strong> {cotizacion.fecha}</p>
@@ -46,13 +71,15 @@ const VerCotizacion = () => {
             <p><strong>Cantidad:</strong> {cotizacion.cantidad}</p>
             <p><strong>Estatus:</strong> {cotizacion.estatus}</p>
 
-            <h5 className="mt-4">Resumen</h5>
-            <p><strong>Propuesta:</strong> ${Number(cotizacion.propuesta || 0).toFixed(2)}</p>
-            <p><strong>Total:</strong> ${Number(cotizacion.total || 0).toFixed(2)}</p>
-            <p><strong>Ahorro:</strong> ${Number(cotizacion.ahorro || 0).toFixed(2)}</p>
+            <hr className='separador-horizontal'/>
+
+            <h5 className="detalle-title-resumen">Resumen</h5>
             <p><strong>Fracción IGI:</strong> {cotizacion.fraccion_igi}</p>
             <p><strong>Monto Comisionista:</strong> ${Number(cotizacion.monto_comisionista || 0).toFixed(2)}</p>
             <p><strong>Notas:</strong> {cotizacion.notas}</p>
+            <p className='detalle-totalgral'><strong>Total:</strong> ${Number(cotizacion.total || 0).toFixed(2)}</p>
+            <p className='detalle-propuesta'><strong>Propuesta:</strong> ${Number(cotizacion.propuesta || 0).toFixed(2)}</p>
+            <p className='detalle-ahorro'><strong>Ahorro:</strong> ${Number(cotizacion.ahorro || 0).toFixed(2)}</p>
           </Col>
 
           {/* Columna derecha - Acordeones */}
@@ -65,7 +92,7 @@ const VerCotizacion = () => {
                   <p><strong>Concepto 1:</strong> {cotizacion.flete_concepto_1} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_1 || 0).toFixed(2)}</p>
                   <p><strong>Concepto 2:</strong> {cotizacion.flete_concepto_2} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_2 || 0).toFixed(2)}</p>
                   <p><strong>Concepto 3:</strong> {cotizacion.flete_concepto_3} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_3 || 0).toFixed(2)}</p>
-                  <p><strong>Total Flete:</strong> ${Number(cotizacion.flete_total || 0).toFixed(2)}</p>
+                  <p className='detalle-subformulario'><strong>Total Flete:</strong> ${Number(cotizacion.flete_total || 0).toFixed(2)}</p>
                 </Accordion.Body>
               </Accordion.Item>
 
@@ -78,7 +105,7 @@ const VerCotizacion = () => {
                         <p><strong>Terrestre:</strong> ${Number(cargo.terrestre || 0).toFixed(2)}</p>
                         <p><strong>Aéreo:</strong> ${Number(cargo.aereo || 0).toFixed(2)}</p>
                         <p><strong>Custodia:</strong> ${Number(cargo.custodia || 0).toFixed(2)}</p>
-                        <p><strong>Total Cargos:</strong> ${Number(cargo.total_cargos || 0).toFixed(2)}</p>
+                        <p className='detalle-subformulario'><strong>Total Cargos:</strong> ${Number(cargo.total_cargos || 0).toFixed(2)}</p>
                       </div>
                     ))
                   ) : (
@@ -101,7 +128,7 @@ const VerCotizacion = () => {
                         <p><strong>IVA:</strong> ${Number(item.iva || 0).toFixed(2)}</p>
                         <p><strong>PRV:</strong> {item.prv}</p>
                         <p><strong>IVA / PRV:</strong> {item.iva_prv}</p>
-                        <p><strong>Total:</strong> <u>${Number(item.total || 0).toFixed(2)}</u></p>
+                        <p className='detalle-subformulario'><strong>Total:</strong> <u>${Number(item.total || 0).toFixed(2)}</u></p>
                       </div>
                     ))
                   ) : (
@@ -123,7 +150,7 @@ const VerCotizacion = () => {
                         <p><strong>Flete Falso:</strong> ${Number(cargo.flete_falso || 0).toFixed(2)}</p>
                         <p><strong>Servicio No Realizado:</strong> ${Number(cargo.servicio_no_realizado || 0).toFixed(2)}</p>
                         <p><strong>Seguro:</strong> ${Number(cargo.seguro || 0).toFixed(2)}</p>
-                        <p><strong>Total Cargos Extra:</strong> ${Number(cargo.total_cargos_extra || 0).toFixed(2)}</p>
+                        <p className='detalle-subformulario'><strong>Total Cargos Extra:</strong> ${Number(cargo.total_cargos_extra || 0).toFixed(2)}</p>
                       </div>
                     ))
                   ) : (
@@ -146,7 +173,7 @@ const VerCotizacion = () => {
                         <p><strong>Garantía de Contenedores:</strong> ${Number(servicio.garantia_contenedores || 0).toFixed(2)}</p>
                         <p><strong>Distribución:</strong> ${Number(servicio.distribucion || 0).toFixed(2)}</p>
                         <p><strong>Serenty PREMIUM:</strong> ${Number(servicio.serenty_premium || 0).toFixed(2)}</p>
-                        <p><strong>Total Servicios:</strong> <u>${Number(servicio.total_servicios || 0).toFixed(2)}</u></p>
+                        <p className='detalle-subformulario'><strong>Total Servicios:</strong> <u>${Number(servicio.total_servicios || 0).toFixed(2)}</u></p>
                       </div>
                     ))
                   ) : (
@@ -167,7 +194,7 @@ const VerCotizacion = () => {
                         <p><strong>Manejo de Carga:</strong> ${Number(gasto.manejo_carga || 0).toFixed(2)}</p>
                         <p><strong>Subtotal:</strong> ${Number(gasto.subtotal || 0).toFixed(2)}</p>
                         <p><strong>IVA (16%):</strong> ${(Number(gasto.subtotal || 0) * 0.16).toFixed(2)}</p>
-                        <p><strong>Total:</strong> <u>${Number(gasto.total || 0).toFixed(2)}</u></p>
+                        <p className='detalle-subformulario'><strong>Total:</strong> <u>${Number(gasto.total || 0).toFixed(2)}</u></p>
                       </div>
                     ))
                   ) : (
@@ -189,7 +216,7 @@ const VerCotizacion = () => {
                     <p><strong>IGI-IGE:</strong> ${Number(cotizacion.pedimento.igi_ige || 0).toFixed(2)}</p>
                     <p><strong>PRV:</strong> ${Number(cotizacion.pedimento.prv || 0).toFixed(2)}</p>
                     <p><strong>IVA:</strong> ${Number(cotizacion.pedimento.iva || 0).toFixed(2)}</p>
-                    <p><strong><u>Total:</u></strong> <u>${Number(cotizacion.pedimento.total || 0).toFixed(2)}</u></p>
+                    <p className='detalle-subformulario'><strong><u>Total:</u></strong> <u>${Number(cotizacion.pedimento.total || 0).toFixed(2)}</u></p>
                   </div>
                 ) : (
                   <p>No hay pedimento registrado.</p>
@@ -205,6 +232,9 @@ const VerCotizacion = () => {
           <Button variant="secondary" onClick={() => navigate('/cotizaciones')}>
             <BsArrowLeft className="me-2" />
             Volver a la lista
+          </Button>
+          <Button variant="primary" onClick={handlePrint}>
+            <BsPrinter className="me-2" /> Imprimir
           </Button>
           <Button variant="warning" onClick={() => navigate(`/cotizaciones/editar/${id}`)}>
             <BsPencil className="me-2" />

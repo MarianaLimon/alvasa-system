@@ -354,7 +354,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     <Card className="container-cotizaciones">
       <Card.Body>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <Card.Title className="mb-0">
+          <Card.Title className="title-listacot">
             {modo === 'crear' ? 'Registrar Cotización' : `Editar Cotización: ${form.folio}`}
           </Card.Title>
           {form.estatus && renderBadgeEstatus(form.estatus)}

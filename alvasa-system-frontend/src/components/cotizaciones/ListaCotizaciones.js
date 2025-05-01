@@ -8,6 +8,7 @@ const ListaCotizaciones = () => {
   const [cotizaciones, setCotizaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,11 +42,14 @@ const ListaCotizaciones = () => {
     }
   };
 
-  const cotizacionesFiltradas = cotizaciones.filter(cot =>
-    cot.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    cot.folio?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    cot.empresa?.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const cotizacionesFiltradas = cotizaciones.filter(cot => {
+    const matchesStatus = statusFilter ? cot.estatus === statusFilter : true;
+    const matchesSearch =
+      cot.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      cot.folio?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      cot.empresa?.toLowerCase().includes(busqueda.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   const renderBadgeEstatus = (estatus) => {
     const clases = {
@@ -54,19 +58,15 @@ const ListaCotizaciones = () => {
       'Entregado a cliente': 'info',
       'Declinada': 'danger'
     };
-    return (
-      <Badge bg={clases[estatus] || 'secondary'}>
-        {estatus}
-      </Badge>
-    );
+    return <Badge bg={clases[estatus] || 'secondary'}>{estatus}</Badge>;
   };
 
   const formatoFechaBonita = (fechaStr) => {
     const fecha = new Date(fechaStr);
     const dia = fecha.getDate();
     const mesNombres = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      'enero','febrero','marzo','abril','mayo','junio',
+      'julio','agosto','septiembre','octubre','noviembre','diciembre'
     ];
     const mesNombre = mesNombres[fecha.getMonth()];
     const año = fecha.getFullYear();
@@ -77,17 +77,32 @@ const ListaCotizaciones = () => {
 
   return (
     <div className="container mt-4 container-listacot">
-      <InputGroup className="mb-3 buscador-cotizaciones">
-        <Form.Control
-          type="text"
-          placeholder="Buscar por cliente, folio o empresa..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-        <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
-          <BsSearch />
-        </InputGroup.Text>
-      </InputGroup>
+      {/* Filtro y buscador alineados a la izquierda */}
+      <div className="d-flex mb-3 align-items-center">
+        <Form.Select
+          className="me-3 w-auto"
+          style={{ width: '180px' }}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">Todos los estatus</option>
+          <option value="Autorizada">Autorizada</option>
+          <option value="En negociación">En negociación</option>
+          <option value="Entregado a cliente">Entregado a cliente</option>
+          <option value="Declinada">Declinada</option>
+        </Form.Select>
+        <InputGroup className="w-auto buscador-cotizaciones">
+          <Form.Control
+            type="text"
+            placeholder="Buscar..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+            <BsSearch />
+          </InputGroup.Text>
+        </InputGroup>
+      </div>
 
       <Table striped bordered hover responsive>
         <thead>
