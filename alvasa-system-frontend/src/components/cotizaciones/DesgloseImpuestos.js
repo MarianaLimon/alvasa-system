@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Form, Row, Col } from 'react-bootstrap';
+
+// Usar una API de tipo de cambio alternativa y gratuita
+const EXCHANGE_API_URL =
+  process.env.REACT_APP_EXCHANGE_API_URL ||
+  'https://api.exchangerate-api.com/v4/latest/USD';
 
 const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
   const [data, setData] = useState({
@@ -16,6 +22,7 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
 
   const parseNumber = (val) => parseFloat(val) || 0;
 
+  // Precarga de datos en edición
   useEffect(() => {
     if (datos && Object.keys(datos).length > 0) {
       setData({
@@ -25,12 +32,31 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
         igi: datos.igi ?? '',
         prv: datos.prv ?? 'No aplica',
         ivaPrv: datos.ivaPrv ?? 'No aplica',
-        dta: parseFloat(datos.dta ?? 0),
-        iva: parseFloat(datos.iva ?? 0),
-        total: parseFloat(datos.total ?? 0),
+        dta: parseNumber(datos.dta ?? 0),
+        iva: parseNumber(datos.iva ?? 0),
+        total: parseNumber(datos.total ?? 0),
       });
     }
   }, [datos]);
+
+  // Obtener tipo de cambio al montar (solo modo creación)
+  useEffect(() => {
+    if (!datos || Object.keys(datos).length === 0) {
+      axios
+        .get(EXCHANGE_API_URL)
+        .then((res) => {
+          // Con API v4 recibimos un objeto con propiedad rates
+          const rate = res.data.rates?.MXN;
+          if (rate) {
+            setData((prev) => ({ ...prev, tipoCambio: rate }));
+          } else {
+            console.error('Respuesta inesperada de la API:', res.data);
+          }
+        })
+        .catch((err) => console.error('Error al obtener tipo de cambio:', err));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     valorFactura,
@@ -44,6 +70,7 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
     total: totalActual,
   } = data;
 
+  // Cálculo de impuestos
   useEffect(() => {
     const dta = (parseNumber(valorFactura) + parseNumber(flete)) * parseNumber(tipoCambio);
     const iva = (parseNumber(valorFactura) + dta + parseNumber(igi)) * 0.16;
@@ -54,30 +81,16 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
       (prv === '290 pesos mexicanos' ? 290 : 0) +
       (ivaPrv === '46 pesos mexicanos' ? 46 : 0);
 
-    // Solo actualiza si los valores cambiaron
     if (
       dta.toFixed(2) !== dtaActual.toFixed(2) ||
       iva.toFixed(2) !== ivaActual.toFixed(2) ||
       total.toFixed(2) !== totalActual.toFixed(2)
     ) {
-      const resultados = { dta, iva, total };
-      setData((prev) => ({ ...prev, ...resultados }));
-
-      if (onImpuestosChange) {
-        onImpuestosChange({
-          valorFactura,
-          flete,
-          tipoCambio,
-          igi,
-          prv,
-          ivaPrv,
-          dta,
-          iva,
-          total,
-        });
-      }
+      setData((prev) => ({ ...prev, dta, iva, total }));
+      onImpuestosChange?.({ valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dta, iva, total });
     }
   }, [valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dtaActual, ivaActual, totalActual, onImpuestosChange]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({ ...prev, [name]: value }));

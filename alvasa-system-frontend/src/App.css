@@ -1,6 +1,6 @@
 
 body {
-  background-color: #e4e4e4; /* Fondo oscuro pero no negro */
+  background-color: #dfeafc; 
   color: white;
   font-family: 'Segoe UI', sans-serif;
   margin: 0 3rem;
@@ -126,7 +126,7 @@ body {
 .sidebar {
   width: 20rem;
   min-height: 100vh;
-  background-color: #1a2537;
+  background-color: #5751ab;
   color: #ffffff;
   position: fixed;
   top: 0;
@@ -136,7 +136,8 @@ body {
 
 .sidebar-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-top: 3em;
+  margin-bottom: 2em;
   font-weight: bold;
   font-size: 1.5rem;
 }
@@ -149,7 +150,7 @@ body {
 }
 
 .sidebar-link:hover {
-  background-color: #32415d;
+  background-color: #5d4e8f;
   padding-left: 10px;
   border-radius: 5px;
   color: #ffffff;
