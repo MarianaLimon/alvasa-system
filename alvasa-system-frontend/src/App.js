@@ -19,7 +19,7 @@ function App() {
       <div className="d-flex">
         <Sidebar />
         <div className="flex-grow-1" style={{ marginLeft: '250px', padding: '20px' }}>
-          <h1 className="titulo-principal mb-4">ALVASA SYSTEM</h1>
+          {/*<h1 className="titulo-principal mb-4">ALVASA SYSTEM</h1>*/}
           <Routes>
             <Route path="/" element={<Home />} />                                   
             <Route path="/clientes" element={<Clientes />} />

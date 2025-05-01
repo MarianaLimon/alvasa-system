@@ -1,32 +1,39 @@
 import React from 'react';
 import { Nav } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
+import {
+  BsHouse,
+  BsPeople,
+  BsClipboard,
+  BsPlus,
+  BsClock
+} from 'react-icons/bs';
 
 const Sidebar = () => {
-  const handleNavigation = (path) => {
-    window.location.href = path;
-  };
+  const linkClass = ({ isActive }) =>
+    isActive ? 'sidebar-link active' : 'sidebar-link';
 
   return (
     <div className="sidebar">
       <div className="sidebar-header">
         <h4>ALVASA SYSTEM</h4>
       </div>
-      <Nav className="flex-column p-3">
-        <Nav.Link className="sidebar-link" onClick={() => handleNavigation('/')}>
-          🏠 Home
-        </Nav.Link>
-        <Nav.Link className="sidebar-link" onClick={() => handleNavigation('/clientes')}>
-          👥 Clientes
-        </Nav.Link>
-        <Nav.Link className="sidebar-link" onClick={() => handleNavigation('/cotizaciones')}>
-          📋 Lista de Cotizaciones
-        </Nav.Link>
-        <Nav.Link className="sidebar-link" onClick={() => handleNavigation('/nuevacotizacion')}>
-          ➕ Nueva Cotización
-        </Nav.Link>
-        <Nav.Link className="sidebar-link disabled">
-          🔜 Próximamente
-        </Nav.Link>
+      <Nav className="flex-column nav">
+        <NavLink to="/" className={linkClass} end>
+          <BsHouse className="icon" /> Home
+        </NavLink>
+        <NavLink to="/clientes" className={linkClass}>
+          <BsPeople className="icon" /> Clientes
+        </NavLink>
+        <NavLink to="/cotizaciones" className={linkClass}>
+          <BsClipboard className="icon" /> Lista de Cotizaciones
+        </NavLink>
+        <NavLink to="/nuevacotizacion" className={linkClass}>
+          <BsPlus className="icon" /> Nueva Cotización
+        </NavLink>
+        <div className="sidebar-link disabled">
+          <BsClock className="icon" /> Próximamente
+        </div>
       </Nav>
     </div>
   );

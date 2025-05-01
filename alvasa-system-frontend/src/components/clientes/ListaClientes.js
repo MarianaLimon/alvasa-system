@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, InputGroup } from 'react-bootstrap';
+import { BsSearch } from 'react-icons/bs';
 import ModalEditarCliente from './ModalEditarCliente';
 
 const ListaClientes = () => {
@@ -46,7 +47,7 @@ const ListaClientes = () => {
           onChange={(e) => setFiltro(e.target.value)}
         />
         <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
-          <i className="bi bi-search"></i>
+          <BsSearch />
         </InputGroup.Text>
       </InputGroup>
 
