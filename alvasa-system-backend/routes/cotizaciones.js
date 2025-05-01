@@ -287,6 +287,21 @@ router.put('/desglose-impuestos/:id', (req, res) => {
 });
 
 // ------------------------------
-// EXPORTAR
+// ELIMINAR COTIZACIÓN
 // ------------------------------
+router.delete('/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'DELETE FROM cotizaciones WHERE id = ?';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error al eliminar cotización:', err);
+      return res.status(500).json({ error: 'Error al eliminar cotización' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Cotización no encontrada' });
+    }
+    res.json({ message: 'Cotización eliminada correctamente' });
+  });
+});
+
 module.exports = router;

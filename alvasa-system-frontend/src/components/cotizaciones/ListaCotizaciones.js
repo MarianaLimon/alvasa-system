@@ -1,57 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Spinner, Button, Form, Badge, InputGroup } from 'react-bootstrap';
+import {Table, Spinner, Button, Form, Badge, InputGroup, Toast, ToastContainer} from 'react-bootstrap';
 import { BsEye, BsPencil, BsTrash, BsPrinter, BsSearch } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 const ListaCotizaciones = () => {
-  const [cotizaciones, setCotizaciones] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [cotizaciones, setCotizaciones]   = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [busqueda, setBusqueda]           = useState('');
+  const [statusFilter, setStatusFilter]   = useState('');
+  const [showToast, setShowToast]         = useState(false);
+  const [toastMsg, setToastMsg]           = useState('');
+  const [toastVariant, setToastVariant]   = useState('success');
   const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerCotizaciones = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/cotizaciones');
-        setCotizaciones(response.data);
+        const { data } = await axios.get('http://localhost:5000/cotizaciones');
+        setCotizaciones(data);
       } catch (error) {
         console.error('Error al obtener cotizaciones:', error);
       } finally {
         setLoading(false);
       }
     };
-
     obtenerCotizaciones();
   }, []);
 
-  const manejarVer = (id) => navigate(`/cotizaciones/${id}`);
-  const manejarEditar = (id) => navigate(`/cotizaciones/editar/${id}`);
-  const manejarImprimir = () => window.print();
-  const manejarEliminar = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta cotización?')) {
-      try {
-        await axios.delete(`http://localhost:5000/cotizaciones/${id}`);
-        setCotizaciones(cotizaciones.filter(c => c.id !== id));
-        alert('Cotización eliminada correctamente ✅');
-      } catch (error) {
-        console.error('Error al eliminar cotización:', error);
-        alert('Hubo un error al eliminar la cotización ❌');
-      }
+  const manejarVer     = id => navigate(`/cotizaciones/${id}`);
+  const manejarEditar  = id => navigate(`/cotizaciones/editar/${id}`);
+  const manejarImprimir= () => window.print();
+
+  const manejarEliminar = async id => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta cotización?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/cotizaciones/${id}`);
+      setCotizaciones(prev => prev.filter(c => c.id !== id));
+      setToastVariant('success');
+      setToastMsg('Cotización eliminada correctamente');
+      setShowToast(true);
+    } catch (error) {
+      console.error(error);
+      setToastVariant('danger');
+      setToastMsg('Error al eliminar la cotización');
+      setShowToast(true);
     }
   };
 
   const cotizacionesFiltradas = cotizaciones.filter(cot => {
     const matchesStatus = statusFilter ? cot.estatus === statusFilter : true;
-    const matchesSearch =
+    const matchesSearch  =
       cot.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      cot.folio?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      cot.folio?.toLowerCase().includes(busqueda.toLowerCase())   ||
       cot.empresa?.toLowerCase().includes(busqueda.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
-  const renderBadgeEstatus = (estatus) => {
+  const renderBadgeEstatus = estatus => {
     const clases = {
       'Autorizada': 'success',
       'En negociación': 'warning',
@@ -61,29 +67,33 @@ const ListaCotizaciones = () => {
     return <Badge bg={clases[estatus] || 'secondary'}>{estatus}</Badge>;
   };
 
-  const formatoFechaBonita = (fechaStr) => {
+  const formatoFechaBonita = fechaStr => {
     const fecha = new Date(fechaStr);
     const dia = fecha.getDate();
     const mesNombres = [
       'enero','febrero','marzo','abril','mayo','junio',
       'julio','agosto','septiembre','octubre','noviembre','diciembre'
     ];
-    const mesNombre = mesNombres[fecha.getMonth()];
-    const año = fecha.getFullYear();
-    return `${dia} ${mesNombre} ${año}`;
+    return `${dia} ${mesNombres[fecha.getMonth()]} ${fecha.getFullYear()}`;
   };
 
-  if (loading) return <div className="text-center my-4"><Spinner animation="border" /></div>;
+  if (loading) {
+    return (
+      <div className="text-center my-4">
+        <Spinner animation="border" />
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-4 container-listacot">
-      {/* Filtro y buscador alineados a la izquierda */}
+      {/* Filtro y buscador */}
       <div className="d-flex mb-3 align-items-center">
         <Form.Select
-          className="me-3 w-auto"
+          className="me-3"
           style={{ width: '180px' }}
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={e => setStatusFilter(e.target.value)}
         >
           <option value="">Todos los estatus</option>
           <option value="Autorizada">Autorizada</option>
@@ -91,12 +101,13 @@ const ListaCotizaciones = () => {
           <option value="Entregado a cliente">Entregado a cliente</option>
           <option value="Declinada">Declinada</option>
         </Form.Select>
+
         <InputGroup className="w-auto buscador-cotizaciones">
           <Form.Control
             type="text"
             placeholder="Buscar..."
             value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
+            onChange={e => setBusqueda(e.target.value)}
           />
           <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
             <BsSearch />
@@ -104,6 +115,7 @@ const ListaCotizaciones = () => {
         </InputGroup>
       </div>
 
+      {/* Tabla */}
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -148,6 +160,21 @@ const ListaCotizaciones = () => {
           ))}
         </tbody>
       </Table>
+
+      {/* Toast de notificaciones */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          bg={toastVariant}
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
+          autohide
+        >
+          <Toast.Body className="text-white">
+            {toastMsg}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };
