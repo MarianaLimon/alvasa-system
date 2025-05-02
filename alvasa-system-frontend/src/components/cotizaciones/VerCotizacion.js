@@ -40,7 +40,10 @@ const VerCotizacion = () => {
 
   // Función para imprimir la cotización
   const handlePrint = () => {
-    window.print();
+    window.open(
+      `http://localhost:5000/api/cotizaciones/${id}/pdf`,
+      '_blank'
+      );
   };
 
   return (

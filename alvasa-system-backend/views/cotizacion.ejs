@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Cotización <%= cotizacion.folio %></title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+    header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    header img { height: 60px; }
+    h2 { margin: 16px 0 8px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    th, td { border: 1px solid #888; padding: 4px 8px; text-align: left; }
+    .text-right { text-align: right; }
+    footer { position: fixed; bottom: 10mm; width: calc(100% - 40mm); text-align: center; font-size: 10px; }
+    .page-number:after { content: "Página " counter(page) " de " counter(pages); }
+  </style>
+</head>
+<body>
+  <header style="margin-bottom: 80px;">
+    <% if (logo) { %>
+      <img src="<%= logo %>" alt="Grupo ALVASA">
+    <% } %>
+    <div>
+      <p><strong>Folio:</strong> <%= cotizacion.folio %></p>
+      <p><strong>Fecha: </strong><%= formatoFecha(cotizacion.fecha) %></p>
+    </div>
+  </header>
+
+  <section>
+    <h2 style="margin-bottom: 20px;">Estimado(a): <%= cotizacion.cliente %></h2>
+    <div style="margin-bottom: 60px;">
+      <p>Agradecemos mucho su interes por los servicios de GRUPO ALVASA, me permito poner a su gentil consideracion las tarifas para los solicitados.</p>
+      <p>A reserva de cantidades pesos y medidas proporcionados al inicio, en caso de existir algun cambio en estos conceptos, las tarifas seran actualizadas.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Datos Generales</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+      <p><strong>Empresa:</strong> <%= cotizacion.empresa %></p>
+      <p><strong>Mercancía:</strong> <%= cotizacion.mercancia %></p>
+      <p><strong>Régimen:</strong> <%= cotizacion.regimen %></p>
+      <p><strong>Aduana:</strong> <%= cotizacion.aduana %></p>
+      <p><strong>Tipo de Envío:</strong> <%= cotizacion.tipo_envio %></p>
+      <p><strong>Cantidad:</strong> <%= cotizacion.cantidad %></p>
+      <p><strong>Estatus:</strong> <%= cotizacion.estatus %></p>
+    </div>
+  </section>
+
+  <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+    <section style="flex: 1;">
+      <h2>Flete Internacional</h2>
+      <table>
+        <tr><td>Origen – Destino</td><td class="text-right"><%= cotizacion.flete_origen_destino %></td></tr>
+        <tr><td><%= cotizacion.flete_concepto_1 %></td><td class="text-right"><%= formatoMoney(cotizacion.flete_valor_1) %></td></tr>
+        <tr><td><%= cotizacion.flete_concepto_2 %></td><td class="text-right"><%= formatoMoney(cotizacion.flete_valor_2) %></td></tr>
+        <tr><td><%= cotizacion.flete_concepto_3 %></td><td class="text-right"><%= formatoMoney(cotizacion.flete_valor_3) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Flete</strong></td><td class="text-right"><strong><%= formatoMoney(cotizacion.flete_total) %></strong></td></tr>
+      </table>
+    </section>
+
+    <% const c = (cotizacion.cargos && cotizacion.cargos[0]) || {}; %>
+    <section style="flex: 1;">
+      <h2>Cargos de Traslados</h2>
+      <table>
+        <tr><td>Terrestre</td><td class="text-right"><%= formatoMoney(c.terrestre) %></td></tr>
+        <tr><td>Aéreo</td><td class="text-right"><%= formatoMoney(c.aereo) %></td></tr>
+        <tr><td>Custodia</td><td class="text-right"><%= formatoMoney(c.custodia) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Cargos</strong></td><td class="text-right"><strong><%= formatoMoney(c.total_cargos) %></strong></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+    <!-- Columna 1: Cargos Extra -->
+    <section style="flex: 1;">
+      <h2>Cargos Extra</h2>
+      <table>
+        <tr><td>Almacenajes</td><td class="text-right"><%= formatoMoney(c.almacenajes) %></td></tr>
+        <tr><td>Demoras</td><td class="text-right"><%= formatoMoney(c.demoras) %></td></tr>
+        <tr><td>Pernocta</td><td class="text-right"><%= formatoMoney(c.pernocta) %></td></tr>
+        <tr><td>Burreo</td><td class="text-right"><%= formatoMoney(c.burreo) %></td></tr>
+        <tr><td>Flete Falso</td><td class="text-right"><%= formatoMoney(c.flete_falso) %></td></tr>
+        <tr><td>Serv. no Realizado</td><td class="text-right"><%= formatoMoney(c.servicio_no_realizado) %></td></tr>
+        <tr><td>Seguro</td><td class="text-right"><%= formatoMoney(c.seguro) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Cargos Extra</strong></td><td class="text-right"><strong><%= formatoMoney(c.total_cargos_extra) %></strong></td></tr>
+      </table>
+    </section>
+  
+    <!-- Columna 2: Servicios -->
+    <% const s = (cotizacion.servicios && cotizacion.servicios[0]) || {}; %>
+    <section style="flex: 1;">
+      <h2>Servicios</h2>
+      <table>
+        <tr><td>Maniobras</td><td class="text-right"><%= formatoMoney(s.maniobras) %></td></tr>
+        <tr><td>Revalidación</td><td class="text-right"><%= formatoMoney(s.revalidacion) %></td></tr>
+        <tr><td>Gestión Destino</td><td class="text-right"><%= formatoMoney(s.gestion_destino) %></td></tr>
+        <tr><td>Inspección/Peritaje</td><td class="text-right"><%= formatoMoney(s.inspeccion_peritaje) %></td></tr>
+        <tr><td>Doc. Importación</td><td class="text-right"><%= formatoMoney(s.documentacion_importacion) %></td></tr>
+        <tr><td>Garantía Contenedores</td><td class="text-right"><%= formatoMoney(s.garantia_contenedores) %></td></tr>
+        <tr><td>Distribución</td><td class="text-right"><%= formatoMoney(s.distribucion) %></td></tr>
+        <tr><td>Serenty Premium</td><td class="text-right"><%= formatoMoney(s.serenty_premium) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Servicios</strong></td><td class="text-right"><strong><%= formatoMoney(s.total_servicios) %></strong></td></tr>
+      </table>
+    </section>
+  </div>
+
+  
+
+  <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+    <!-- Columna 1: Cuenta de Gastos -->
+    <% const g = (cotizacion.cuentaGastos && cotizacion.cuentaGastos[0]) || {}; %>
+    <section style="flex: 1;">
+      <h2>Cuenta de Gastos</h2>
+      <table>
+        <tr><td>Honorarios</td><td class="text-right"><%= formatoMoney(g.honorarios) %></td></tr>
+        <tr><td>Padrón</td><td class="text-right"><%= formatoMoney(g.padron) %></td></tr>
+        <tr><td>Serv. Complementarios</td><td class="text-right"><%= formatoMoney(g.servicios_complementarios) %></td></tr>
+        <tr><td>Manejo de Carga</td><td class="text-right"><%= formatoMoney(g.manejo_carga) %></td></tr>
+        <tr><td><strong>Subtotal</strong></td><td class="text-right"><strong><%= formatoMoney(g.subtotal) %></strong></td></tr>
+        <tr><td>IVA (16%)</td><td class="text-right"><%= formatoMoney(g.subtotal * 0.16) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Gastos</strong></td><td class="text-right"><strong><%= formatoMoney(g.total) %></strong></td></tr>
+      </table>
+    </section>
+  
+    <!-- Columna 2: Pedimento -->
+    <% const p = cotizacion.pedimento || {}; %>
+    <section style="flex: 1;">
+      <h2>Pedimento</h2>
+      <table>
+        <tr><td>Tipo de Cambio</td><td class="text-right"><%= formatoMoney(p.tipo_cambio) %></td></tr>
+        <tr><td>Peso Bruto</td><td class="text-right"><%= p.peso_bruto %></td></tr>
+        <tr><td>Valor Aduana</td><td class="text-right"><%= formatoMoney(p.valor_aduana) %></td></tr>
+        <tr><td>DTA</td><td class="text-right"><%= formatoMoney(p.dta) %></td></tr>
+        <tr><td>IGI/IGE</td><td class="text-right"><%= formatoMoney(p.igi_ige) %></td></tr>
+        <tr><td>PRV</td><td class="text-right"><%= p.prv %></td></tr>
+        <tr><td>IVA</td><td class="text-right"><%= formatoMoney(p.iva) %></td></tr>
+        <tr style="background-color: #c4c3c3;"><td><strong>Total Pedimento</strong></td><td class="text-right"><strong><%= formatoMoney(p.total) %></strong></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <section>
+    <h2>Desglose de Impuestos</h2>
+    <% const imp = (cotizacion.desgloseImpuestos && cotizacion.desgloseImpuestos[0]) || {}; %>
+    <table>
+      <tr><td>Valor Factura</td><td class="text-right"><%= formatoMoney(imp.valor_factura) %></td></tr>
+      <tr><td>Flete</td><td class="text-right"><%= formatoMoney(imp.flete) %></td></tr>
+      <tr><td>Tipo de Cambio</td><td class="text-right"><%= formatoMoney(imp.tipo_cambio) %></td></tr>
+      <tr><td>DTA</td><td class="text-right"><%= formatoMoney(imp.dta) %></td></tr>
+      <tr><td>IGI</td><td class="text-right"><%= formatoMoney(imp.igi) %></td></tr>
+      <tr><td>IVA</td><td class="text-right"><%= formatoMoney(imp.iva) %></td></tr>
+      <tr><td>PRV</td><td class="text-right"><%= imp.prv %></td></tr>
+      <tr><td>IVA-PRV</td><td class="text-right"><%= imp.iva_prv %></td></tr>
+      <tr style="background-color: #c4c3c3;"><td><strong>Total Impuestos</strong></td><td class="text-right"><strong><%= formatoMoney(imp.total) %></strong></td></tr>
+    </table>
+  </section>
+
+  <section style="margin-top: 40px;">
+    <h2>Resumen</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div>
+        <p><strong>Fracción IGI: </strong><%= cotizacion.fraccion_igi %></p>
+        <p><strong>Notas: </strong><%= cotizacion.notas %></p>
+        <p><strong>Monto Comisionista: </strong><%= formatoMoney(cotizacion.monto_comisionista) %></p>
+      </div>
+      <div style="text-align: right;">
+        <p><strong><strong>Total General: </strong><%= formatoMoney(cotizacion.total) %></strong></p>
+        <p><strong>Propuesta: </strong><%= formatoMoney(cotizacion.propuesta) %></p>
+        <p><strong>Ahorro: </strong><%= formatoMoney(cotizacion.ahorro) %></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="margin-top: 60px;">
+      <p>* COSTO DE IMPORTACION + FLETE INTERNACIONAL</p>
+      <p>* COSTO DE IMPORTACION + CARGOS DE TRASLADO Y/O GASTOS COMPROBADOS</p>
+      <p>* GASTOS COMPROBADOS( AQUELLOS INCLUIDOS EN CARGOS EXTRAS)</p>
+      <p>* EL VALOR ANTES MENCIONADO PUEDE SUFRIR  CAMBIOS DE ACUERDO </p>
+      <p>* AL TC Y/O  TARIFAS DE FLETE</p>
+    </div>
+  </section>
+
+  <footer></footer>
+</body>
+</html>

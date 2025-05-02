@@ -1,14 +1,16 @@
 const express = require('express');
-const cors = require('cors');
-const db = require('./config/db');
+const path    = require('path');
+const cors    = require('cors');
+const db      = require('./config/db');
+const pdfRoutes = require('./routes/pdf');
 
 // Importar rutas
-const clientesRoutes = require('./routes/clientes');
-const cotizacionesRoutes = require('./routes/cotizaciones');
-const cargosRoutes = require('./routes/cargos'); 
-const serviciosRoutes = require('./routes/servicios');
-const cuentaGastosRoutes = require('./routes/cuentaGastos');
-const pedimentosRoutes = require('./routes/pedimentos');
+const clientesRoutes       = require('./routes/clientes');
+const cotizacionesRoutes   = require('./routes/cotizaciones');
+const cargosRoutes         = require('./routes/cargos');
+const serviciosRoutes      = require('./routes/servicios');
+const cuentaGastosRoutes   = require('./routes/cuentaGastos');
+const pedimentosRoutes     = require('./routes/pedimentos');
 const desgloseImpuestosRoutes = require('./routes/desgloseImpuestos');
 
 const app = express();
@@ -18,15 +20,20 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
+// Servir archivos estáticos desde /public
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Usar rutas
 app.use('/clientes', clientesRoutes);
 app.use('/cotizaciones', cotizacionesRoutes);
-app.use('/cargos', cargosRoutes); 
+app.use('/cargos', cargosRoutes);
 app.use('/servicios', serviciosRoutes);
 app.use('/cuenta-gastos', cuentaGastosRoutes);
 app.use('/pedimentos', pedimentosRoutes);
 app.use('/desglose-impuestos', desgloseImpuestosRoutes);
 
+// Ruta para PDFs
+app.use('/api', pdfRoutes);
 
 // Ruta básica de prueba
 app.get('/', (req, res) => {

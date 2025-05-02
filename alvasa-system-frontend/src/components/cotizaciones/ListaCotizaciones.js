@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {Table, Spinner, Button, Form, Badge, InputGroup, Toast, ToastContainer} from 'react-bootstrap';
+import {
+  Table,
+  Spinner,
+  Button,
+  Form,
+  Badge,
+  InputGroup,
+  Toast,
+  ToastContainer
+} from 'react-bootstrap';
 import { BsEye, BsPencil, BsTrash, BsPrinter, BsSearch } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,7 +39,11 @@ const ListaCotizaciones = () => {
 
   const manejarVer     = id => navigate(`/cotizaciones/${id}`);
   const manejarEditar  = id => navigate(`/cotizaciones/editar/${id}`);
-  const manejarImprimir= () => window.print();
+  const manejarImprimir = id =>
+    window.open(
+      `http://localhost:5000/api/cotizaciones/${id}/pdf`,
+      '_blank'
+    );
 
   const manejarEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar esta cotización?')) return;
@@ -149,7 +162,12 @@ const ListaCotizaciones = () => {
                 <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(cot.id)}>
                   <BsPencil />
                 </Button>
-                <Button variant="primary" size="sm" className="me-2" onClick={manejarImprimir}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => manejarImprimir(cot.id)}
+                >
                   <BsPrinter />
                 </Button>
                 <Button variant="danger" size="sm" onClick={() => manejarEliminar(cot.id)}>
