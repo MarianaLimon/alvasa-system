@@ -26,13 +26,9 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
     datos && datos.total != null && !isNaN(parseFloat(datos.total))
       ? parseFloat(datos.total)
       : [
-          datosTotales?.flete,
-          datosTotales?.cargos,
           datosTotales?.impuestos,
-          datosTotales?.cargosExtra,
           datosTotales?.servicios,
-          datosTotales?.cuentaGastos,
-          datosTotales?.pedimento,
+          datosTotales?.cuentaGastos
         ].reduce((acc, item) => acc + (parseFloat(item?.total) || 0), 0);
 
   useEffect(() => {
@@ -104,18 +100,6 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
-            <Form.Label>Fracción / %IGI</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={1}
-              placeholder="Escribe aquí..."
-              value={fraccion_igi}
-              onChange={(e) => setFraccionIgi(e.target.value)}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={4}>
-          <Form.Group>
             <Form.Label>Monto del comisionista</Form.Label>
             <Form.Control
               type="number"
@@ -135,6 +119,18 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
               placeholder="Notas adicionales..."
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
+            />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <Form.Label>Fracción / %IGI</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={1}
+              placeholder="Escribe aquí..."
+              value={fraccion_igi}
+              onChange={(e) => setFraccionIgi(e.target.value)}
             />
           </Form.Group>
         </Col>

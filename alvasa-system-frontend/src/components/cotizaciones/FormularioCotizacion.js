@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Form, Button, Card, Row, Col, Accordion } from 'react-bootstrap';
+import { Form, Button, Card, Row, Col, Accordion, Badge } from 'react-bootstrap';
 import { BsSave, BsPrinter, BsListUl } from 'react-icons/bs';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -93,13 +93,18 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
         const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
         idCotizacion = response.data.id;
 
+        const totalCargosCalculado = 
+        parseFloat(cargos.terrestre || 0) +
+        parseFloat(cargos.aereo || 0) +
+        parseFloat(cargos.custodia || 0);
+
         await axios.post('http://localhost:5000/cargos', {
           cotizacion_id: idCotizacion,
           terrestre: cargos.terrestre || 0,
           aereo: cargos.aereo || 0,
           custodia: cargos.custodia || 0,
           total_cargos: cargos.total || 0,
-          almacenajes: cargosExtra.almacenajes || 0,
+          almacenajes: totalCargosCalculado,
           demoras: cargosExtra.demoras || 0,
           pernocta: cargosExtra.pernocta || 0,
           burreo: cargosExtra.burreo || 0,
@@ -161,11 +166,16 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
       } else {
         await axios.put(`http://localhost:5000/cotizaciones/${id}`, cotizacionCompleta);
 
+        const totalCargosCalculado = 
+          parseFloat(cargos.terrestre || 0) +
+          parseFloat(cargos.aereo || 0) +
+          parseFloat(cargos.custodia || 0);
+
         await axios.put(`http://localhost:5000/cargos/${idCotizacion}`, {
           terrestre: cargos.terrestre || 0,
           aereo: cargos.aereo || 0,
           custodia: cargos.custodia || 0,
-          total_cargos: cargos.total || 0,
+          total_cargos: totalCargosCalculado,
           almacenajes: cargosExtra.almacenajes || 0,
           demoras: cargosExtra.demoras || 0,
           pernocta: cargosExtra.pernocta || 0,
@@ -463,43 +473,78 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
 
           <Accordion defaultActiveKey="0" className="mt-4">
             <Accordion.Item eventKey="0">
-              <Accordion.Header>Flete Internacional</Accordion.Header>
+            <Accordion.Header>
+              <div className="d-flex justify-content-between align-items-center w-100">
+                <span>Flete Internacional</span>
+                <Badge className="total-solapa">Total: {flete.total}</Badge>
+              </div>
+            </Accordion.Header>
               <Accordion.Body>
                 <FleteInternacional onFleteChange={handleFleteChange} datos={flete} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
-              <Accordion.Header>Cargos de Traslados</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Cargos de Traslados</span>
+                  <Badge className="total-solapa">Total: {cargos.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <CargosTraslados onCargosChange={handleCargosChange} datos={cargos} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="2">
-              <Accordion.Header>Desglose de Impuestos</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Desglose de Impuestos</span>
+                  <Badge className="total-solapa">Total: {impuestos.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <DesgloseImpuestos onImpuestosChange={handleImpuestosChange} datos={impuestos} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="3">
-              <Accordion.Header>Cargos Extra</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Cargos Extra</span>
+                  <Badge className="total-solapa">Total: {cargosExtra.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <CargosExtra onCargosExtraChange={handleCargosExtraChange} datos={cargosExtra} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="4">
-              <Accordion.Header>Servicios</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Servicios</span>
+                  <Badge className="total-solapa">Total: {servicios.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <Servicios onServiciosChange={handleServiciosChange} datos={servicios} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="5">
-              <Accordion.Header>Cuenta de Gastos</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Cuenta de Gastos</span>
+                  <Badge className="total-solapa">Total: {cuentaGastos.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <CuentaGastos onCuentaChange={handleCuentaGastosChange} datos={cuentaGastos} />
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="6">
-              <Accordion.Header>Pedimento</Accordion.Header>
+              <Accordion.Header>
+              <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Pedimento</span>
+                  <Badge className="total-solapa">Total: {pedimento.total}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 <Pedimento onPedimentoChange={handlePedimentoChange} datos={pedimento} />
               </Accordion.Body>

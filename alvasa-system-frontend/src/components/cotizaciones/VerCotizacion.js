@@ -46,6 +46,7 @@ const VerCotizacion = () => {
       );
   };
 
+  
   return (
     <Card className="detalle-card">
       <Card.Body>
@@ -89,7 +90,12 @@ const VerCotizacion = () => {
           <Col md={8}>
             <Accordion defaultActiveKey="0">
               <Accordion.Item eventKey="0">
-                <Accordion.Header>Flete Internacional</Accordion.Header>
+                <Accordion.Header>
+                  <div className="d-flex justify-content-between align-items-center w-100">
+                    <span>Flete Internacional</span>
+                    <Badge className="total-solapa">Total: ${Number(cotizacion.flete_total || 0).toFixed(2)}</Badge>
+                  </div>
+                </Accordion.Header>
                 <Accordion.Body>
                   <p><strong>Origen - Destino:</strong> {cotizacion.flete_origen_destino}</p>
                   <p><strong>Concepto 1:</strong> {cotizacion.flete_concepto_1} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_1 || 0).toFixed(2)}</p>
@@ -100,7 +106,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="1">
-                <Accordion.Header>Cargos de Traslados</Accordion.Header>
+                <Accordion.Header>
+                  <div className="d-flex justify-content-between align-items-center w-100">
+                    <span>Cargos de Traslados</span>
+                    <Badge className="total-solapa">Total: ${Number(cotizacion.cargos?.[0]?.total_cargos  || 0).toFixed(2)}</Badge>
+                  </div>
+                </Accordion.Header>
                 <Accordion.Body>
                   {cotizacion.cargos && cotizacion.cargos.length > 0 ? (
                     cotizacion.cargos.map((cargo, index) => (
@@ -118,7 +129,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="2">
-              <Accordion.Header>Desglose de Impuestos</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Desglose de Impuestos</span>
+                  <Badge className="total-solapa">Total: ${Number(cotizacion.desgloseImpuestos?.[0]?.total  || 0).toFixed(2)}</Badge>
+                </div>
+              </Accordion.Header>
                 <Accordion.Body>
                   {cotizacion.desgloseImpuestos && cotizacion.desgloseImpuestos.length > 0 ? (
                     cotizacion.desgloseImpuestos.map((item, index) => (
@@ -141,7 +157,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="3">
-                <Accordion.Header>Cargos Extra</Accordion.Header>
+                <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Cargos Extra</span>
+                  <Badge className="total-solapa">Total: ${Number(cotizacion.cargos?.[0]?.total_cargos_extra  || 0).toFixed(2)}</Badge>
+                </div>
+                </Accordion.Header>
                 <Accordion.Body>
                   {cotizacion.cargos && cotizacion.cargos.length > 0 ? (
                     cotizacion.cargos.map((cargo, index) => (
@@ -163,7 +184,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="4">
-                <Accordion.Header>Servicios</Accordion.Header>
+                <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Servicios</span>
+                  <Badge className="total-solapa">Total: ${Number(cotizacion.servicios?.[0]?.total_servicios  || 0).toFixed(2)}</Badge>
+                </div>
+                </Accordion.Header>
                 <Accordion.Body>
                   {cotizacion.servicios && cotizacion.servicios.length > 0 ? (
                     cotizacion.servicios.map((servicio, index) => (
@@ -186,7 +212,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="5">
-                <Accordion.Header>Cuenta de Gastos</Accordion.Header>
+                <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Cuenta de Gastos</span>
+                  <Badge className="total-solapa">Total: ${Number(cotizacion.cuentaGastos?.[0]?.total  || 0).toFixed(2)}</Badge>
+                </div>
+                </Accordion.Header>
                 <Accordion.Body>
                   {cotizacion.cuentaGastos && cotizacion.cuentaGastos.length > 0 ? (
                     cotizacion.cuentaGastos.map((gasto, index) => (
@@ -207,7 +238,12 @@ const VerCotizacion = () => {
               </Accordion.Item>
 
               <Accordion.Item eventKey="6">
-              <Accordion.Header>Pedimento</Accordion.Header>
+              <Accordion.Header>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <span>Pedimento</span>
+                  <Badge className="total-solapa">Total: ${Number(cotizacion.pedimento.total || 0).toFixed(2)}</Badge>
+                </div>
+              </Accordion.Header>
               <Accordion.Body>
                 {cotizacion.pedimento ? (
                   <div>
