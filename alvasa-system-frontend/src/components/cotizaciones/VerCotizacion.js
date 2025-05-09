@@ -13,7 +13,7 @@ const VerCotizacion = () => {
   useEffect(() => {
     const obtenerCotizacion = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
+        const response = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
         setCotizacion(response.data);
         setLoading(false);
       } catch (error) {
@@ -41,7 +41,7 @@ const VerCotizacion = () => {
   // Función para imprimir la cotización
   const handlePrint = () => {
     window.open(
-      `http://localhost:5000/api/cotizaciones/${id}/pdf`,
+      `http://localhost:5050/api/cotizaciones/${id}/pdf`,
       '_blank'
       );
   };

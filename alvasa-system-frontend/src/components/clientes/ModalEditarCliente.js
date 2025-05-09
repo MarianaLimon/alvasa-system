@@ -28,7 +28,7 @@ const ModalEditarCliente = ({ cliente, onClose, onSave }) => {
 
   const handleGuardar = async () => {
     try {
-      await axios.put(`http://localhost:5000/clientes/${cliente.id}`, formData);
+      await axios.put(`http://localhost:5050/clientes/${cliente.id}`, formData);
       if (onSave) onSave(); // Para refrescar la lista
     } catch (error) {
       console.error('Error al actualizar cliente:', error);

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Card, Row, Col } from 'react-bootstrap';
 import { BsClipboard, BsPeople, BsBox } from 'react-icons/bs';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5050';
 
 const Home = () => {
   const [clientsCount, setClientsCount] = useState(0);

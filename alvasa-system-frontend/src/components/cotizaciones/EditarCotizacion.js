@@ -11,7 +11,7 @@ const EditarCotizacion = () => {
   useEffect(() => {
     const cargarCotizacion = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
+        const response = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
         const cot = response.data;
 
         setDatosIniciales({

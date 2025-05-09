@@ -26,7 +26,7 @@ const ListaCotizaciones = () => {
   useEffect(() => {
     const obtenerCotizaciones = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/cotizaciones');
+        const { data } = await axios.get('http://localhost:5050/cotizaciones');
         setCotizaciones(data);
       } catch (error) {
         console.error('Error al obtener cotizaciones:', error);
@@ -41,14 +41,14 @@ const ListaCotizaciones = () => {
   const manejarEditar  = id => navigate(`/cotizaciones/editar/${id}`);
   const manejarImprimir = id =>
     window.open(
-      `http://localhost:5000/api/cotizaciones/${id}/pdf`,
+      `http://localhost:5050/api/cotizaciones/${id}/pdf`,
       '_blank'
     );
 
   const manejarEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar esta cotización?')) return;
     try {
-      await axios.delete(`http://localhost:5000/cotizaciones/${id}`);
+      await axios.delete(`http://localhost:5050/cotizaciones/${id}`);
       setCotizaciones(prev => prev.filter(c => c.id !== id));
       setToastVariant('success');
       setToastMsg('Cotización eliminada correctamente');

@@ -20,7 +20,7 @@ const FormularioCliente = ({ onClienteAgregado }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/clientes', cliente);
+      await axios.post('http://localhost:5050/clientes', cliente);
       setCliente({ nombre: '', direccion: '', telefono: '', email: '' });
       if (onClienteAgregado) onClienteAgregado(); // Llamada para refrescar la tabla
     } catch (error) {

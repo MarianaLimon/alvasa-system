@@ -11,7 +11,7 @@ const ListaClientes = () => {
 
   const obtenerClientes = async () => {
     try {
-      const respuesta = await axios.get('http://localhost:5000/clientes');
+      const respuesta = await axios.get('http://localhost:5050/clientes');
       setClientes(respuesta.data);
     } catch (error) {
       console.error('Error al obtener clientes:', error);
@@ -25,7 +25,7 @@ const ListaClientes = () => {
   const eliminarCliente = async (id) => {
     if (!window.confirm('¿Estás seguro de eliminar este cliente?')) return;
     try {
-      await axios.delete(`http://localhost:5000/clientes/${id}`);
+      await axios.delete(`http://localhost:5050/clientes/${id}`);
       obtenerClientes(); // refrescar la lista
     } catch (error) {
       console.error('Error al eliminar cliente:', error);

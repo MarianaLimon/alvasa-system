@@ -90,7 +90,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     try {
       let idCotizacion = form.id || id;
       if (modo === 'crear') {
-        const response = await axios.post('http://localhost:5000/cotizaciones', cotizacionCompleta);
+        const response = await axios.post('http://localhost:5050/cotizaciones', cotizacionCompleta);
         idCotizacion = response.data.id;
 
         const totalCargosCalculado = 
@@ -98,7 +98,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
         parseFloat(cargos.aereo || 0) +
         parseFloat(cargos.custodia || 0);
 
-        await axios.post('http://localhost:5000/cargos', {
+        await axios.post('http://localhost:5050/cargos', {
           cotizacion_id: idCotizacion,
           terrestre: cargos.terrestre || 0,
           aereo: cargos.aereo || 0,
@@ -114,7 +114,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total_cargos_extra: cargosExtra.total || 0
         });
 
-        await axios.post('http://localhost:5000/servicios', {
+        await axios.post('http://localhost:5050/servicios', {
           cotizacion_id: idCotizacion,
           maniobras: servicios.maniobras || 0,
           revalidacion: servicios.revalidacion || 0,
@@ -127,7 +127,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: servicios.total || 0
         });
 
-        await axios.post('http://localhost:5000/cuenta-gastos', {
+        await axios.post('http://localhost:5050/cuenta-gastos', {
           cotizacion_id: idCotizacion,
           honorarios: cuentaGastos.honorarios || 0,
           padron: cuentaGastos.padron || 0,
@@ -138,7 +138,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: cuentaGastos.total || 0
         });
 
-        await axios.post('http://localhost:5000/pedimentos', {
+        await axios.post('http://localhost:5050/pedimentos', {
           cotizacion_id: idCotizacion,
           tipoCambio: pedimento.tipoCambio || 0,
           pesoBruto: pedimento.pesoBruto || 0,
@@ -151,7 +151,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: pedimento.total || 0
         });
 
-        await axios.post('http://localhost:5000/desglose-impuestos', {
+        await axios.post('http://localhost:5050/desglose-impuestos', {
           cotizacion_id: idCotizacion,
           valorFactura: impuestos.valorFactura || 0,
           flete: impuestos.flete || 0,
@@ -164,14 +164,14 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: impuestos.total || 0
         });
       } else {
-        await axios.put(`http://localhost:5000/cotizaciones/${id}`, cotizacionCompleta);
+        await axios.put(`http://localhost:5050/cotizaciones/${id}`, cotizacionCompleta);
 
         const totalCargosCalculado = 
           parseFloat(cargos.terrestre || 0) +
           parseFloat(cargos.aereo || 0) +
           parseFloat(cargos.custodia || 0);
 
-        await axios.put(`http://localhost:5000/cargos/${idCotizacion}`, {
+        await axios.put(`http://localhost:5050/cargos/${idCotizacion}`, {
           terrestre: cargos.terrestre || 0,
           aereo: cargos.aereo || 0,
           custodia: cargos.custodia || 0,
@@ -186,7 +186,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total_cargos_extra: cargosExtra.total || 0
         });
 
-        await axios.put(`http://localhost:5000/servicios/${idCotizacion}`, {
+        await axios.put(`http://localhost:5050/servicios/${idCotizacion}`, {
           maniobras: servicios.maniobras || 0,
           revalidacion: servicios.revalidacion || 0,
           gestionDestino: servicios.gestionDestino || 0,
@@ -198,7 +198,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: servicios.total || 0
         });
 
-        await axios.put(`http://localhost:5000/cuenta-gastos/${idCotizacion}`, {
+        await axios.put(`http://localhost:5050/cuenta-gastos/${idCotizacion}`, {
           honorarios: cuentaGastos.honorarios || 0,
           padron: cuentaGastos.padron || 0,
           serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
@@ -208,7 +208,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: cuentaGastos.total || 0
         });
 
-        await axios.put(`http://localhost:5000/pedimentos/${idCotizacion}`, {
+        await axios.put(`http://localhost:5050/pedimentos/${idCotizacion}`, {
           tipoCambio: pedimento.tipoCambio || 0,
           pesoBruto: pedimento.pesoBruto || 0,
           valorAduana: pedimento.valorAduana || 0,
@@ -220,7 +220,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           total: pedimento.total || 0
         });
 
-        await axios.put(`http://localhost:5000/desglose-impuestos/${idCotizacion}`, {
+        await axios.put(`http://localhost:5050/desglose-impuestos/${idCotizacion}`, {
           valorFactura: impuestos.valorFactura || 0,
           flete: impuestos.flete || 0,
           tipoCambio: impuestos.tipoCambio || 0,
@@ -255,7 +255,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
   useEffect(() => {
     const obtenerClientes = async () => {
       try {
-        const respuesta = await axios.get('http://localhost:5000/clientes');
+        const respuesta = await axios.get('http://localhost:5050/clientes');
         setClientes(respuesta.data);
       } catch (error) {
         console.error('Error al obtener clientes:', error);
@@ -269,7 +269,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     if (modo === 'crear') {
       const obtenerUltimoFolio = async () => {
         try {
-          const respuesta = await axios.get('http://localhost:5000/cotizaciones');
+          const respuesta = await axios.get('http://localhost:5050/cotizaciones');
           const cotizaciones = respuesta.data;
           if (cotizaciones.length > 0) {
             const folios = cotizaciones.map(c => c.folio);
@@ -289,7 +289,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     } else if (modo === 'editar' && id) {
       const obtenerDatos = async () => {
         try {
-          const respuesta = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
+          const respuesta = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
           const cot = respuesta.data;
   
           setForm({
