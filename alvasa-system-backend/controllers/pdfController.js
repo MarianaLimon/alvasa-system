@@ -34,7 +34,7 @@ exports.generarPdf = async (req, res) => {
 
   try {
     // 1) Obtener la cotización exactamente igual que tu UI
-    const { data: cotizacion } = await axios.get(`http://localhost:5000/cotizaciones/${id}`);
+    const { data: cotizacion } = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
     if (!cotizacion || !cotizacion.id) {
       return res.status(404).send('Cotización no encontrada');
     }
@@ -50,7 +50,7 @@ exports.generarPdf = async (req, res) => {
     const page    = await browser.newPage();
     await page.setContent(html, {
       waitUntil: 'networkidle0',
-      url: 'http://localhost:5000' // para recursos relativos si hiciera falta
+      url: 'http://localhost:5050' // para recursos relativos si hiciera falta
     });
     const pdfBuffer = await page.pdf({
       format: 'A4',

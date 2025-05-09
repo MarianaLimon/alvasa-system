@@ -1,29 +1,41 @@
 const express = require('express');
-const path    = require('path');
-const cors    = require('cors');
-const db      = require('./config/db');
-const pdfRoutes = require('./routes/pdf');
+const path = require('path');
+const db = require('./config/db');
 
-// Importar rutas
-const clientesRoutes       = require('./routes/clientes');
-const cotizacionesRoutes   = require('./routes/cotizaciones');
-const cargosRoutes         = require('./routes/cargos');
-const serviciosRoutes      = require('./routes/servicios');
-const cuentaGastosRoutes   = require('./routes/cuentaGastos');
-const pedimentosRoutes     = require('./routes/pedimentos');
+// Rutas
+const pdfRoutes = require('./routes/pdf');
+const clientesRoutes = require('./routes/clientes');
+const cotizacionesRoutes = require('./routes/cotizaciones');
+const cargosRoutes = require('./routes/cargos');
+const serviciosRoutes = require('./routes/servicios');
+const cuentaGastosRoutes = require('./routes/cuentaGastos');
+const pedimentosRoutes = require('./routes/pedimentos');
 const desgloseImpuestosRoutes = require('./routes/desgloseImpuestos');
 
 const app = express();
-const port = 5000;
+const port = 5050;
 
-// Middlewares
-app.use(cors());
+//
+// ✅ CORS manual que funciona siempre
+//
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204); // Preflight
+  }
+  next();
+});
+
+// ✅ Middleware JSON
 app.use(express.json());
 
-// Servir archivos estáticos desde /public
+// ✅ Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Usar rutas
+// ✅ Rutas del sistema
 app.use('/clientes', clientesRoutes);
 app.use('/cotizaciones', cotizacionesRoutes);
 app.use('/cargos', cargosRoutes);
@@ -31,16 +43,14 @@ app.use('/servicios', serviciosRoutes);
 app.use('/cuenta-gastos', cuentaGastosRoutes);
 app.use('/pedimentos', pedimentosRoutes);
 app.use('/desglose-impuestos', desgloseImpuestosRoutes);
-
-// Ruta para PDFs
 app.use('/api', pdfRoutes);
 
-// Ruta básica de prueba
+// ✅ Ruta de prueba
 app.get('/', (req, res) => {
   res.send('¡Hola desde el backend de ALVASA-SYSTEM!');
 });
 
-// Iniciar servidor
+// ✅ Iniciar servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
