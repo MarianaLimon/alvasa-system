@@ -81,7 +81,7 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                 <option value="">Selecciona</option>
                 {i === 1 && (
                   <>
-                    <option value="Flete marino">Flete marino</option>
+                    <option value="Flete marítimo">Flete marítimo</option>
                     <option value="20DS">20DS</option>
                   </>
                 )}

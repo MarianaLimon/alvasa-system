@@ -7,6 +7,7 @@ const crearDesgloseImpuestos = (req, res) => {
     valorFactura,
     flete,
     tipoCambio,
+    valorAduana,
     dta,
     igi,
     iva,
@@ -17,8 +18,8 @@ const crearDesgloseImpuestos = (req, res) => {
 
   const sql = `
     INSERT INTO desglose_impuestos_cotizacion
-    (cotizacion_id, valor_factura, flete, tipo_cambio, dta, igi, iva, prv, iva_prv, total)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (cotizacion_id, valor_factura, flete, tipo_cambio, valor_aduana, dta, igi, iva, prv, iva_prv, total)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(sql, [
@@ -26,6 +27,7 @@ const crearDesgloseImpuestos = (req, res) => {
     valorFactura,
     flete,
     tipoCambio,
+    valorAduana,
     dta,
     igi,
     iva,
@@ -48,6 +50,7 @@ const actualizarDesgloseImpuestos = (req, res) => {
     valorFactura,
     flete,
     tipoCambio,
+    valorAduana,
     dta,
     igi,
     iva,
@@ -58,7 +61,7 @@ const actualizarDesgloseImpuestos = (req, res) => {
 
   const sql = `
     UPDATE desglose_impuestos_cotizacion SET
-      valor_factura = ?, flete = ?, tipo_cambio = ?, dta = ?,
+      valor_factura = ?, flete = ?, tipo_cambio = ?, valor_aduana = ?, dta = ?,
       igi = ?, iva = ?, prv = ?, iva_prv = ?, total = ?
     WHERE cotizacion_id = ?
   `;
@@ -67,6 +70,7 @@ const actualizarDesgloseImpuestos = (req, res) => {
     valorFactura,
     flete,
     tipoCambio,
+    valorAduana,
     dta,
     igi,
     iva,

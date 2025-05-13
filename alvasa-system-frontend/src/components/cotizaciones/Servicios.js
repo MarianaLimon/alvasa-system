@@ -208,7 +208,7 @@ const Servicios = ({ onServiciosChange, datos = {} }) => {
           </Form.Group>
         </Col>
         <Col md={6} className="d-flex align-items-end justify-content-end total-servicios">
-          <strong>Total Servicios: ${total.toFixed(2)} USD</strong>
+          <strong>Total Servicios: ${total.toFixed(2)}</strong>
         </Col>
       </Row>
     </div>

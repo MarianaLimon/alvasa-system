@@ -12,6 +12,7 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
     valorFactura: '',
     flete: '',
     tipoCambio: '',
+    valorAduana: 0, // nuevo campo
     igi: '',
     prv: 'No aplica',
     ivaPrv: 'No aplica',
@@ -29,6 +30,7 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
         valorFactura: datos.valorFactura ?? datos.valor_factura ?? '',
         flete: datos.flete ?? '',
         tipoCambio: datos.tipoCambio ?? datos.tipo_cambio ?? '',
+        valorAduana: parseNumber(datos.valorAduana ??((parseNumber(datos.valorFactura) + parseNumber(datos.flete)) * parseNumber(datos.tipoCambio))),
         igi: datos.igi ?? '',
         prv: datos.prv ?? 'No aplica',
         ivaPrv: datos.ivaPrv ?? 'No aplica',
@@ -72,8 +74,9 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
 
   // Cálculo de impuestos
   useEffect(() => {
-    const dta = (parseNumber(valorFactura) + parseNumber(flete)) * parseNumber(tipoCambio);
-    const iva = (parseNumber(valorFactura) + dta + parseNumber(igi)) * 0.16;
+    const valorAduanaCalculado = (parseNumber(valorFactura) + parseNumber(flete)) * parseNumber(tipoCambio);
+    const dta = parseNumber(valorAduanaCalculado) * 0.008;
+    const iva = (parseNumber(valorAduanaCalculado) + dta + parseNumber(igi)) * 0.16;
     const total =
       dta +
       parseNumber(igi) +
@@ -82,14 +85,15 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
       (ivaPrv === '46 pesos mexicanos' ? 46 : 0);
 
     if (
-      dta.toFixed(2) !== dtaActual.toFixed(2) ||
-      iva.toFixed(2) !== ivaActual.toFixed(2) ||
-      total.toFixed(2) !== totalActual.toFixed(2)
+        valorAduanaCalculado.toFixed(2) !== data.valorAduana?.toFixed(2) ||
+        dta.toFixed(2) !== dtaActual.toFixed(2) ||
+        iva.toFixed(2) !== ivaActual.toFixed(2) ||
+        total.toFixed(2) !== totalActual.toFixed(2)
     ) {
-      setData((prev) => ({ ...prev, dta, iva, total }));
-      onImpuestosChange?.({ valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dta, iva, total });
+      setData((prev) => ({ ...prev, valorAduana: valorAduanaCalculado, dta, iva, total }));
+      onImpuestosChange?.({ valorFactura, flete, tipoCambio, valorAduana: valorAduanaCalculado, igi, prv, ivaPrv, dta, iva, total });
     }
-  }, [valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dtaActual, ivaActual, totalActual, onImpuestosChange]);
+  }, [valorFactura, flete, tipoCambio, igi, prv, ivaPrv, dtaActual, ivaActual, totalActual, data.valorAduana, onImpuestosChange]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -148,6 +152,12 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
+            <Form.Label>Valor Aduana (calculado)</Form.Label>
+            <Form.Control value={`$${data.valorAduana.toFixed(2)} MXN`} disabled />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group>
             <Form.Label>DTA (calculado)</Form.Label>
             <Form.Control value={`$${dtaActual.toFixed(2)} MXN`} disabled />
           </Form.Group>
@@ -164,16 +174,16 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
             />
           </Form.Group>
         </Col>
+      </Row>
+
+      <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
             <Form.Label>IVA (calculado)</Form.Label>
             <Form.Control value={`$${ivaActual.toFixed(2)} MXN`} disabled />
           </Form.Group>
         </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
+        <Col md={4}>
           <Form.Group>
             <Form.Label>PRV</Form.Label>
             <Form.Select name="prv" value={prv} onChange={handleChange}>
@@ -182,7 +192,7 @@ const DesgloseImpuestos = ({ onImpuestosChange, datos = {} }) => {
             </Form.Select>
           </Form.Group>
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <Form.Group>
             <Form.Label>IVA / PRV</Form.Label>
             <Form.Select name="ivaPrv" value={ivaPrv} onChange={handleChange}>

@@ -142,6 +142,7 @@ const VerCotizacion = () => {
                         <p><strong>Valor Factura:</strong> ${Number(item.valor_factura || 0).toFixed(2)}</p>
                         <p><strong>Flete:</strong> ${Number(item.flete || 0).toFixed(2)}</p>
                         <p><strong>Tipo de Cambio:</strong> {Number(item.tipo_cambio || 0).toFixed(2)}</p>
+                        <p><strong>Valor Aduana:</strong> ${Number(item.valor_aduana || 0).toFixed(2)}</p>
                         <p><strong>DTA:</strong> ${Number(item.dta || 0).toFixed(2)}</p>
                         <p><strong>IGI:</strong> ${Number(item.igi || 0).toFixed(2)}</p>
                         <p><strong>IVA:</strong> ${Number(item.iva || 0).toFixed(2)}</p>

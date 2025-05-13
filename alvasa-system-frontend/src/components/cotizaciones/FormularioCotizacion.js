@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Card, Row, Col, Accordion, Badge } from 'react-bootstrap';
-import { BsSave, BsPrinter, BsListUl } from 'react-icons/bs';
+import { BsSave, BsListUl } from 'react-icons/bs';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -156,6 +156,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           valorFactura: impuestos.valorFactura || 0,
           flete: impuestos.flete || 0,
           tipoCambio: impuestos.tipoCambio || 0,
+          valorAduana: impuestos.valorAduana || 0,
           dta: impuestos.dta || 0,
           igi: impuestos.igi || 0,
           iva: impuestos.iva || 0,
@@ -224,6 +225,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           valorFactura: impuestos.valorFactura || 0,
           flete: impuestos.flete || 0,
           tipoCambio: impuestos.tipoCambio || 0,
+          valorAduana: impuestos.valorAduana || 0,
           dta: impuestos.dta || 0,
           igi: impuestos.igi || 0,
           iva: impuestos.iva || 0,
@@ -336,6 +338,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
             valorFactura: imp.valor_factura ?? '',
             flete: imp.flete ?? '',
             tipoCambio: imp.tipo_cambio ?? '',
+            valorAduana: imp.valor_aduana ?? 0,
             dta: imp.dta ?? 0,
             igi: imp.igi ?? '',
             iva: imp.iva ?? 0,
@@ -562,13 +565,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
               <BsSave className="me-2" />
               {modo === 'crear' ? 'Guardar Cotización' : 'Actualizar Cotización'}
             </Button>
-            <Button variant="primary" onClick={() => window.print()}>
-              <BsPrinter className="me-2" />
-              Imprimir Cotización
-            </Button>
-          </div>
 
-          <div className="d-flex justify-content-center mt-3">
             <Button variant="warning" onClick={() => navigate('/cotizaciones')}>
               <BsListUl className="me-2" />
               Ver todas las cotizaciones

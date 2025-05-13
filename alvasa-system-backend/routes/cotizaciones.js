@@ -266,19 +266,19 @@ router.put('/pedimentos/:id', (req, res) => {
 router.put('/desglose-impuestos/:id', (req, res) => {
   const { id } = req.params;
   const {
-    valorFactura, flete, tipoCambio, dta,
+    valorFactura, flete, tipoCambio, valorAduana,dta,
     igi, iva, prv, ivaPrv, total
   } = req.body;
 
   const sql = `
     UPDATE desglose_impuestos_cotizacion SET
-      valorFactura = ?, flete = ?, tipoCambio = ?, dta = ?,
-      igi = ?, iva = ?, prv = ?, ivaPrv = ?, total = ?
+      valor_factura = ?, flete = ?, tipo_cambio = ?, valor_aduana = ?, dta = ?,
+      igi = ?, iva = ?, prv = ?, iva_prv = ?, total = ?
     WHERE cotizacion_id = ?
   `;
 
   db.query(sql, [
-    valorFactura, flete, tipoCambio, dta,
+    valorFactura, flete, tipoCambio, valorAduana,dta,
     igi, iva, prv, ivaPrv, total, id
   ], (err) => {
     if (err) return res.status(500).json({ error: 'Error al actualizar desglose de impuestos' });
