@@ -10,13 +10,12 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
     valor2: datos.valor2 || '',
     concepto3: datos.concepto3 || '',
     valor3: datos.valor3 || '',
-    total:
-      parseFloat(datos.valor1 || 0) +
-      parseFloat(datos.valor2 || 0) +
-      parseFloat(datos.valor3 || 0),
+    total: 0,
   });
 
-  // 🔄 Actualizar los campos cuando datos cambian (modo edición)
+  const parseNumber = (val) => parseFloat(val) || 0;
+
+  // Precargar datos en modo edición
   useEffect(() => {
     const actualizado = {
       origenDestino: datos.origenDestino || '',
@@ -26,11 +25,13 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
       valor2: datos.valor2 || '',
       concepto3: datos.concepto3 || '',
       valor3: datos.valor3 || '',
-      total:
-        parseFloat(datos.valor1 || 0) +
-        parseFloat(datos.valor2 || 0) +
-        parseFloat(datos.valor3 || 0),
     };
+
+    actualizado.total =
+      (actualizado.concepto1 ? parseNumber(actualizado.valor1) : 0) +
+      (actualizado.concepto2 ? parseNumber(actualizado.valor2) : 0) +
+      (actualizado.concepto3 ? parseNumber(actualizado.valor3) : 0);
+
     setFlete(actualizado);
   }, [datos]);
 
@@ -38,13 +39,27 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
     const { name, value } = e.target;
     const actualizado = { ...flete, [name]: value };
 
+    // Si se borró el concepto, también reseteamos el valor
+    if (name.startsWith('concepto') && value === '') {
+      const valorKey = `valor${name.slice(-1)}`;
+      actualizado[valorKey] = '';
+    }
+
     actualizado.total =
-      parseFloat(actualizado.valor1 || 0) +
-      parseFloat(actualizado.valor2 || 0) +
-      parseFloat(actualizado.valor3 || 0);
+      (actualizado.concepto1 ? parseNumber(actualizado.valor1) : 0) +
+      (actualizado.concepto2 ? parseNumber(actualizado.valor2) : 0) +
+      (actualizado.concepto3 ? parseNumber(actualizado.valor3) : 0);
 
     setFlete(actualizado);
-    if (onFleteChange) onFleteChange(actualizado);
+
+    if (onFleteChange) {
+      onFleteChange({
+        ...actualizado,
+        valor1: actualizado.concepto1 ? parseNumber(actualizado.valor1) : 0,
+        valor2: actualizado.concepto2 ? parseNumber(actualizado.valor2) : 0,
+        valor3: actualizado.concepto3 ? parseNumber(actualizado.valor3) : 0,
+      });
+    }
   };
 
   return (
@@ -57,6 +72,7 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
           name="origenDestino"
           value={flete.origenDestino}
           onChange={handleChange}
+          required
         >
           <option value="">Seleccionar destino...</option>
           <option>China - México</option>
@@ -81,20 +97,22 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                 <option value="">Selecciona</option>
                 {i === 1 && (
                   <>
-                    <option value="Flete marítimo">Flete marítimo</option>
-                    <option value="20DS">20DS</option>
+                    <option value="40">40</option>
+                    <option value="20">20</option>
                   </>
                 )}
                 {i === 2 && (
                   <>
+                    <option value="Liberación">Liberación</option>
                     <option value="Cargos locales">Cargos locales</option>
-                    <option value="40HQ">40HQ</option>
+                    <option value="40">40</option>
                   </>
                 )}
                 {i === 3 && (
                   <>
                     <option value="Liberación">Liberación</option>
-                    <option value="Seguro de mercancía">Seguro de mercancía</option>
+                    <option value="Seguro (mercancia)">Seguro (mercancia)</option>
+                    <option value="Cargos locales">Cargos locales</option>
                   </>
                 )}
               </Form.Select>
@@ -108,6 +126,7 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                 name={`valor${i}`}
                 value={flete[`valor${i}`]}
                 onChange={handleChange}
+                disabled={!flete[`concepto${i}`]}
               />
             </Form.Group>
           </Col>
@@ -115,7 +134,7 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
       ))}
 
       <div className="text-end mt-3">
-        <strong>Total Flete: ${Number(flete.total || 0).toFixed(2)} USD</strong>
+        <strong>Total Flete: ${Number(flete.total).toFixed(2)} USD</strong>
       </div>
     </div>
   );
