@@ -66,8 +66,8 @@ const Home = () => {
         <Col md={3}>
           <Card className="dashboard-card border-delivered">
             <Card.Body className="d-flex align-items-center">
-              <div className="col-md-9"><Card.Title className="dashboard-card-title">Entregado a cliente</Card.Title></div>
-              <div className="col-md-3"><Card.Text className="dashboard-card-number">{deliveredCount}</Card.Text></div>
+              <div className="col-md-6"><Card.Title className="dashboard-card-title">Entregado a cliente</Card.Title></div>
+              <div className="col-md-6"><Card.Text className="dashboard-card-number">{deliveredCount}</Card.Text></div>
             </Card.Body>
           </Card>
         </Col>
@@ -75,8 +75,8 @@ const Home = () => {
         <Col md={3}>
           <Card className="dashboard-card border-negociacion">
             <Card.Body className="d-flex align-items-center">
-              <div className="col-md-9"><Card.Title className="dashboard-card-title">En negociación</Card.Title></div>
-              <div className="col-md-3"><Card.Text className="dashboard-card-number">{negotiationCount}</Card.Text></div>
+              <div className="col-md-6"><Card.Title className="dashboard-card-title">En negociación</Card.Title></div>
+              <div className="col-md-6"><Card.Text className="dashboard-card-number">{negotiationCount}</Card.Text></div>
             </Card.Body>
           </Card>
         </Col>
@@ -84,8 +84,8 @@ const Home = () => {
         <Col md={3}>
           <Card className="dashboard-card border-autorizadas">
             <Card.Body className="d-flex align-items-center">
-              <div className="col-md-9"><Card.Title className="dashboard-card-title">Autorizadas</Card.Title></div>
-              <div className="col-md-3"><Card.Text className=" dashboard-card-number">{authorizedCount}</Card.Text></div>
+              <div className="col-md-6"><Card.Title className="dashboard-card-title">Autorizadas</Card.Title></div>
+              <div className="col-md-6"><Card.Text className=" dashboard-card-number">{authorizedCount}</Card.Text></div>
             </Card.Body>
           </Card>
         </Col>

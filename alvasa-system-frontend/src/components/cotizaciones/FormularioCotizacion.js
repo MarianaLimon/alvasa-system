@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Form, Button, Card, Row, Col, Accordion, Badge } from 'react-bootstrap';
+import React, { useState } from 'react';
+
+import { guardarCotizacion } from '../../utils/guardarCotizacion';
+import { useCargaInicialCotizacion } from '../../hooks/useCargaInicialCotizacion';
+
+import { Form, Button, Card, Accordion, Badge } from 'react-bootstrap';
 import { BsSave, BsListUl } from 'react-icons/bs';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import FormularioDatosGenerales from './FormularioDatosGenerales';
 import FleteInternacional from './FleteInternacional';
 import CargosTraslados from './CargosTraslados';
 import DesgloseImpuestos from './DesgloseImpuestos';
@@ -50,6 +54,20 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
   const [pedimento, setPedimento] = useState({});
   const [resumen, setResumen] = useState({});
 
+  useCargaInicialCotizacion({
+    modo,
+    id,
+    setForm,
+    setClientes,
+    setFlete,
+    setCargos,
+    setCargosExtra,
+    setServicios,
+    setCuentaGastos,
+    setPedimento,
+    setImpuestos
+  });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: name === 'cantidad' ? parseInt(value, 10) || 0 : value });
@@ -69,291 +87,36 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const cotizacionCompleta = {
-      ...form,
-      propuesta: resumen.propuesta,
-      total: resumen.total,
-      ahorro: resumen.ahorro,
-      fraccion_igi: resumen.fraccion_igi,
-      monto_comisionista: resumen.monto_comisionista || 0,
-      notas: resumen.notas,
-      flete_origen_destino: flete.origenDestino,
-      flete_concepto_1: flete.concepto1,
-      flete_valor_1: flete.valor1,
-      flete_concepto_2: flete.concepto2,
-      flete_valor_2: flete.valor2,
-      flete_concepto_3: flete.concepto3,
-      flete_valor_3: flete.valor3,
-      flete_total: flete.total,
-    };
-
     try {
-      let idCotizacion = form.id || id;
-      if (modo === 'crear') {
-        const response = await axios.post('http://localhost:5050/cotizaciones', cotizacionCompleta);
-        idCotizacion = response.data.id;
-
-        const totalCargosCalculado = 
-        parseFloat(cargos.terrestre || 0) +
-        parseFloat(cargos.aereo || 0) +
-        parseFloat(cargos.custodia || 0);
-
-        await axios.post('http://localhost:5050/cargos', {
-          cotizacion_id: idCotizacion,
-          terrestre: cargos.terrestre || 0,
-          aereo: cargos.aereo || 0,
-          custodia: cargos.custodia || 0,
-          total_cargos: cargos.total || 0,
-          almacenajes: totalCargosCalculado,
-          demoras: cargosExtra.demoras || 0,
-          pernocta: cargosExtra.pernocta || 0,
-          burreo: cargosExtra.burreo || 0,
-          flete_falso: cargosExtra.fleteFalso || 0,
-          servicio_no_realizado: cargosExtra.servicioNoRealizado || 0,
-          seguro: cargosExtra.seguro || 0,
-          total_cargos_extra: cargosExtra.total || 0
-        });
-
-        await axios.post('http://localhost:5050/servicios', {
-          cotizacion_id: idCotizacion,
-          maniobras: servicios.maniobras || 0,
-          revalidacion: servicios.revalidacion || 0,
-          gestionDestino: servicios.gestionDestino || 0,
-          inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
-          documentacionImportacion: servicios.documentacionImportacion || 0,
-          garantiaContenedores: servicios.garantiaContenedores || 0,
-          distribucion: servicios.distribucion || 0,
-          serentyPremium: servicios.serentyPremium || 0,
-          total: servicios.total || 0
-        });
-
-        await axios.post('http://localhost:5050/cuenta-gastos', {
-          cotizacion_id: idCotizacion,
-          honorarios: cuentaGastos.honorarios || 0,
-          padron: cuentaGastos.padron || 0,
-          serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
-          manejoCarga: cuentaGastos.manejoCarga || 0,
-          subtotal: cuentaGastos.subtotal || 0,
-          iva: 0.16,
-          total: cuentaGastos.total || 0
-        });
-
-        await axios.post('http://localhost:5050/pedimentos', {
-          cotizacion_id: idCotizacion,
-          tipoCambio: pedimento.tipoCambio || 0,
-          pesoBruto: pedimento.pesoBruto || 0,
-          valorAduana: pedimento.valorAduana || 0,
-          dta: pedimento.dta || 0,
-          ivaPrv: pedimento.ivaPrv || 0,
-          igiIge: pedimento.igiIge || 0,
-          prv: pedimento.prv || 0,
-          iva: pedimento.iva || 0,
-          total: pedimento.total || 0
-        });
-
-        await axios.post('http://localhost:5050/desglose-impuestos', {
-          cotizacion_id: idCotizacion,
-          valorFactura: impuestos.valorFactura || 0,
-          flete: impuestos.flete || 0,
-          tipoCambio: impuestos.tipoCambio || 0,
-          valorAduana: impuestos.valorAduana || 0,
-          dta: impuestos.dta || 0,
-          igi: impuestos.igi || 0,
-          iva: impuestos.iva || 0,
-          prv: impuestos.prv || 'No aplica',
-          ivaPrv: impuestos.ivaPrv || 'No aplica',
-          total: impuestos.total || 0
-        });
-      } else {
-        await axios.put(`http://localhost:5050/cotizaciones/${id}`, cotizacionCompleta);
-
-        const totalCargosCalculado = 
-          parseFloat(cargos.terrestre || 0) +
-          parseFloat(cargos.aereo || 0) +
-          parseFloat(cargos.custodia || 0);
-
-        await axios.put(`http://localhost:5050/cargos/${idCotizacion}`, {
-          terrestre: cargos.terrestre || 0,
-          aereo: cargos.aereo || 0,
-          custodia: cargos.custodia || 0,
-          total_cargos: totalCargosCalculado,
-          almacenajes: cargosExtra.almacenajes || 0,
-          demoras: cargosExtra.demoras || 0,
-          pernocta: cargosExtra.pernocta || 0,
-          burreo: cargosExtra.burreo || 0,
-          flete_falso: cargosExtra.fleteFalso || 0,
-          servicio_no_realizado: cargosExtra.servicioNoRealizado || 0,
-          seguro: cargosExtra.seguro || 0,
-          total_cargos_extra: cargosExtra.total || 0
-        });
-
-        await axios.put(`http://localhost:5050/servicios/${idCotizacion}`, {
-          maniobras: servicios.maniobras || 0,
-          revalidacion: servicios.revalidacion || 0,
-          gestionDestino: servicios.gestionDestino || 0,
-          inspeccionPeritaje: servicios.inspeccionPeritaje || 0,
-          documentacionImportacion: servicios.documentacionImportacion || 0,
-          garantiaContenedores: servicios.garantiaContenedores || 0,
-          distribucion: servicios.distribucion || 0,
-          serentyPremium: servicios.serentyPremium || 0,
-          total: servicios.total || 0
-        });
-
-        await axios.put(`http://localhost:5050/cuenta-gastos/${idCotizacion}`, {
-          honorarios: cuentaGastos.honorarios || 0,
-          padron: cuentaGastos.padron || 0,
-          serviciosComplementarios: cuentaGastos.serviciosComplementarios || 0,
-          manejoCarga: cuentaGastos.manejoCarga || 0,
-          subtotal: cuentaGastos.subtotal || 0,
-          iva: 0.16,
-          total: cuentaGastos.total || 0
-        });
-
-        await axios.put(`http://localhost:5050/pedimentos/${idCotizacion}`, {
-          tipoCambio: pedimento.tipoCambio || 0,
-          pesoBruto: pedimento.pesoBruto || 0,
-          valorAduana: pedimento.valorAduana || 0,
-          dta: pedimento.dta || 0,
-          ivaPrv: pedimento.ivaPrv || 0,
-          igiIge: pedimento.igiIge || 0,
-          prv: pedimento.prv || 0,
-          iva: pedimento.iva || 0,
-          total: pedimento.total || 0
-        });
-
-        await axios.put(`http://localhost:5050/desglose-impuestos/${idCotizacion}`, {
-          valorFactura: impuestos.valorFactura || 0,
-          flete: impuestos.flete || 0,
-          tipoCambio: impuestos.tipoCambio || 0,
-          valorAduana: impuestos.valorAduana || 0,
-          dta: impuestos.dta || 0,
-          igi: impuestos.igi || 0,
-          iva: impuestos.iva || 0,
-          prv: impuestos.prv || 'No aplica',
-          ivaPrv: impuestos.ivaPrv || 'No aplica',
-          total: impuestos.total || 0
-        });
-      }
+      const { cotizacionCompleta } = await guardarCotizacion({
+        modo,
+        form,
+        resumen,
+        flete,
+        cargos,
+        cargosExtra,
+        servicios,
+        cuentaGastos,
+        pedimento,
+        impuestos,
+        id,
+      });
 
       if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
 
-        toast.success(
-          modo === 'crear'
-            ? 'Cotización guardada correctamente ✅'
-            : 'Cotización actualizada correctamente ✅'
-        );
+      toast.success(
+        modo === 'crear'
+          ? 'Cotización guardada correctamente ✅'
+          : 'Cotización actualizada correctamente ✅'
+      );
 
-        // Redireccionar después de un pequeño delay
-        setTimeout(() => navigate('/cotizaciones'), 1000);
-
-      } catch (error) {
-        console.error('Error al guardar cotización:', error);
-        toast.error('Hubo un error al guardar la cotización ❌');
-      }
+      setTimeout(() => navigate('/cotizaciones'), 1000);
+    } catch (error) {
+      console.error('Error al guardar cotización:', error);
+      toast.error('Hubo un error al guardar la cotización ❌');
+    }
   };
 
-  
-
-  useEffect(() => {
-    const obtenerClientes = async () => {
-      try {
-        const respuesta = await axios.get('http://localhost:5050/clientes');
-        setClientes(respuesta.data);
-      } catch (error) {
-        console.error('Error al obtener clientes:', error);
-      }
-    };
-    obtenerClientes();
-  }, []);
-
-  
-  useEffect(() => {
-    if (modo === 'crear') {
-      const obtenerUltimoFolio = async () => {
-        try {
-          const respuesta = await axios.get('http://localhost:5050/cotizaciones');
-          const cotizaciones = respuesta.data;
-          if (cotizaciones.length > 0) {
-            const folios = cotizaciones.map(c => c.folio);
-            const numeros = folios.map(folio => parseInt(folio.split('-')[1], 10));
-            const maxNumero = Math.max(...numeros);
-            const nuevoNumero = maxNumero + 1;
-            const nuevoFolio = `COT-${nuevoNumero.toString().padStart(4, '0')}`;
-            setForm(prevForm => ({ ...prevForm, folio: nuevoFolio }));
-          } else {
-            setForm(prevForm => ({ ...prevForm, folio: 'COT-0001' }));
-          }
-        } catch (error) {
-          console.error('Error al obtener el último folio:', error);
-        }
-      };
-      obtenerUltimoFolio();
-    } else if (modo === 'editar' && id) {
-      const obtenerDatos = async () => {
-        try {
-          const respuesta = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
-          const cot = respuesta.data;
-  
-          setForm({
-            id: cot.id,
-            folio: cot.folio,
-            cliente_id: cot.cliente_id,
-            empresa: cot.empresa,
-            fecha: cot.fecha.split('T')[0],
-            mercancia: cot.mercancia,
-            regimen: cot.regimen,
-            aduana: cot.aduana,
-            tipo_envio: cot.tipo_envio,
-            cantidad: cot.cantidad,
-            estatus: cot.estatus,
-            propuesta: cot.propuesta || '',
-            total: cot.total || 0,
-            ahorro: cot.ahorro || 0,
-            fraccion_igi: cot.fraccion_igi || '',
-            monto_comisionista: cot.monto_comisionista || '',
-            notas: cot.notas || ''
-          });
-  
-          setFlete({
-            origenDestino: cot.flete_origen_destino,
-            concepto1: cot.flete_concepto_1,
-            valor1: cot.flete_valor_1,
-            concepto2: cot.flete_concepto_2,
-            valor2: cot.flete_valor_2,
-            concepto3: cot.flete_concepto_3,
-            valor3: cot.flete_valor_3,
-            total: parseFloat(cot.flete_valor_1 || 0) +
-                   parseFloat(cot.flete_valor_2 || 0) +
-                   parseFloat(cot.flete_valor_3 || 0)
-          });
-  
-          setCargos(cot.cargos?.[0] || {});
-          setCargosExtra(cot.cargos?.[0] || {});
-          setServicios(cot.servicios?.[0] || {});
-          setCuentaGastos(cot.cuentaGastos?.[0] || {});
-          setPedimento(cot.pedimento || {});
-  
-          const imp = cot.desgloseImpuestos?.[0] || {};
-          setImpuestos({
-            valorFactura: imp.valor_factura ?? '',
-            flete: imp.flete ?? '',
-            tipoCambio: imp.tipo_cambio ?? '',
-            valorAduana: imp.valor_aduana ?? 0,
-            dta: imp.dta ?? 0,
-            igi: imp.igi ?? '',
-            iva: imp.iva ?? 0,
-            prv: imp.prv ?? 'No aplica',
-            ivaPrv: imp.iva_prv ?? 'No aplica',
-            total: imp.total ?? 0
-          });
-  
-        } catch (error) {
-          console.error('Error al cargar datos para edición:', error);
-        }
-      };
-      obtenerDatos();
-    }
-  }, [modo, id]);
 
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);
   const handleCargosChange = (datosCargos) => setCargos(datosCargos);
@@ -386,94 +149,14 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
               />
             </div>
           </div>
-
-          <Row>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Cliente</Form.Label>
-                <Form.Select name="cliente_id" value={form.cliente_id} onChange={handleChange} required>
-                  <option value="">Seleccionar cliente...</option>
-                  {clientes.map(cliente => (
-                    <option key={cliente.id} value={cliente.id}>
-                      {cliente.nombre}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Empresa</Form.Label>
-                <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Fecha</Form.Label>
-                <Form.Control type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Mercancía</Form.Label>
-                <Form.Control type="text" name="mercancia" value={form.mercancia} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Régimen</Form.Label>
-                <Form.Select name="regimen" value={form.regimen} onChange={handleChange}>
-                  <option value="">Seleccionar...</option>
-                  <option value="A1">A1</option>
-                  <option value="A4">A4</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Aduana</Form.Label>
-                <Form.Select name="aduana" value={form.aduana} onChange={handleChange}>
-                  <option value="">Seleccionar...</option>
-                  <option value="AICM">AICM</option>
-                  <option value="Manzanillo">Manzanillo</option>
-                  <option value="Lazaro Cardenas">Lázaro Cárdenas</option>
-                  <option value="Long Beach">Long Beach</option>
-                  <option value="Progreso">Progreso</option>
-                  <option value="San Diego">San Diego</option>
-                  <option value="Veracruz">Veracruz</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label>Tipo de Envío</Form.Label>
-                <Form.Select
-                  name="tipo_envio"
-                  value={form.tipo_envio || ''}
-                  onChange={(e) => setForm({ ...form, tipo_envio: e.target.value })}
-                >
-                  <option value="">Selecciona tipo de envío</option>
-                  <option value="Pallets">Pallets</option>
-                  <option value="Cajas">Cajas</option>
-                  <option value="Contenedor">Contenedor</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Cantidad</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="cantidad"
-                  value={form.cantidad}
-                  onChange={handleChange}
-                  min={0}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Estatus</Form.Label>
-                <Form.Select name="estatus" value={form.estatus} onChange={handleChange} required>
-                  <option value="">Seleccionar...</option>
-                  <option value="Autorizada">Autorizada</option>
-                  <option value="En negociación">En negociación</option>
-                  <option value="Entregado a cliente">Entregado a cliente</option>
-                  <option value="Declinada">Declinada</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-
+          
+          <FormularioDatosGenerales
+            form={form}
+            handleChange={handleChange}
+            clientes={clientes}
+            setForm={setForm}
+          />
+          
           <Accordion defaultActiveKey="0" className="mt-4">
             <Accordion.Item eventKey="0">
             <Accordion.Header>
