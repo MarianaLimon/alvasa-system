@@ -23,6 +23,10 @@ body {
   text-align: center;
 }
 
+.uppercase {
+  text-transform: uppercase;
+}
+
 /* ----- Sidebar ------ */
 
 .sidebar {
@@ -240,7 +244,7 @@ body {
   border-radius: 20px;
 }
 
-.title-listacot{
+.title-listacot, .title-reg-po{
   color: #5d4e8f;
   font-weight: bold;
   font-size: 2rem;
@@ -331,4 +335,11 @@ body {
 .detalle-subformulario{
   color: #21a768;
   font-size: 1.2rem;
+}
+
+/* ----- Procesos Operativos ----- */
+
+.title-section{
+  margin-top: 2em;
+  font-weight: bold;
 }

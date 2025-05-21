@@ -31,6 +31,12 @@ const Sidebar = () => {
         <NavLink to="/nuevacotizacion" className={linkClass}>
           <BsPlus className="icon" /> Nueva Cotización
         </NavLink>
+        <NavLink to="/procesos-operativos" className={linkClass}>
+          <BsClipboard className="icon" /> Lista de Procesos
+        </NavLink>
+        <NavLink to="/procesos-operativos/nuevo" className={linkClass}>
+          <BsPlus className="icon" /> Nuevo Proceso
+        </NavLink>
         <div className="sidebar-link disabled">
           <BsClock className="icon" /> Próximamente
         </div>

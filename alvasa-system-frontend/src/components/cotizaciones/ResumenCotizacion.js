@@ -129,8 +129,8 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
               as="textarea"
               rows={1}
               placeholder="Escribe aquí..."
-              value={fraccion_igi}
-              onChange={(e) => setFraccionIgi(e.target.value)}
+              value={fraccion_igi.toUpperCase()} 
+              onChange={(e) => setFraccionIgi(e.target.value.toUpperCase())} 
             />
           </Form.Group>
         </Col>
