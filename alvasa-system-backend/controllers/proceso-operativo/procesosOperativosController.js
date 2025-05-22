@@ -135,7 +135,10 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
   const { id } = req.params;
 
   const consultaProceso = `
-    SELECT * FROM procesos_operativos WHERE id = ?
+    SELECT po.*, c.nombre AS cliente
+    FROM procesos_operativos po
+    LEFT JOIN clientes c ON po.cliente_id = c.id
+    WHERE po.id = ?
   `;
 
   const consultasSubformularios = {

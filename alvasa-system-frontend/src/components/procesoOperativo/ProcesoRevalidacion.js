@@ -18,15 +18,15 @@ const ProcesoRevalidacion = ({ onChange, datos = {} }) => {
   }, [datos]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    const nuevoValor = value.toUpperCase();
+    const { name, value, type } = e.target;
+    const nuevoValor = type === 'date' ? value : value.toUpperCase();
     const nuevoForm = { ...form, [name]: nuevoValor };
     setForm(nuevoForm);
     if (onChange) onChange(nuevoForm);
   };
 
   return (
-    <div>
+    <div className="container-subform">
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
@@ -38,14 +38,14 @@ const ProcesoRevalidacion = ({ onChange, datos = {} }) => {
         <Col md={4}>
           <Form.Group>
             <Form.Label>ETA</Form.Label>
-            <Form.Control type="text" name="eta" value={form.eta} onChange={handleChange} className="text-uppercase" />
+            <Form.Control type="date" name="eta" value={form.eta} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
             <Form.Label>Descarga</Form.Label>
-            <Form.Control name="descarga" value={form.descarga} onChange={handleChange} className="text-uppercase" />
+            <Form.Control type="date" name="descarga" value={form.descarga} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
       </Row>
@@ -68,14 +68,14 @@ const ProcesoRevalidacion = ({ onChange, datos = {} }) => {
         <Col md={4}>
           <Form.Group>
             <Form.Label>Revalidación</Form.Label>
-            <Form.Control name="revalidacion" value={form.revalidacion} onChange={handleChange} className="text-uppercase" />
+            <Form.Control type="date" name="revalidacion" value={form.revalidacion} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
             <Form.Label>F. Recepción y envío de Docum.</Form.Label>
-            <Form.Control name="recepcionEnvioDocs" value={form.recepcionEnvioDocs} onChange={handleChange} className="text-uppercase" />
+            <Form.Control type="date" name="recepcionEnvioDocs" value={form.recepcionEnvioDocs} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
       </Row>

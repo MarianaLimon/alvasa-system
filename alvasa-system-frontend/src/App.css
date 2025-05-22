@@ -256,11 +256,6 @@ body {
   font-weight: bold;
 }
 
-.container-subform{
-  background: rgb(67, 69, 96);
-  color: white;
-}
-
 .text-end, .total-servicios, .total-cargos-extra {
   text-align: right !important;
   font-size: 1.6rem;
@@ -274,8 +269,9 @@ body {
 
 .container-subform{
   padding: 2rem 4rem;
-  background: #454084;
-  color: white;
+  background: #dfeafc;
+  color: #5d4e8f;
+  font-weight: 600;
   border-radius: 20px;
 }
 

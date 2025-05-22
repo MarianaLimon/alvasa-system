@@ -35,7 +35,7 @@ const InformacionEmbarque = ({ onChange, datos = {} }) => {
   };
 
   return (
-    <div>
+    <div className="container-subform">
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
@@ -137,7 +137,7 @@ const InformacionEmbarque = ({ onChange, datos = {} }) => {
       </Row>
 
       <Row className="mb-3">
-        <Col md={6}>
+        <Col md={4}>
           <Form.Group>
             <Form.Label>País Origen</Form.Label>
             <Form.Select name="paisOrigen" value={form.paisOrigen} onChange={handleChange} className="text-uppercase">
@@ -148,7 +148,7 @@ const InformacionEmbarque = ({ onChange, datos = {} }) => {
             </Form.Select>
           </Form.Group>
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <Form.Group>
             <Form.Label>POD</Form.Label>
             <Form.Select name="pod" value={form.pod} onChange={handleChange} className="text-uppercase">
@@ -159,10 +159,7 @@ const InformacionEmbarque = ({ onChange, datos = {} }) => {
             </Form.Select>
           </Form.Group>
         </Col>
-      </Row>
-
-      <Row>
-        <Col md={6}>
+        <Col md={4}>
           <Form.Group>
             <Form.Label>País Destino</Form.Label>
             <Form.Select name="paisDestino" value={form.paisDestino} onChange={handleChange} className="text-uppercase">

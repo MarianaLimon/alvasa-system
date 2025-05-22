@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Button, Card, Row, Col, Accordion } from 'react-bootstrap';
 import { BsSave, BsListUl } from 'react-icons/bs';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import InformacionEmbarque from './InformacionEmbarque';
 import ProcesoRevalidacion from './ProcesoRevalidacion';
 import DatosPedimento from './DatosPedimento';
 import ContenedorSalidaRetorno from './ContenedorSalidaRetorno';
+import { useCargaInicialProceso } from '../../hooks/useCargaInicialProceso';
 
 // Utilidad para fecha local
 const getFechaHoyLocal = () => {
@@ -19,7 +20,8 @@ const getFechaHoyLocal = () => {
 
 const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSubmit }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
+
   const [clientes, setClientes] = useState([]);
   const [embarque, setEmbarque] = useState({});
   const [revalidacion, setRevalidacion] = useState({});
@@ -38,35 +40,8 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     observaciones: '',
   });
 
-  // Reinicia el formulario al cambiar de ruta si estás en modo "crear"
-  useEffect(() => {
-    if (modo === 'crear') {
-      setForm({
-        folioProceso: '',
-        clienteId: '',
-        docPO: '',
-        mercancia: '',
-        fechaAlta: getFechaHoyLocal(),
-        tipoImportacion: '',
-        etd: '',
-        cotizacionId: '',
-        observaciones: '',
-      });
-      setEmbarque({});
-    }
-  }, [location.pathname, modo]);
-
-  useEffect(() => {
-    axios.get('http://localhost:5050/clientes')
-      .then(res => setClientes(res.data))
-      .catch(err => console.error('Error al cargar clientes:', err));
-  }, []);
-
-  useEffect(() => {
-    if (modo === 'editar' && datosIniciales) {
-      setForm(prev => ({ ...prev, ...datosIniciales }));
-    }
-  }, [modo, datosIniciales]);
+  // Hook personalizado para cargar clientes y folio o datos en modo edición
+  useCargaInicialProceso({ modo, id, setForm, setClientes });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,8 +91,8 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
               type="text"
               name="folioProceso"
               value={form.folioProceso}
-              onChange={handleChange}
-              placeholder="PRO-0001"
+              readOnly
+              disabled
               className="text-uppercase"
             />
           </div>
@@ -125,7 +100,6 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
 
         {/* Formulario principal */}
         <Form onSubmit={handleSubmit}>
-          {/* DATOS GENERALES */}
           <h5 className="mb-3 title-section">Datos Generales</h5>
           <Row className="mb-3">
             <Col md={4}>
@@ -223,7 +197,6 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
             </Col>
           </Row>
 
-          {/* SUBFORMULARIOS COMO ACORDEONES */}
           <Accordion defaultActiveKey="0" className="mb-3 text-uppercase">
             <Accordion.Item eventKey="0">
               <Accordion.Header>Información general del embarque</Accordion.Header>
@@ -254,7 +227,6 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
             </Accordion.Item>
           </Accordion>
 
-          {/* OBSERVACIONES */}
           <Form.Group className="mb-3">
             <Form.Label>Observaciones</Form.Label>
             <Form.Control
@@ -267,7 +239,6 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
             />
           </Form.Group>
 
-          {/* BOTONES */}
           <div className="d-flex justify-content-center gap-3 mt-4">
             <Button type="submit" variant="success">
               <BsSave className="me-2" />

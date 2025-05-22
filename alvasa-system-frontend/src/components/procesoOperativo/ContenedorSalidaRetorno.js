@@ -18,49 +18,34 @@ const ContenedorSalidaRetorno = ({ onChange, datos = {} }) => {
   }, [datos]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    const nuevoValor = value.toUpperCase();
+    const { name, value, type } = e.target;
+    const nuevoValor = type === 'date' ? value : value.toUpperCase();
     const nuevoForm = { ...form, [name]: nuevoValor };
     setForm(nuevoForm);
     if (onChange) onChange(nuevoForm);
   };
 
   return (
-    <div>
+    <div className="container-subform">
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
             <Form.Label>Salida Aduana</Form.Label>
-            <Form.Control
-              name="salidaAduana"
-              value={form.salidaAduana}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Control type='date' name="salidaAduana" value={form.salidaAduana} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
-            <Form.Label>Entrega</Form.Label>
-            <Form.Control
-              name="entrega"
-              value={form.entrega}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Label>Entrega Cliente</Form.Label>
+            <Form.Control  type='date' name="entrega" value={form.entrega} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
-            <Form.Label>F. Max</Form.Label>
-            <Form.Control
-              name="fMax"
-              value={form.fMax}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Label>F. Max Retorno</Form.Label>
+            <Form.Control type='date' name="fMax" value={form.fMax} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
       </Row>
@@ -69,36 +54,21 @@ const ContenedorSalidaRetorno = ({ onChange, datos = {} }) => {
         <Col md={4}>
           <Form.Group>
             <Form.Label>Entrega Vacío</Form.Label>
-            <Form.Control
-              name="entregaVacio"
-              value={form.entregaVacio}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Control type='date' name="entregaVacio" value={form.entregaVacio} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
             <Form.Label>Condiciones Contenedor</Form.Label>
-            <Form.Control
-              name="condicionesContenedor"
-              value={form.condicionesContenedor}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Control type='text' name="condicionesContenedor" value={form.condicionesContenedor} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 
         <Col md={4}>
           <Form.Group>
             <Form.Label>Terminal Vacío</Form.Label>
-            <Form.Control
-              name="terminalVacio"
-              value={form.terminalVacio}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Control type='text' name="terminalVacio" value={form.terminalVacio} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
       </Row>

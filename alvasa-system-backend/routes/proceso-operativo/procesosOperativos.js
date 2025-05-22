@@ -1,14 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/proceso-operativo/procesosOperativosController');
+const db = require('../../config/db'); // Asegúrate que esta ruta sea correcta
 
 // Crear proceso operativo
 router.post('/', controller.crearProcesoOperativo);
 
+// Obtener el siguiente folio disponible
+router.get('/siguiente-folio', (req, res) => {
+  db.query('SELECT MAX(id) AS ultimo_id FROM procesos_operativos', (err, resultado) => {
+    if (err) {
+      console.error('Error al generar el folio del proceso:', err);
+      return res.status(500).json({ error: 'Error al generar folio' });
+    }
+
+    const siguienteId = (resultado[0].ultimo_id || 0) + 1;
+    const folio = `PROC-${String(siguienteId).padStart(4, '0')}`;
+    res.json({ folio });
+  });
+});
+
+// Obtener proceso operativo por ID (¡esto debe ir al final!)
+router.get('/:id', controller.obtenerProcesoOperativoPorId);
+
 // Obtener todos los procesos operativos
 router.get('/', controller.obtenerProcesosOperativos);
-
-// Obtener proceso operativo por ID
-router.get('/:id', controller.obtenerProcesoOperativoPorId);
 
 module.exports = router;

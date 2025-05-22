@@ -25,17 +25,12 @@ const DatosPedimento = ({ onChange, datos = {} }) => {
   };
 
   return (
-    <div>
+    <div className="container-subform">
       <Row className="mb-3">
         <Col md={6}>
           <Form.Group>
             <Form.Label>Pedimento</Form.Label>
-            <Form.Control
-              name="pedimento"
-              value={form.pedimento}
-              onChange={handleChange}
-              className="text-uppercase"
-            />
+            <Form.Control name="pedimento" value={form.pedimento} onChange={handleChange} className="text-uppercase" />
           </Form.Group>
         </Col>
 

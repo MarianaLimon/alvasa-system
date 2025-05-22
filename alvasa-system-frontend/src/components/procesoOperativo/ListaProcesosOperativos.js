@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const ListaProcesosOperativos = () => {
   const [procesos, setProcesos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
+  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastVariant, setToastVariant] = useState('success');
@@ -16,10 +17,11 @@ const ListaProcesosOperativos = () => {
     const obtenerProcesos = async () => {
       try {
         const { data } = await axios.get('http://localhost:5050/procesos-operativos');
-        setProcesos(data);
+        const ordenados = data.sort((a, b) => b.id - a.id);
+        setProcesos(ordenados);
       } catch (error) {
         console.error('Error al obtener procesos operativos:', error);
-      } 
+      }
     };
     obtenerProcesos();
   }, []);
@@ -43,10 +45,18 @@ const ListaProcesosOperativos = () => {
     }
   };
 
-  const procesosFiltrados = procesos.filter(proc =>
-    proc.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    proc.folio_proceso?.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const clientesUnicos = [...new Set(procesos.map(p => p.cliente).filter(Boolean))];
+
+  const procesosFiltrados = procesos.filter(proc => {
+    const coincideTexto =
+      proc.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      proc.folio_proceso?.toLowerCase().includes(busqueda.toLowerCase());
+
+    const coincideCliente =
+      clienteSeleccionado === '' || proc.cliente === clienteSeleccionado;
+
+    return coincideTexto && coincideCliente;
+  });
 
   const formatoFechaBonita = (fechaStr) => {
     if (!fechaStr) return '—';
@@ -54,20 +64,31 @@ const ListaProcesosOperativos = () => {
     if (isNaN(fecha.getTime())) return '—';
 
     const dia = fecha.getUTCDate().toString().padStart(2, '0');
-    const mes = fecha.getUTCMonth(); // 0-based
+    const mes = fecha.getUTCMonth();
     const año = fecha.getUTCFullYear();
 
     const mesNombres = [
-        'enero','febrero','marzo','abril','mayo','junio',
-        'julio','agosto','septiembre','octubre','noviembre','diciembre'
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
     ];
 
     return `${dia} ${mesNombres[mes]} ${año}`;
-    };
+  };
 
   return (
     <div className="container mt-4">
-      <div className="d-flex mb-3 align-items-center">
+      <div className="d-flex mb-3 align-items-center gap-3 flex-wrap">
+        <Form.Select
+          value={clienteSeleccionado}
+          onChange={e => setClienteSeleccionado(e.target.value)}
+          className="w-auto"
+        >
+          <option value="">Todos los clientes</option>
+          {clientesUnicos.map(cliente => (
+            <option key={cliente} value={cliente}>{cliente}</option>
+          ))}
+        </Form.Select>
+
         <InputGroup className="w-auto">
           <Form.Control
             type="text"
@@ -75,7 +96,9 @@ const ListaProcesosOperativos = () => {
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
           />
-          <InputGroup.Text><BsSearch /></InputGroup.Text>
+          <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+            <BsSearch />
+          </InputGroup.Text>
         </InputGroup>
       </div>
 
