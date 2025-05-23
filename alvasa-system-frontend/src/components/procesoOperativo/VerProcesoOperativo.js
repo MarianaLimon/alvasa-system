@@ -38,6 +38,11 @@ const VerProcesoOperativo = () => {
   if (loading) return <div className="text-center mt-4"><Spinner animation="border" /></div>;
   if (!proceso) return <div className="text-center mt-4">Proceso no encontrado</div>;
 
+  const manejarImprimir = () => {
+    const url = `http://localhost:5050/procesos-operativos/pdf/${id}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <Card className="detalle-card">
       <Card.Body>
@@ -148,7 +153,7 @@ const VerProcesoOperativo = () => {
           <Button variant="secondary" onClick={() => navigate('/procesos-operativos')}>
             <BsArrowLeft className="me-2" /> Volver a la lista
           </Button>
-          <Button variant="primary">
+          <Button variant="primary" onClick={manejarImprimir}>
             <BsPrinter className="me-2" /> Imprimir
           </Button>
           <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>

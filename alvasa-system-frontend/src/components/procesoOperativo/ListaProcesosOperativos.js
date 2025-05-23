@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, InputGroup, Toast, ToastContainer } from 'react-bootstrap';
-import { BsEye, BsPencil, BsTrash, BsSearch } from 'react-icons/bs';
+import { BsEye, BsPencil, BsTrash, BsSearch, BsPrinter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 const ListaProcesosOperativos = () => {
@@ -41,6 +41,18 @@ const ListaProcesosOperativos = () => {
       console.error(error);
       setToastVariant('danger');
       setToastMsg('Error al eliminar el proceso');
+      setShowToast(true);
+    }
+  };
+
+  const manejarImprimir = async (id) => {
+    try {
+      const url = `http://localhost:5050/procesos-operativos/pdf/${id}`;
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      setToastVariant('danger');
+      setToastMsg('Error al generar PDF del proceso');
       setShowToast(true);
     }
   };
@@ -126,7 +138,8 @@ const ListaProcesosOperativos = () => {
               <td className="text-center">
                 <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
                 <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
-                <Button variant="danger" size="sm" onClick={() => manejarEliminar(proc.id)}><BsTrash /></Button>
+                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}> <BsPrinter /> </Button>
+                <Button variant="danger" size="sm" className="me-2" onClick={() => manejarEliminar(proc.id)}><BsTrash /></Button>
               </td>
             </tr>
           ))}

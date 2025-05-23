@@ -1,4 +1,25 @@
 const db = require('../../config/db');
+const ejs = require('ejs');
+const path = require('path');
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+// Formatear fecha estilo MX
+function formatoFecha(date) {
+  const f = new Date(date);
+  return isNaN(f) ? '—' : `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear()}`;
+}
+
+// Codificar el logo
+const logoPath = path.join(__dirname, '../../public/images/alvasa-logo-new.jpg');
+const logoData = (() => {
+  try {
+    const img = fs.readFileSync(logoPath);
+    return 'data:image/jpeg;base64,' + img.toString('base64');
+  } catch {
+    return null;
+  }
+})();
 
 // Función para generar folio
 const generarFolioProceso = (callback) => {
@@ -266,4 +287,81 @@ exports.actualizarProcesoOperativo = (req, res) => {
       });
     });
   });
+};
+
+// Eliminar proceso operativo
+exports.eliminarProcesoOperativo = (req, res) => {
+  const { id } = req.params;
+
+  const tablasSubformularios = [
+    'informacion_embarque',
+    'proceso_revalidacion',
+    'datos_pedimento',
+    'salida_retorno_contenedor'
+  ];
+
+  let completadas = 0;
+  let errores = [];
+
+  tablasSubformularios.forEach(tabla => {
+    const sql = `DELETE FROM ${tabla} WHERE proceso_operativo_id = ?`;
+    db.query(sql, [id], (err) => {
+      if (err) {
+        console.error(`Error al eliminar de ${tabla}:`, err);
+        errores.push({ tabla, error: err });
+      }
+      completadas++;
+      if (completadas === tablasSubformularios.length) {
+        // Una vez eliminados los subformularios, eliminar el proceso principal
+        const sqlPrincipal = `DELETE FROM procesos_operativos WHERE id = ?`;
+        db.query(sqlPrincipal, [id], (err) => {
+          if (err) {
+            console.error('Error al eliminar el proceso operativo:', err);
+            return res.status(500).json({ error: 'Error al eliminar el proceso principal' });
+          }
+          if (errores.length > 0) {
+            return res.status(207).json({ message: 'Proceso eliminado parcialmente', errores });
+          }
+          res.status(200).json({ message: 'Proceso operativo eliminado correctamente' });
+        });
+      }
+    });
+  });
+};
+
+// Generar PDF
+
+const obtenerDatosDelProceso = require('../../utils/obtenerDatosDelProceso');
+exports.generarPDFProcesoOperativo = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const procesoCompleto = await obtenerDatosDelProceso(id);
+
+    const html = await ejs.renderFile(
+      path.join(__dirname, '../../views/proceso.ejs'),
+      {
+        proceso: procesoCompleto,
+        formatoFecha,
+        logo: logoData
+      }
+    );
+
+    const browser = await puppeteer.launch({ headless: 'new' });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    const buffer = await page.pdf({ format: 'A4' });
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename=proceso-${id}.pdf`,
+    });
+
+    res.send(buffer);
+  } catch (error) {
+    console.error('Error al generar PDF del proceso:', error);
+    res.status(500).json({ error: 'Error al generar PDF del proceso' });
+  }
 };

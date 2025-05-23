@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Proceso <%= proceso.folio_proceso %></title>
+  <style>
+    @page { size: A4; margin: 10mm; }
+    body { font-family: Arial, sans-serif; font-size: 10px; color: #333; }
+    header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    header img { height: 60px; }
+    h1 { margin: 16px 0 8px; border-bottom: 1px solid #888; padding-bottom: 4px; font-size: 14px;}
+    h2 { margin: 16px 0 8px; border-bottom: 1px solid #888; padding-bottom: 4px; font-size: 12px;}
+    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    th, td { border: 1px solid #888; padding: 4px 8px; text-align: left; }
+    .text-right { text-align: right; }
+    footer { position: fixed; bottom: 10mm; width: calc(100% - 40mm); text-align: center; font-size: 10px; }
+    .page-number:after { content: "Página " counter(page) " de " counter(pages); }
+  </style>
+</head>
+<body>
+  <header>
+    <% if (logo) { %>
+      <img src="<%= logo %>" alt="Grupo ALVASA">
+    <% } %>
+    <div>
+      <p><strong>Folio:</strong> <%= proceso.folio_proceso %></p>
+      <p><strong>Fecha de Alta:</strong> <%= formatoFecha(proceso.fecha_alta) %></p>
+    </div>
+  </header>
+
+  <section>
+    <h2>Datos Generales</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+      <p><strong>Cliente: </strong><%= proceso.cliente %></p>
+      <p><strong>Doc. PO: </strong><%= proceso.doc_po %></p>
+      <p><strong>Mercancía: </strong><%= proceso.mercancia %></p>
+      <p><strong>Tipo de Importación: </strong><%= proceso.tipo_importacion %></p>
+    </div>
+
+    <h2>BOOKING</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+      <p><strong>ETD :</strong><%= formatoFecha(proceso.etd) %></p>
+    </div>
+  </section>
+
+  <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+    <section style="flex: 1;">
+       <h2>Información del Embarque</h2>
+      <% const e = proceso.informacion_embarque || {}; %>
+      <table>
+        <tr><td>HBL</td><td><%= e.hbl %></td></tr>
+        <tr><td>No Contenedor</td><td><%= e.no_contenedor %></td></tr>
+        <tr><td>Shipper</td><td><%= e.shipper %></td></tr>
+        <tr><td>ICOTERM</td><td><%= e.icoterm %></td></tr>
+        <tr><td>Consignatario</td><td><%= e.consignatario %></td></tr>
+        <tr><td>Forwarde</td><td><%= e.forwarde %></td></tr>
+        <tr><td>Tipo</td><td><%= e.tipo %></td></tr>
+        <tr><td>Peso BL</td><td><%= e.peso_bl %></td></tr>
+        <tr><td>Peso Real</td><td><%= e.peso_real %></td></tr>
+        <tr><td>Vessel</td><td><%= e.vessel %></td></tr>
+        <tr><td>Naviera</td><td><%= e.naviera %></td></tr>
+        <tr><td>POL</td><td><%= e.pol %></td></tr>
+        <tr><td>País Origen</td><td><%= e.pais_origen %></td></tr>
+        <tr><td>POD</td><td><%= e.pod %></td></tr>
+        <tr><td>País Destino</td><td><%= e.pais_destino %></td></tr>
+      </table>
+    </section>
+    <section style="flex: 1;">
+       <h2>Proceso de Revalidación</h2>
+      <% const r = proceso.proceso_revalidacion || {}; %>
+      <table>
+        <tr><td>MBL</td><td><%= r.mbl %></td></tr>
+        <tr><td>ETA</td><td><%= formatoFecha(r.eta) %></td></tr>
+        <tr><td>Descarga</td><td><%= formatoFecha(r.descarga) %></td></tr>
+        <tr><td>Terminal</td><td><%= r.terminal %></td></tr>
+        <tr><td>Revalidación</td><td><%= formatoFecha(r.revalidacion) %></td></tr>
+        <tr><td>F. Recepción y Envío de Docs</td><td><%= formatoFecha(r.recepcion_envio_docs) %></td></tr>
+      </table>
+      <h2>Datos de Pedimento</h2>
+      <% const d = proceso.datos_pedimento || {}; %>
+      <table>
+        <tr><td>Pedimento</td><td><%= d.pedimento %></td></tr>
+        <tr><td>Pago Pedimento</td><td><%= formatoFecha(d.pago_pedimento) %></td></tr>
+        <tr><td>Régimen</td><td><%= d.regimen %></td></tr>
+        <tr><td>AA Despacho</td><td><%= d.aa_despacho %></td></tr>
+        <tr><td>Agente Aduanal</td><td><%= d.agente_aduanal %></td></tr>
+      </table>
+      <h2>Salida y Retorno del Contenedor</h2>
+      <% const s = proceso.salida_retorno_contenedor || {}; %>
+      <table>
+        <tr><td>Salida Aduana</td><td><%= s.salida_aduana %></td></tr>
+        <tr><td>Entrega Cliente</td><td><%= s.entrega %></td></tr>
+        <tr><td>F. Máx Retorno</td><td><%= formatoFecha(s.f_max) %></td></tr>
+        <tr><td>Entrega Vacío</td><td><%= s.entrega_vacio %></td></tr>
+        <tr><td>Condiciones Contenedor</td><td><%= s.condiciones_contenedor %></td></tr>
+        <tr><td>Terminal Vacío</td><td><%= s.terminal_vacio %></td></tr>
+      </table>
+    </section>
+  </div>
+
+
+  <section>
+    <h2>Observaciones: </h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+      <p><%= proceso.observaciones %></p>
+    </div>
+  </section>
+</body>
+</html>

@@ -23,10 +23,18 @@ router.get('/siguiente-folio', (req, res) => {
 // Permitir la edición (PUT)
 router.put('/:id', controller.actualizarProcesoOperativo);
 
+// Eliminar proceso operativo
+router.delete('/:id', controller.eliminarProcesoOperativo);
+
+// Generar PDF 
+router.get('/pdf/:id', controller.generarPDFProcesoOperativo);
+
 // Obtener proceso operativo por ID (¡debe ir al final!)
 router.get('/:id', controller.obtenerProcesoOperativoPorId);
 
 // Obtener todos los procesos operativos
 router.get('/', controller.obtenerProcesosOperativos);
+
+
 
 module.exports = router;
