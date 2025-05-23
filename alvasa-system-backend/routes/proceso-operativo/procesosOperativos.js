@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/proceso-operativo/procesosOperativosController');
-const db = require('../../config/db'); // Asegúrate que esta ruta sea correcta
+const db = require('../../config/db');
 
 // Crear proceso operativo
 router.post('/', controller.crearProcesoOperativo);
@@ -20,7 +20,10 @@ router.get('/siguiente-folio', (req, res) => {
   });
 });
 
-// Obtener proceso operativo por ID (¡esto debe ir al final!)
+// Permitir la edición (PUT)
+router.put('/:id', controller.actualizarProcesoOperativo);
+
+// Obtener proceso operativo por ID (¡debe ir al final!)
 router.get('/:id', controller.obtenerProcesoOperativoPorId);
 
 // Obtener todos los procesos operativos

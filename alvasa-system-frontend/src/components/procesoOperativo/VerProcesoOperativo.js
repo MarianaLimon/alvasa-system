@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Spinner, Button, Row, Col, Accordion} from 'react-bootstrap';
-import { BsArrowLeft } from 'react-icons/bs';
+import { BsArrowLeft, BsPrinter, BsPencil } from 'react-icons/bs';
 
 const VerProcesoOperativo = () => {
   const { id } = useParams();
@@ -147,6 +147,13 @@ const VerProcesoOperativo = () => {
         <div className="d-flex justify-content-center gap-3 mt-4">
           <Button variant="secondary" onClick={() => navigate('/procesos-operativos')}>
             <BsArrowLeft className="me-2" /> Volver a la lista
+          </Button>
+          <Button variant="primary">
+            <BsPrinter className="me-2" /> Imprimir
+          </Button>
+          <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
+            <BsPencil className="me-2" />
+            Editar cotización
           </Button>
         </div>
       </Card.Body>

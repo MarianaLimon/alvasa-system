@@ -175,3 +175,95 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
     }
   });
 };
+
+// Actualizar proceso operativo
+exports.actualizarProcesoOperativo = (req, res) => {
+  const { id } = req.params;
+  const {
+    clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
+    etd, cotizacionId, observaciones,
+    informacionEmbarque, procesoRevalidacion,
+    datosPedimento, salidaRetornoContenedor
+  } = req.body;
+
+  const cotizacion_id_final = cotizacionId === '' ? null : cotizacionId;
+
+  const sqlPrincipal = `
+    UPDATE procesos_operativos
+    SET cliente_id = ?, doc_po = ?, mercancia = ?, fecha_alta = ?, tipo_importacion = ?, etd = ?, cotizacion_id = ?, observaciones = ?
+    WHERE id = ?
+  `;
+
+  db.query(sqlPrincipal, [
+    clienteId, docPO, mercancia, fechaAlta, tipoImportacion, etd, cotizacion_id_final, observaciones, id
+  ], (err) => {
+    if (err) {
+      console.error('Error al actualizar proceso principal:', err);
+      return res.status(500).json({ error: 'Error al actualizar proceso operativo' });
+    }
+
+    const updates = [
+      {
+        sql: `
+          UPDATE informacion_embarque SET hbl=?, no_contenedor=?, shipper=?, icoterm=?, consignatario=?, forwarde=?, tipo=?, peso_bl=?, peso_real=?, vessel=?, naviera=?, pol=?, pais_origen=?, pod=?, pais_destino=?
+          WHERE proceso_operativo_id=?
+        `,
+        values: [
+          informacionEmbarque.hbl, informacionEmbarque.noContenedor, informacionEmbarque.shipper, informacionEmbarque.icoterm,
+          informacionEmbarque.consignatario, informacionEmbarque.forwarde, informacionEmbarque.tipo,
+          informacionEmbarque.pesoBL, informacionEmbarque.pesoReal, informacionEmbarque.vessel, informacionEmbarque.naviera,
+          informacionEmbarque.pol, informacionEmbarque.paisOrigen, informacionEmbarque.pod, informacionEmbarque.paisDestino, id
+        ]
+      },
+      {
+        sql: `
+          UPDATE proceso_revalidacion SET mbl=?, eta=?, descarga=?, terminal=?, revalidacion=?, recepcion_envio_docs=?
+          WHERE proceso_operativo_id=?
+        `,
+        values: [
+          procesoRevalidacion.mbl, procesoRevalidacion.eta, procesoRevalidacion.descarga,
+          procesoRevalidacion.terminal, procesoRevalidacion.revalidacion, procesoRevalidacion.recepcionEnvioDocs, id
+        ]
+      },
+      {
+        sql: `
+          UPDATE datos_pedimento SET pedimento=?, pago_pedimento=?, regimen=?, aa_despacho=?, agente_aduanal=?
+          WHERE proceso_operativo_id=?
+        `,
+        values: [
+          datosPedimento.pedimento, datosPedimento.pagoPedimento,
+          datosPedimento.regimen, datosPedimento.aaDespacho, datosPedimento.agenteAduanal, id
+        ]
+      },
+      {
+        sql: `
+          UPDATE salida_retorno_contenedor SET salida_aduana=?, entrega=?, f_max=?, entrega_vacio=?, condiciones_contenedor=?, terminal_vacio=?
+          WHERE proceso_operativo_id=?
+        `,
+        values: [
+          salidaRetornoContenedor.salidaAduana, salidaRetornoContenedor.entrega, salidaRetornoContenedor.fMax,
+          salidaRetornoContenedor.entregaVacio, salidaRetornoContenedor.condicionesContenedor, salidaRetornoContenedor.terminalVacio, id
+        ]
+      }
+    ];
+
+    let errores = [];
+    let completadas = 0;
+
+    updates.forEach(({ sql, values }) => {
+      db.query(sql, values, (err) => {
+        if (err) {
+          console.error('Error al actualizar subformulario:', err);
+          errores.push(err);
+        }
+        completadas++;
+        if (completadas === updates.length) {
+          if (errores.length > 0) {
+            return res.status(207).json({ message: 'Proceso actualizado con errores en subformularios', errors: errores });
+          }
+          res.status(200).json({ message: 'Proceso operativo actualizado correctamente' });
+        }
+      });
+    });
+  });
+};

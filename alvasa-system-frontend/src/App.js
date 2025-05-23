@@ -34,6 +34,7 @@ function App() {
             <Route path="/procesos-operativos/nuevo" element={<FormularioProcesoOperativo />} />
             <Route path="/procesos-operativos" element={<ListaProcesosOperativos />} />
             <Route path="/procesos-operativos/:id" element={<VerProcesoOperativo />} />
+            <Route path="/procesos-operativos/editar/:id" element={<FormularioProcesoOperativo modo="editar" />} />
           </Routes>
         </div>
       </div>

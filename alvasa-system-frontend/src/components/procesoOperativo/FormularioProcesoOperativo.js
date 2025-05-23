@@ -41,7 +41,16 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
   });
 
   // Hook personalizado para cargar clientes y folio o datos en modo edición
-  useCargaInicialProceso({ modo, id, setForm, setClientes });
+  useCargaInicialProceso({
+    modo,
+    id,
+    setForm,
+    setClientes,
+    setEmbarque,
+    setRevalidacion,
+    setDatosPedimento,
+    setSalidaContenedor
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,10 +70,20 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     if (onSubmit) {
       onSubmit(datosCompletos);
     } else {
-      axios.post('http://localhost:5050/procesos-operativos', datosCompletos)
+      const url = modo === 'editar'
+        ? `http://localhost:5050/procesos-operativos/${id}`
+        : 'http://localhost:5050/procesos-operativos';
+
+      const metodo = modo === 'editar' ? 'put' : 'post';
+
+      axios[metodo](url, datosCompletos)
         .then((res) => {
-          if (res.status === 201) {
-            toast.success('Proceso operativo guardado correctamente ✅');
+          if (res.status === 201 || res.status === 200) {
+            toast.success(
+              modo === 'crear'
+                ? 'Proceso operativo guardado correctamente ✅'
+                : 'Proceso operativo actualizado correctamente ✅'
+            );
           } else if (res.status === 207) {
             toast.warning('Guardado parcial: hubo errores en subformularios ⚠️');
           }
@@ -74,7 +93,7 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
           console.error('Error al guardar:', err);
           toast.error('Error al guardar el proceso operativo ❌');
         });
-    }
+    } 
   };
 
   return (
