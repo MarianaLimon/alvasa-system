@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Spinner, Button, Row, Col, Accordion} from 'react-bootstrap';
-import { BsArrowLeft, BsPrinter, BsPencil } from 'react-icons/bs';
+import { BsArrowLeft, BsPrinter, BsPencil, BsGoogle } from 'react-icons/bs';
 
 const VerProcesoOperativo = () => {
   const { id } = useParams();
@@ -49,7 +49,7 @@ const VerProcesoOperativo = () => {
         <Card.Title>
           <Row>
             <Col md={6}>
-              <p className="detalle-title">Folio del proceso: {proceso.folio_proceso}</p>
+              <p className="detalle-title">Folio del Proceso Operativo: {proceso.folio_proceso}</p>
             </Col>
           </Row>
         </Card.Title>
@@ -81,6 +81,32 @@ const VerProcesoOperativo = () => {
             <hr className='separador-horizontal'/>
             <h5 className="detalle-title-resumen">Observaciones</h5>
             <p>{proceso.observaciones}</p>
+           
+            {proceso.links_drive_array && proceso.links_drive_array.length > 0 && (
+              <>
+                <hr className='separador-horizontal'/>
+                <h5 className="detalle-title-resumen">Archivos en Drive</h5>
+                <div className="d-flex flex-wrap gap-2">
+                  {proceso.links_drive_array.map((link, idx) => {
+                    const nombreAproximado = decodeURIComponent(
+                      link.trim().split('/').pop().split('?')[0]
+                    );
+                    return (
+                      <Button
+                        key={idx}
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-sm d-flex align-items-center gap-2 btn-drivelink"
+                        title={nombreAproximado}
+                      >
+                        <BsGoogle /> {`Enlace ${idx + 1}`}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </Col>
 
           <Col md={8}>
@@ -169,7 +195,7 @@ const VerProcesoOperativo = () => {
           </Button>
           <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
             <BsPencil className="me-2" />
-            Editar cotización
+            Editar proceso operativo
           </Button>
         </div>
       </Card.Body>

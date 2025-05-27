@@ -36,7 +36,7 @@ const generarFolioProceso = (callback) => {
 exports.crearProcesoOperativo = (req, res) => {
   const {
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
-    ejecutivoCuenta, tipoCarga, valorMercancia,
+    ejecutivoCuenta, tipoCarga, valorMercancia, linksDrive,
     etd, cotizacionId, observaciones,
     informacionEmbarque, procesoRevalidacion,
     datosPedimento, salidaRetornoContenedor
@@ -55,15 +55,15 @@ exports.crearProcesoOperativo = (req, res) => {
     const sqlPrincipal = `
       INSERT INTO procesos_operativos
       (folio_proceso, cliente_id, doc_po, mercancia, fecha_alta, tipo_importacion,
-      ejecutivo_cuenta, tipo_carga, valor_mercancia,
+      ejecutivo_cuenta, tipo_carga, valor_mercancia, links_drive,
       etd, cotizacion_id, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sqlPrincipal, [
       folioProceso, clienteId, docPO, mercancia, fechaAlta,
       tipoImportacion, ejecutivoCuenta, tipoCarga, valorMercancia,
-      etd, cotizacion_id_final, observaciones
+      etd, cotizacion_id_final, observaciones, linksDrive
     ], (err, result) => {
       if (err) {
         console.error('Error al insertar proceso operativo:', err);
@@ -193,6 +193,11 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
     const proceso = resultProceso[0];
     const datosCompletos = { ...proceso };
 
+    // Procesamos links_drive para convertirlo en un arreglo
+    datosCompletos.links_drive_array = proceso.links_drive
+      ? proceso.links_drive.split('\n').map(link => link.trim()).filter(link => link)
+      : [];
+
     let consultasCompletadas = 0;
     const totalConsultas = Object.keys(consultasSubformularios).length;
 
@@ -218,7 +223,7 @@ exports.actualizarProcesoOperativo = (req, res) => {
   const {
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
     ejecutivoCuenta, tipoCarga, valorMercancia,
-    etd, cotizacionId, observaciones,
+    etd, cotizacionId, observaciones, linksDrive,
     informacionEmbarque, procesoRevalidacion,
     datosPedimento, salidaRetornoContenedor
   } = req.body;
@@ -229,14 +234,14 @@ exports.actualizarProcesoOperativo = (req, res) => {
     UPDATE procesos_operativos
     SET cliente_id = ?, doc_po = ?, mercancia = ?, fecha_alta = ?, tipo_importacion = ?,
         ejecutivo_cuenta = ?, tipo_carga = ?, valor_mercancia = ?,
-        etd = ?, cotizacion_id = ?, observaciones = ?
+        etd = ?, cotizacion_id = ?, observaciones = ?, links_drive = ?
     WHERE id = ?
   `;
 
   db.query(sqlPrincipal, [
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
     ejecutivoCuenta, tipoCarga, valorMercancia,
-    etd, cotizacion_id_final, observaciones, id
+    etd, cotizacion_id_final, observaciones, linksDrive, id
   ], (err) => {
     if (err) {
       console.error('Error al actualizar proceso principal:', err);

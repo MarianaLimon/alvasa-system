@@ -40,7 +40,8 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     observaciones: '',
     ejecutivoCuenta: '',
     tipoCarga: '',
-    valorMercancia: '' 
+    valorMercancia: '',
+    linksDrive: ''
   });
 
   // Hook personalizado para cargar clientes y folio o datos en modo edición
@@ -59,10 +60,16 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     const { name, value, type } = e.target;
 
     if (name === 'valorMercancia') {
-      return; 
+      return;
     }
 
-    const nuevoValor = type === 'number' ? value : value.toUpperCase();
+    const nuevoValor =
+      name === 'linksDrive'
+        ? value // ← NO transformamos a mayúsculas
+        : type === 'number'
+          ? value
+          : value.toUpperCase();
+
     setForm(prev => ({ ...prev, [name]: nuevoValor }));
   };
 
@@ -321,6 +328,18 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
               value={form.observaciones}
               onChange={handleChange}
               className="text-uppercase"
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Enlaces de Google Drive (uno por línea)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="linksDrive"
+              value={form.linksDrive}
+              onChange={handleChange}
+              placeholder="https://drive.google.com/..."
             />
           </Form.Group>
 

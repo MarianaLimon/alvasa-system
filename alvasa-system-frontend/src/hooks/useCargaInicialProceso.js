@@ -45,7 +45,8 @@ export const useCargaInicialProceso = ({
           valorMercancia: data.valor_mercancia || '',
           etd: data.etd?.split('T')[0] || '',
           cotizacionId: data.cotizacion_id,
-          observaciones: data.observaciones
+          observaciones: data.observaciones,
+          linksDrive: data.links_drive_array?.join('\n') || ''
         });
 
         setEmbarque({
