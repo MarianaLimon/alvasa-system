@@ -36,6 +36,11 @@
       <p><strong>Mercancía: </strong><%= proceso.mercancia %></p>
       <p><strong>Tipo de Importación: </strong><%= proceso.tipo_importacion %></p>
     </div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+      <p><strong>Ejecutivo de Cuenta: </strong><%= proceso.ejecutivo_cuenta || '—' %></p>
+      <p><strong>Tipo de Carga: </strong><%= proceso.tipo_carga || '—' %></p>
+      <p><strong>Valor Mercancía: </strong>$<%= proceso.valor_mercancia?.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00' %></p>
+    </div>
 
     <h2>BOOKING</h2>
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">

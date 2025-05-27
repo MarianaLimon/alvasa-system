@@ -38,6 +38,9 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     etd: '',
     cotizacionId: '',
     observaciones: '',
+    ejecutivoCuenta: '',
+    tipoCarga: '',
+    valorMercancia: '' 
   });
 
   // Hook personalizado para cargar clientes y folio o datos en modo edición
@@ -53,8 +56,14 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: typeof value === 'string' ? value.toUpperCase() : value }));
+    const { name, value, type } = e.target;
+
+    if (name === 'valorMercancia') {
+      return; 
+    }
+
+    const nuevoValor = type === 'number' ? value : value.toUpperCase();
+    setForm(prev => ({ ...prev, [name]: nuevoValor }));
   };
 
   const handleSubmit = (e) => {
@@ -66,6 +75,8 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
       datosPedimento: datosPedimento,
       salidaRetornoContenedor: salidaContenedor
     };
+
+    console.log('Datos que se van a enviar al backend:', datosCompletos);
 
     if (onSubmit) {
       onSubmit(datosCompletos);
@@ -196,6 +207,61 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
                   <option value="TERRESTRE">Terrestre</option>
                   <option value="AEREO">Aéreo</option>
                 </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Ejecutivo de Cuenta</Form.Label>
+                <Form.Select
+                  name="ejecutivoCuenta"
+                  value={form.ejecutivoCuenta}
+                  onChange={handleChange}
+                  className="text-uppercase"
+                  required
+                >
+                  <option value="">Seleccionar ejecutivo</option>
+                  <option value="ARA FLORES">Ara Flores</option>
+                  <option value="ARI MURILLO">Ari Murillo</option>
+                  <option value="FER BELMONT">Fer Belmont</option>
+                  <option value="MAR MONTOYA">Mar Montoya</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tipo de Carga</Form.Label>
+                <Form.Select
+                  name="tipoCarga"
+                  value={form.tipoCarga}
+                  onChange={handleChange}
+                  className="text-uppercase"
+                >
+                  <option value="">Seleccionar tipo</option>
+                  <option value="PALETS">Palets</option>
+                  <option value="CAJAS">Cajas</option>
+                  <option value="CONTENEDOR">Contenedor</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Valor Mercancía (MXN)</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="valorMercancia"
+                  value={form.valorMercancia}
+                  onChange={(e) => {
+                    const { value } = e.target;
+                    if (/^\d*\.?\d*$/.test(value)) {
+                      setForm((prev) => ({ ...prev, valorMercancia: value }));
+                    }
+                  }}
+                  inputMode="decimal"
+                />
               </Form.Group>
             </Col>
           </Row>

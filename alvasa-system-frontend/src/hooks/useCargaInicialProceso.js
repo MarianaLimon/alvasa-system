@@ -40,6 +40,9 @@ export const useCargaInicialProceso = ({
           mercancia: data.mercancia,
           fechaAlta: data.fecha_alta?.split('T')[0] || '',
           tipoImportacion: data.tipo_importacion,
+          ejecutivoCuenta: data.ejecutivo_cuenta || '',
+          tipoCarga: data.tipo_carga || '',
+          valorMercancia: data.valor_mercancia || '',
           etd: data.etd?.split('T')[0] || '',
           cotizacionId: data.cotizacion_id,
           observaciones: data.observaciones

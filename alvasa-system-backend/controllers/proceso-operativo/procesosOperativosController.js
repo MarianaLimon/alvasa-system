@@ -36,10 +36,13 @@ const generarFolioProceso = (callback) => {
 exports.crearProcesoOperativo = (req, res) => {
   const {
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
+    ejecutivoCuenta, tipoCarga, valorMercancia,
     etd, cotizacionId, observaciones,
     informacionEmbarque, procesoRevalidacion,
     datosPedimento, salidaRetornoContenedor
   } = req.body;
+
+  console.log('Campos a guardar:', { ejecutivoCuenta, tipoCarga, valorMercancia });
 
   const cotizacion_id_final = cotizacionId === '' ? null : cotizacionId;
 
@@ -51,13 +54,16 @@ exports.crearProcesoOperativo = (req, res) => {
 
     const sqlPrincipal = `
       INSERT INTO procesos_operativos
-      (folio_proceso, cliente_id, doc_po, mercancia, fecha_alta, tipo_importacion, etd, cotizacion_id, observaciones)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (folio_proceso, cliente_id, doc_po, mercancia, fecha_alta, tipo_importacion,
+      ejecutivo_cuenta, tipo_carga, valor_mercancia,
+      etd, cotizacion_id, observaciones)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sqlPrincipal, [
       folioProceso, clienteId, docPO, mercancia, fechaAlta,
-      tipoImportacion, etd, cotizacion_id_final, observaciones
+      tipoImportacion, ejecutivoCuenta, tipoCarga, valorMercancia,
+      etd, cotizacion_id_final, observaciones
     ], (err, result) => {
       if (err) {
         console.error('Error al insertar proceso operativo:', err);
@@ -135,7 +141,16 @@ exports.crearProcesoOperativo = (req, res) => {
 // Obtener todos los procesos operativos
 exports.obtenerProcesosOperativos = (req, res) => {
   const sql = `
-    SELECT po.id, po.folio_proceso, c.nombre AS cliente, po.mercancia, po.fecha_alta, ie.no_contenedor, ie.naviera, ie.pais_origen
+    SELECT 
+      po.id,
+      po.folio_proceso,
+      po.ejecutivo_cuenta,
+      c.nombre AS cliente,
+      po.mercancia,
+      po.fecha_alta,
+      ie.no_contenedor,
+      ie.naviera,
+      ie.pais_origen
     FROM procesos_operativos po
     LEFT JOIN clientes c ON po.cliente_id = c.id
     LEFT JOIN informacion_embarque ie ON po.id = ie.proceso_operativo_id
@@ -202,6 +217,7 @@ exports.actualizarProcesoOperativo = (req, res) => {
   const { id } = req.params;
   const {
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
+    ejecutivoCuenta, tipoCarga, valorMercancia,
     etd, cotizacionId, observaciones,
     informacionEmbarque, procesoRevalidacion,
     datosPedimento, salidaRetornoContenedor
@@ -211,12 +227,16 @@ exports.actualizarProcesoOperativo = (req, res) => {
 
   const sqlPrincipal = `
     UPDATE procesos_operativos
-    SET cliente_id = ?, doc_po = ?, mercancia = ?, fecha_alta = ?, tipo_importacion = ?, etd = ?, cotizacion_id = ?, observaciones = ?
+    SET cliente_id = ?, doc_po = ?, mercancia = ?, fecha_alta = ?, tipo_importacion = ?,
+        ejecutivo_cuenta = ?, tipo_carga = ?, valor_mercancia = ?,
+        etd = ?, cotizacion_id = ?, observaciones = ?
     WHERE id = ?
   `;
 
   db.query(sqlPrincipal, [
-    clienteId, docPO, mercancia, fechaAlta, tipoImportacion, etd, cotizacion_id_final, observaciones, id
+    clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
+    ejecutivoCuenta, tipoCarga, valorMercancia,
+    etd, cotizacion_id_final, observaciones, id
   ], (err) => {
     if (err) {
       console.error('Error al actualizar proceso principal:', err);

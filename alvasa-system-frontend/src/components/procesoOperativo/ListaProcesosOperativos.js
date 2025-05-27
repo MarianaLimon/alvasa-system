@@ -8,6 +8,7 @@ const ListaProcesosOperativos = () => {
   const [procesos, setProcesos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [clienteSeleccionado, setClienteSeleccionado] = useState('');
+  const [ejecutivoSeleccionado, setEjecutivoSeleccionado] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastVariant, setToastVariant] = useState('success');
@@ -58,6 +59,7 @@ const ListaProcesosOperativos = () => {
   };
 
   const clientesUnicos = [...new Set(procesos.map(p => p.cliente).filter(Boolean))];
+  const ejecutivosUnicos = [...new Set(procesos.map(p => p.ejecutivo_cuenta).filter(Boolean))];
 
   const procesosFiltrados = procesos.filter(proc => {
     const coincideTexto =
@@ -67,7 +69,10 @@ const ListaProcesosOperativos = () => {
     const coincideCliente =
       clienteSeleccionado === '' || proc.cliente === clienteSeleccionado;
 
-    return coincideTexto && coincideCliente;
+    const coincideEjecutivo =
+      ejecutivoSeleccionado === '' || proc.ejecutivo_cuenta === ejecutivoSeleccionado;
+
+    return coincideTexto && coincideCliente && coincideEjecutivo;
   });
 
   const formatoFechaBonita = (fechaStr) => {
@@ -101,6 +106,17 @@ const ListaProcesosOperativos = () => {
           ))}
         </Form.Select>
 
+        <Form.Select
+          value={ejecutivoSeleccionado}
+          onChange={e => setEjecutivoSeleccionado(e.target.value)}
+          className="w-auto"
+        >
+          <option value="">Todos los ejecutivos</option>
+          {ejecutivosUnicos.map(ej => (
+            <option key={ej} value={ej}>{ej}</option>
+          ))}
+        </Form.Select>
+
         <InputGroup className="w-auto">
           <Form.Control
             type="text"
@@ -119,6 +135,7 @@ const ListaProcesosOperativos = () => {
           <tr>
             <th>Folio</th>
             <th>Cliente</th>
+            <th>Ejecutivo</th>
             <th>Naviera</th>
             <th>Contenedor</th>
             <th>País Origen</th>
@@ -131,6 +148,7 @@ const ListaProcesosOperativos = () => {
             <tr key={proc.id}>
               <td>{proc.folio_proceso}</td>
               <td>{proc.cliente}</td>
+              <td>{proc.ejecutivo_cuenta || '—'}</td>
               <td>{proc.naviera}</td>
               <td>{proc.no_contenedor}</td>
               <td>{proc.pais_origen}</td>
@@ -138,7 +156,7 @@ const ListaProcesosOperativos = () => {
               <td className="text-center">
                 <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
                 <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
-                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}> <BsPrinter /> </Button>
+                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button>
                 <Button variant="danger" size="sm" className="me-2" onClick={() => manejarEliminar(proc.id)}><BsTrash /></Button>
               </td>
             </tr>

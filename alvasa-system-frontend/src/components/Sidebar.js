@@ -1,12 +1,7 @@
 import React from 'react';
 import { Nav } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import {
-  BsHouse,
-  BsPeople,
-  BsClipboard,
-  BsPlus,
-  BsClock
+import {BsCalculator, BsHouse, BsPeople, BsClipboard, BsPlus, BsClock
 } from 'react-icons/bs';
 
 const Sidebar = () => {
@@ -26,7 +21,7 @@ const Sidebar = () => {
           <BsPeople className="icon" /> Clientes
         </NavLink>
         <NavLink to="/cotizaciones" className={linkClass}>
-          <BsClipboard className="icon" /> Lista de Cotizaciones
+          <BsCalculator className="icon" /> Lista de Cotizaciones
         </NavLink>
         <NavLink to="/nuevacotizacion" className={linkClass}>
           <BsPlus className="icon" /> Nueva Cotización

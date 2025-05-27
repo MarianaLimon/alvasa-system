@@ -62,6 +62,17 @@ const VerProcesoOperativo = () => {
             <p><strong>Mercancía:</strong> {proceso.mercancia}</p>
             <p><strong>Fecha Alta:</strong> {formatoFecha(proceso.fecha_alta)}</p>
             <p><strong>Tipo de importación:</strong> {proceso.tipo_importacion}</p>
+            <p><strong>Ejecutivo de Cuenta:</strong> {proceso.ejecutivo_cuenta || '—'}</p>
+            <p><strong>Tipo de Carga:</strong> {proceso.tipo_carga || '—'}</p>
+            <p>
+              <strong>Valor Mercancía:</strong>{' '}
+              {proceso.valor_mercancia
+                ? `$${parseFloat(proceso.valor_mercancia).toLocaleString('es-MX', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}`
+                : '—'}
+            </p>
 
             <hr className='separador-horizontal'/>
             <h5 className="detalle-title-resumen">Booking</h5>

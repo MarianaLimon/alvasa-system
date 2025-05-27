@@ -176,6 +176,9 @@ body {
 .border-clientes { border-left-color: #0d6efd; }
 .border-clientes .icon { color: #0d6efd; }
 
+.border-procesos { border-left-color: #6c757d; }
+.border-procesos .icon { color: #6c757d; }
+
 .border-proximamente { border-left-color: #6c757d; }
 .border-proximamente .icon { color: #6c757d; }
 
@@ -186,11 +189,33 @@ body {
   margin: auto 1rem;
 }
 
+.cont-ejecutivos{
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.cont-ejecutivos-title{
+  color: #595c5e;
+  font-size: 1.4rem;
+}
+
+.img-ejecutivo {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
 /* ----- Clientes ----- */
 
 .card-formulario {
   background-color: #454084;; 
-  color: white;
+  color: rgb(196, 196, 196);
   border: none;
   margin:0 1.5rem;
   padding: 1rem 2rem;
