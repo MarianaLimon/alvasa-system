@@ -15,6 +15,7 @@ import VerCotizacion from './components/cotizaciones/VerCotizacion';
 import FormularioProcesoOperativo from './components/procesoOperativo/FormularioProcesoOperativo';
 import ListaProcesosOperativos from './components/procesoOperativo/ListaProcesosOperativos';
 import VerProcesoOperativo from './components/procesoOperativo/VerProcesoOperativo';
+import FormularioAsignacionCostos from './components/asignacionCostos/FormularioAsignacionCostos';
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="/procesos-operativos" element={<ListaProcesosOperativos />} />
             <Route path="/procesos-operativos/:id" element={<VerProcesoOperativo />} />
             <Route path="/procesos-operativos/editar/:id" element={<FormularioProcesoOperativo modo="editar" />} />
+            <Route path="/asignacion-costos/nuevo" element={<FormularioAsignacionCostos />} />
           </Routes>
         </div>
       </div>
