@@ -20,17 +20,17 @@ const Sidebar = () => {
           <BsPeople className="icon" /> Clientes
         </NavLink>
         <NavLink to="/cotizaciones" className={linkClass}>
-          <BsCalculator className="icon" /> Lista de Cotizaciones
+          <BsCalculator className="icon" /> Cotizaciones
         </NavLink>
-        <NavLink to="/nuevacotizacion" className={linkClass}>
+        {/* <NavLink to="/nuevacotizacion" className={linkClass}>
           <BsPlus className="icon" /> Nueva Cotización
-        </NavLink>
+        </NavLink> */}
         <NavLink to="/procesos-operativos" className={linkClass} end>
-          <BsClipboard className="icon" /> Lista de Procesos
+          <BsClipboard className="icon" /> Procesos Operativos
         </NavLink>
-        <NavLink to="/procesos-operativos/nuevo" className={linkClass}>
+        {/* <NavLink to="/procesos-operativos/nuevo" className={linkClass}>
           <BsPlus className="icon" /> Nuevo Proceso
-        </NavLink>
+        </NavLink> */}
         <NavLink to="/asignacion-costos/nuevo" className={linkClass}>
           <BsPlus className="icon" /> Nueva Asignación
         </NavLink>

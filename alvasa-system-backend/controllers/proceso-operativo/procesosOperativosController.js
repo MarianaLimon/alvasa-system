@@ -138,6 +138,33 @@ exports.crearProcesoOperativo = (req, res) => {
   });
 };
 
+// Función auxiliar para actualizar asignación de costos
+const actualizarAsignacionRelacionado = (datos) => {
+  const sql = `
+    UPDATE asignacion_costos
+    SET nombre_cliente = ?, ejecutivo_cuenta = ?, no_contenedor = ?, mercancia = ?, tipo_carga = ?, salida_aduana = ?
+    WHERE proceso_operativo_id = ?
+  `;
+
+  const valores = [
+    datos.nombreCliente || datos.cliente || '',
+    datos.ejecutivo_cuenta,
+    datos.informacion_embarque?.no_contenedor || '',
+    datos.mercancia,
+    datos.tipo_carga,
+    datos.salida_retorno_contenedor?.salida_aduana || '',
+    datos.id
+  ];
+
+  db.query(sql, valores, (err) => {
+    if (err) {
+      console.error('❌ Error al actualizar asignación relacionada:', err);
+    } else {
+      console.log('✅ Asignación relacionada actualizada correctamente');
+    }
+  });
+};
+
 // Obtener todos los procesos operativos
 exports.obtenerProcesosOperativos = (req, res) => {
   const sql = `
@@ -171,7 +198,7 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
   const { id } = req.params;
 
   const consultaProceso = `
-    SELECT po.*, c.nombre AS cliente
+    SELECT po.*, c.nombre AS nombre_cliente
     FROM procesos_operativos po
     LEFT JOIN clientes c ON po.cliente_id = c.id
     WHERE po.id = ?
@@ -219,13 +246,15 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
 
 // Actualizar proceso operativo
 exports.actualizarProcesoOperativo = (req, res) => {
+  const nombreClienteDesdeCliente = req.body.nombreCliente || '';
   const { id } = req.params;
   const {
     clienteId, docPO, mercancia, fechaAlta, tipoImportacion,
     ejecutivoCuenta, tipoCarga, valorMercancia,
     etd, cotizacionId, observaciones, linksDrive,
     informacionEmbarque, procesoRevalidacion,
-    datosPedimento, salidaRetornoContenedor
+    datosPedimento, salidaRetornoContenedor,
+    nombreCliente
   } = req.body;
 
   const cotizacion_id_final = cotizacionId === '' ? null : cotizacionId;
@@ -307,7 +336,30 @@ exports.actualizarProcesoOperativo = (req, res) => {
           if (errores.length > 0) {
             return res.status(207).json({ message: 'Proceso actualizado con errores en subformularios', errors: errores });
           }
-          res.status(200).json({ message: 'Proceso operativo actualizado correctamente' });
+          // Intentar actualizar asignación relacionada
+          const actualizarAsignacionRelacionado = `
+            UPDATE asignacion_costos
+            SET nombre_cliente = ?, ejecutivo_cuenta = ?, mercancia = ?, tipo_carga = ?, no_contenedor = ?, salida_aduana = ?
+            WHERE proceso_operativo_id = ?
+          `;
+
+          const valoresAsignacion = [
+            nombreClienteDesdeCliente, ejecutivoCuenta, mercancia, tipoCarga,
+            informacionEmbarque.noContenedor,
+            salidaRetornoContenedor.salidaAduana,
+            id
+          ];
+
+          console.log('✍️ nombreClienteDesdeCliente:', nombreClienteDesdeCliente);
+
+          db.query(actualizarAsignacionRelacionado, valoresAsignacion, (errAsignacion) => {
+            if (errAsignacion) {
+              console.warn('⚠️ No se pudo actualizar asignación relacionada:', errAsignacion);
+              return res.status(200).json({ message: 'Proceso operativo actualizado, pero no se actualizó asignación relacionada.' });
+            }
+
+            res.status(200).json({ message: 'Proceso operativo y asignación relacionada actualizados correctamente' });
+          });
         }
       });
     });

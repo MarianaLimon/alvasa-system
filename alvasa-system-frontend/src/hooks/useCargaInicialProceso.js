@@ -36,6 +36,7 @@ export const useCargaInicialProceso = ({
         setForm({
           folioProceso: data.folio_proceso,
           clienteId: data.cliente_id,
+          nombreCliente: data.nombre_cliente || '',
           docPO: data.doc_po,
           mercancia: data.mercancia,
           fechaAlta: data.fecha_alta?.split('T')[0] || '',

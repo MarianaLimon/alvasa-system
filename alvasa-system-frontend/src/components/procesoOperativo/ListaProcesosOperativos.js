@@ -128,7 +128,16 @@ const ListaProcesosOperativos = () => {
             <BsSearch />
           </InputGroup.Text>
         </InputGroup>
+
+        <Button variant="success" className="ms-auto" onClick={() => navigate('/procesos-operativos/nuevo')} >
+          + Nuevo Proceso
+        </Button>
+
+        <Button variant="primary" onClick={() => navigate('/asignacion-costos/nuevo')} >
+          + Asignar Costos
+        </Button>
       </div>
+
 
       <Table striped bordered hover responsive>
         <thead>
@@ -156,7 +165,10 @@ const ListaProcesosOperativos = () => {
               <td className="text-center">
                 <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
                 <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
-                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button>
+                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button> 
+                {/* <Button variant="success" size="sm" className="me-2" onClick={() => navigate(`/asignacion-costos/crear/${proc.id}`)}>
+                  <BsCurrencyDollar />
+                </Button>*/}
                 <Button variant="danger" size="sm" className="me-2" onClick={() => manejarEliminar(proc.id)}><BsTrash /></Button>
               </td>
             </tr>

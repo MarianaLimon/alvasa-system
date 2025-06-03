@@ -73,10 +73,16 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
     setForm(prev => ({ ...prev, [name]: nuevoValor }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Buscar el nombre del cliente
+    const clienteSeleccionado = clientes.find(c => c.id === parseInt(form.clienteId));
+    const nombreCliente = clienteSeleccionado?.nombre || '';
+
     const datosCompletos = {
       ...form,
+      nombreCliente, // 👈 Agregamos explícitamente el nombre
       informacionEmbarque: embarque,
       procesoRevalidacion: revalidacion,
       datosPedimento: datosPedimento,
@@ -111,8 +117,9 @@ const FormularioProcesoOperativo = ({ modo = 'crear', datosIniciales = {}, onSub
           console.error('Error al guardar:', err);
           toast.error('Error al guardar el proceso operativo ❌');
         });
-    } 
+    }
   };
+
 
   return (
     <Card className="container-cotizaciones">

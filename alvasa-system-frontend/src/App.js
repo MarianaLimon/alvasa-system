@@ -36,7 +36,8 @@ function App() {
             <Route path="/procesos-operativos" element={<ListaProcesosOperativos />} />
             <Route path="/procesos-operativos/:id" element={<VerProcesoOperativo />} />
             <Route path="/procesos-operativos/editar/:id" element={<FormularioProcesoOperativo modo="editar" />} />
-            <Route path="/asignacion-costos/nuevo" element={<FormularioAsignacionCostos />} />
+            <Route path="/asignacion-costos/nuevo" element={<FormularioAsignacionCostos modo="crear" />} />
+            <Route path="/asignacion-costos/editar/:folioProceso" element={<FormularioAsignacionCostos modo="editar" />} />
           </Routes>
         </div>
       </div>

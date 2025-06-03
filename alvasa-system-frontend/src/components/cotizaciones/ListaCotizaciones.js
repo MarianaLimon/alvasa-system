@@ -101,32 +101,40 @@ const ListaCotizaciones = () => {
   return (
     <div className="container mt-4 container-listacot">
       {/* Filtro y buscador */}
-      <div className="d-flex mb-3 align-items-center">
-        <Form.Select
-          className="me-3"
-          style={{ width: '180px' }}
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-        >
-          <option value="">Todos los estatus</option>
-          <option value="Autorizada">Autorizada</option>
-          <option value="En negociación">En negociación</option>
-          <option value="Entregado a cliente">Entregado a cliente</option>
-          <option value="Declinada">Declinada</option>
-        </Form.Select>
+      <div className="d-flex mb-3 align-items-center justify-content-between">
+        <div className="d-flex align-items-center">
+          <Form.Select
+            className="me-3"
+            style={{ width: '180px' }}
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="">Todos los estatus</option>
+            <option value="Autorizada">Autorizada</option>
+            <option value="En negociación">En negociación</option>
+            <option value="Entregado a cliente">Entregado a cliente</option>
+            <option value="Declinada">Declinada</option>
+          </Form.Select>
 
-        <InputGroup className="w-auto buscador-cotizaciones">
-          <Form.Control
-            type="text"
-            placeholder="Buscar..."
-            value={busqueda}
-            onChange={e => setBusqueda(e.target.value)}
-          />
-          <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
-            <BsSearch />
-          </InputGroup.Text>
-        </InputGroup>
+          <InputGroup className="w-auto buscador-cotizaciones">
+            <Form.Control
+              type="text"
+              placeholder="Buscar..."
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+            />
+            <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+              <BsSearch />
+            </InputGroup.Text>
+          </InputGroup>
+        </div>
+
+        <Button variant="success" onClick={() => navigate('/nuevacotizacion')}>
+          + Nueva Cotización
+        </Button>
       </div>
+
+      
 
       {/* Tabla */}
       <Table striped bordered hover responsive>
