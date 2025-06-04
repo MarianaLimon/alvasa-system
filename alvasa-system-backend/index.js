@@ -14,6 +14,8 @@ const desgloseImpuestosRoutes = require('./routes/desgloseImpuestos');
 
 const procesosOperativosRoutes = require('./routes/proceso-operativo/procesosOperativos');
 const asignacionCostosRoutes = require('./routes/asignacion-costos/asignacionCostos');
+const aaDespachoRoutes = require('./routes/asignacion-costos/aaDespacho');
+const forwarderRoutes = require('./routes/asignacion-costos/forwarder');
 
 const app = express();
 const port = 5050;
@@ -49,6 +51,8 @@ app.use('/desglose-impuestos', desgloseImpuestosRoutes);
 app.use('/api', pdfRoutes);
 app.use('/procesos-operativos', procesosOperativosRoutes);
 app.use('/asignacion-costos', asignacionCostosRoutes);
+app.use('/asignacion-costos/aa-despacho', aaDespachoRoutes);
+app.use('/asignacion-costos/forwarder', forwarderRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

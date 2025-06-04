@@ -4,6 +4,8 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
+const { sincronizarAADespacho, sincronizarForwarder } = require('../../utils/sincronizarAsignacion');
+
 // Formatear fecha estilo MX
 function formatoFecha(date) {
   const f = new Date(date);
@@ -198,7 +200,7 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
   const { id } = req.params;
 
   const consultaProceso = `
-    SELECT po.*, c.nombre AS nombre_cliente
+    SELECT po.*, c.nombre AS cliente
     FROM procesos_operativos po
     LEFT JOIN clientes c ON po.cliente_id = c.id
     WHERE po.id = ?
@@ -244,7 +246,6 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
   });
 };
 
-// Actualizar proceso operativo
 exports.actualizarProcesoOperativo = (req, res) => {
   const nombreClienteDesdeCliente = req.body.nombreCliente || '';
   const { id } = req.params;
@@ -336,7 +337,7 @@ exports.actualizarProcesoOperativo = (req, res) => {
           if (errores.length > 0) {
             return res.status(207).json({ message: 'Proceso actualizado con errores en subformularios', errors: errores });
           }
-          // Intentar actualizar asignación relacionada
+
           const actualizarAsignacionRelacionado = `
             UPDATE asignacion_costos
             SET nombre_cliente = ?, ejecutivo_cuenta = ?, mercancia = ?, tipo_carga = ?, no_contenedor = ?, salida_aduana = ?
@@ -350,15 +351,31 @@ exports.actualizarProcesoOperativo = (req, res) => {
             id
           ];
 
-          console.log('✍️ nombreClienteDesdeCliente:', nombreClienteDesdeCliente);
-
-          db.query(actualizarAsignacionRelacionado, valoresAsignacion, (errAsignacion) => {
+          db.query(actualizarAsignacionRelacionado, valoresAsignacion, async (errAsignacion) => {
             if (errAsignacion) {
               console.warn('⚠️ No se pudo actualizar asignación relacionada:', errAsignacion);
               return res.status(200).json({ message: 'Proceso operativo actualizado, pero no se actualizó asignación relacionada.' });
             }
 
-            res.status(200).json({ message: 'Proceso operativo y asignación relacionada actualizados correctamente' });
+            try {
+              const proveedorNuevo = datosPedimento.aaDespacho || '';
+              const resultadoSync = await sincronizarAADespacho(id, proveedorNuevo);
+
+              const resultadoForwarder = await sincronizarForwarder(id, { informacion_embarque: informacionEmbarque });
+
+              console.log('✅ Sincronización AA Despacho:', resultadoSync);
+              console.log('✅ Sincronización Forwarder:', resultadoForwarder);
+
+              return res.status(200).json({
+                message: 'Proceso operativo y asignación actualizados correctamente. ' + resultadoSync + '. ' + resultadoForwarder
+              });
+            } catch (syncError) {
+              console.error('❌ Error al sincronizar subformularios:', syncError);
+              return res.status(200).json({
+                message: 'Proceso operativo actualizado. Falló sincronización de subformularios.',
+                error: syncError
+              });
+            }
           });
         }
       });

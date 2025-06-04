@@ -22,7 +22,8 @@ const Forwarder = ({ datos = {}, onChange }) => {
   });
 
   useEffect(() => {
-    const sinDatos = !data.fleteInternacionalCosto && !data.fleteInternacionalVenta &&
+    const sinDatos =
+      !data.fleteInternacionalCosto && !data.fleteInternacionalVenta &&
       !data.cargosLocalesCosto && !data.cargosLocalesVenta &&
       !data.demorasCosto && !data.demorasVenta &&
       !data.abonado && !data.fechaAbon && !data.rembolsado && !data.fechaRemb;
@@ -30,7 +31,7 @@ const Forwarder = ({ datos = {}, onChange }) => {
     if (sinDatos && datos && Object.keys(datos).length > 0) {
       setData({
         forwarder: datos.forwarder ?? '',
-        asignadoPor: datos.asignadoPor ?? '',
+        asignadoPor: datos.asignadoPor ?? datos.asignado_por ?? '',
         consignatario: datos.consignatario ?? '',
         naviera: datos.naviera ?? '',
 
@@ -47,6 +48,7 @@ const Forwarder = ({ datos = {}, onChange }) => {
         fechaRemb: datos.fechaRemb ?? '',
       });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datos]);
 

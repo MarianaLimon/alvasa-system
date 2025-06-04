@@ -22,6 +22,8 @@ const crearAsignacionCostos = (req, res) => {
     if (resultados.length > 0) {
       return res.status(400).json({ mensaje: 'Ya existe una asignación para este folio de proceso' });
     }
+    
+    console.log('🧪 Claves recibidas:', Object.keys(req.body));
 
     const consultaInsertar = `
       INSERT INTO asignacion_costos
@@ -74,9 +76,26 @@ const obtenerAsignacionPorId = (req, res) => {
 const obtenerPorFolio = (req, res) => {
   const folio = req.params.folio;
 
-  db.query('SELECT * FROM asignacion_costos WHERE folio_proceso = ?', [folio], (err, resultados) => {
-    if (err) return res.status(500).json({ mensaje: 'Error al buscar por folio' });
-    if (resultados.length === 0) return res.status(404).json({ mensaje: 'No se encontró asignación con ese folio' });
+  const sql = `
+    SELECT 
+      ac.*, 
+      ad.aa_despacho AS aa_despacho_asignacion
+    FROM asignacion_costos AS ac
+    LEFT JOIN aa_despacho_costos AS ad
+      ON ad.asignacion_id = ac.id
+    WHERE ac.folio_proceso = ?
+    LIMIT 1
+  `;
+
+  db.query(sql, [folio], (err, resultados) => {
+    if (err) {
+      console.error('Error en JOIN al buscar por folio:', err);
+      return res.status(500).json({ mensaje: 'Error al buscar por folio con JOIN' });
+    }
+    if (resultados.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró asignación con ese folio' });
+    }
+
     res.json(resultados[0]);
   });
 };
@@ -85,15 +104,13 @@ const obtenerPorFolio = (req, res) => {
 const actualizarAsignacion = (req, res) => {
   const id = req.params.id;
   const {
-    clienteId, nombreCliente, ejecutivoCuenta, noContenedor, mercancia, tipoCarga, salidaAduana,
-    aaDespacho, forwarder, consignatario, naviera
+    clienteId, nombreCliente, ejecutivoCuenta, noContenedor, mercancia, tipoCarga, salidaAduana
   } = req.body;
 
   const sql = `
     UPDATE asignacion_costos
     SET cliente_id = ?, nombre_cliente = ?, ejecutivo_cuenta = ?, no_contenedor = ?,
-        mercancia = ?, tipo_carga = ?, salida_aduana = ?, aa_despacho = ?, forwarder = ?,
-        consignatario = ?, naviera = ?
+        mercancia = ?, tipo_carga = ?, salida_aduana = ?
     WHERE id = ?
   `;
 
@@ -105,10 +122,6 @@ const actualizarAsignacion = (req, res) => {
     mercancia,
     tipoCarga,
     salidaAduana,
-    aaDespacho,
-    forwarder,
-    consignatario,
-    naviera,
     id
   ];
 
@@ -145,6 +158,44 @@ const obtenerPorProcesoOperativo = (req, res) => {
   );
 };
 
+const obtenerAsignacionCompleta = async (req, res) => {
+  const folio = req.params.folio;
+
+  try {
+    // 1. Buscar asignación principal
+    const [asignaciones] = await db.promise().query('SELECT * FROM asignacion_costos WHERE folio_proceso = ?', [folio]);
+
+    if (asignaciones.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró la asignación' });
+    }
+
+    const asignacion = asignaciones[0];
+
+    // 2. Subformularios
+    const [aaDespacho] = await db.promise().query(
+      'SELECT * FROM aa_despacho_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+    const [forwarder] = await db.promise().query(
+      'SELECT * FROM forwarder_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+    // 3. Armar respuesta completa
+    const respuesta = {
+      ...asignacion,
+      aa_despacho: aaDespacho[0] || null,
+      forwarder: forwarder[0] || null,
+    };
+
+    res.json(respuesta);
+  } catch (error) {
+    console.error('❌ Error al obtener asignación completa:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   crearAsignacionCostos,
   obtenerAsignaciones,
@@ -152,5 +203,6 @@ module.exports = {
   actualizarAsignacion,
   eliminarAsignacion,
   obtenerPorProcesoOperativo,
-  obtenerPorFolio
+  obtenerPorFolio,
+  obtenerAsignacionCompleta
 };

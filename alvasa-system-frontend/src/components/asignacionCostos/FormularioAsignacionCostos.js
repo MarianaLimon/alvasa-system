@@ -17,7 +17,7 @@ import Aseguradora from './Aseguradora';
 const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
   console.log("Modo del formulario:", modo);
   const navigate = useNavigate();
-  const { folioProceso } = useParams();
+  const { folio } = useParams();
   const location = useLocation();
   const [mostrarModal, setMostrarModal] = useState(modo === 'crear');
   const [form, setForm] = useState({
@@ -45,8 +45,8 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
       const res = await axios.get(`http://localhost:5050/asignacion-costos/proceso/${idProceso}`);
       
       // Si existe, redirige a la edición
-      if (res.data && res.data.id) {
-        navigate(`/asignacion-costos/editar/${res.data.id}`, { replace: true });
+      if (res.data && res.data.folio_proceso) {
+        navigate(`/asignacion-costos/editar/${res.data.folio_proceso}`, { replace: true });
       }
     } catch (error) {
       // Si no existe, entonces carga el proceso para crear una nueva
@@ -85,51 +85,179 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
 
   useEffect(() => {
     const cargarAsignacion = async () => {
-      if (modo === 'editar' && folioProceso) {
-        console.log("Entrando a modo editar con ID:", folioProceso);
+      if (modo === 'editar' && folio) {
         try {
-          const { data } = await axios.get(`http://localhost:5050/asignacion-costos/folio/${folioProceso}`);
-          console.log("Datos cargados para edición:", data);
+          const { data } = await axios.get(`http://localhost:5050/asignacion-costos/completo/${folio}`);
+
+          // Función auxiliar para convertir a YYYY-MM-DD
+          const formatearFecha = (fecha) => {
+            if (!fecha) return '';
+            return new Date(fecha).toISOString().split('T')[0];
+          };
+
+          // Datos principales
           setForm(prev => ({
-          ...prev,
-          procesoOperativoId: data.proceso_operativo_id || '',
-          clienteId: data.cliente_id || '',
-          nombreCliente: data.nombre_cliente || '',
-          folioProceso: data.folio_proceso || '',
-          cliente: data.nombre_cliente || '',
-          ejecutivoCuenta: data.ejecutivo_cuenta || '',
-          noContenedor: data.no_contenedor || '',
-          mercancia: data.mercancia || '',
-          tipoCarga: data.tipo_carga || '',
-          salidaAduana: data.salida_aduana || ''
-        }));
+            ...prev,
+            asignacionId: data.id || '',
+            procesoOperativoId: data.proceso_operativo_id || '',
+            clienteId: data.cliente_id || '',
+            nombreCliente: data.nombre_cliente || '',
+            folioProceso: data.folio_proceso || '',
+            cliente: data.nombre_cliente || '',
+            ejecutivoCuenta: data.ejecutivo_cuenta || '',
+            noContenedor: data.no_contenedor || '',
+            mercancia: data.mercancia || '',
+            tipoCarga: data.tipo_carga || '',
+            salidaAduana: data.salida_aduana || ''
+          }));
+
+          // AA Despacho
+          const aa = data.aa_despacho || {};
+          setForm(prev => ({
+            ...prev,
+            aaDespacho: aa.aa_despacho || '',
+            importacionCosto: aa.importacion_costo || '',
+            importacionVenta: aa.importacion_venta || '',
+            almacenajesCosto: aa.almacenajes_costo || '',
+            almacenajesVenta: aa.almacenajes_venta || '',
+            servicioCosto: aa.servicio_costo || '',
+            servicioVenta: aa.servicio_venta || '',
+            tipoServicio1: aa.tipo_servicio1 || '',
+            costoServicio1: aa.costo_servicio1 || '',
+            ventaServicio1: aa.venta_servicio1 || '',
+            tipoServicio2: aa.tipo_servicio2 || '',
+            costoServicio2: aa.costo_servicio2 || '',
+            ventaServicio2: aa.venta_servicio2 || ''
+          }));
+
+          // Forwarder
+          const fw = data.forwarder || {};
+          setForm(prev => ({
+            ...prev,
+            forwarder: fw.forwarder || '',
+            asignadoPor: fw.asignado_por || '',
+            consignatario: fw.consignatario || '',
+            naviera: fw.naviera || '',
+            fleteInternacionalCosto: fw.flete_internacional_costo || '',
+            fleteInternacionalVenta: fw.flete_internacional_venta || '',
+            cargosLocalesCosto: fw.cargos_locales_costo || '',
+            cargosLocalesVenta: fw.cargos_locales_venta || '',
+            demorasCosto: fw.demoras_costo || '',
+            demorasVenta: fw.demoras_venta || '',
+            abonado: fw.abonado || '',
+            fechaAbon: formatearFecha(fw.fecha_abon),
+            rembolsado: fw.rembolsado || '',
+            fechaRemb: formatearFecha(fw.fecha_remb)
+          }));
+
           setMostrarModal(false);
         } catch (error) {
-          console.error('Error al cargar asignación existente:', error);
+          console.error('❌ Error al cargar asignación completa:', error);
         }
       }
     };
 
     cargarAsignacion();
-  }, [modo, folioProceso, location.key]);
+  }, [modo, folio, location.key]);
+
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      if (modo === 'editar') {
-        await axios.put(`http://localhost:5050/asignacion-costos/${folioProceso}`, form);
-        alert('Asignación actualizada correctamente');
-      } else {
-        await axios.post('http://localhost:5050/asignacion-costos', form);
-        alert('Asignación guardada correctamente');
-      }
-      navigate('/'); // o la ruta deseada
-    } catch (error) {
-      console.error('Error al guardar la asignación:', error);
-      alert('Hubo un error al guardar la asignación');
+  try {
+    if (modo === 'editar') {
+      const asignacionId = form.asignacionId;
+
+      // 🔄 Actualiza asignación principal
+      await axios.put(`http://localhost:5050/asignacion-costos/${asignacionId}`, form);
+
+      // 🔄 Actualiza subformulario AA Despacho
+      await axios.post(`http://localhost:5050/asignacion-costos/aa-despacho/${asignacionId}`, {
+        aaDespacho: form.aaDespacho,
+        importacionCosto: form.importacionCosto,
+        importacionVenta: form.importacionVenta,
+        almacenajesCosto: form.almacenajesCosto,
+        almacenajesVenta: form.almacenajesVenta,
+        servicioCosto: form.servicioCosto,
+        servicioVenta: form.servicioVenta,
+        tipoServicio1: form.tipoServicio1,
+        costoServicio1: form.costoServicio1,
+        ventaServicio1: form.ventaServicio1,
+        tipoServicio2: form.tipoServicio2,
+        costoServicio2: form.costoServicio2,
+        ventaServicio2: form.ventaServicio2
+      });
+
+      // 🔄 Actualiza subformulario Forwarder (✅ AHORA INCLUYE CAMPOS FALTANTES)
+      await axios.post(`http://localhost:5050/asignacion-costos/forwarder/${asignacionId}`, {
+        forwarder: form.forwarder,
+        asignadoPor: form.asignadoPor,
+        consignatario: form.consignatario,
+        naviera: form.naviera,
+        fleteInternacionalCosto: form.fleteInternacionalCosto,
+        fleteInternacionalVenta: form.fleteInternacionalVenta,
+        cargosLocalesCosto: form.cargosLocalesCosto,
+        cargosLocalesVenta: form.cargosLocalesVenta,
+        demorasCosto: form.demorasCosto,
+        demorasVenta: form.demorasVenta,
+        abonado: form.abonado,
+        fechaAbon: form.fechaAbon,
+        rembolsado: form.rembolsado,
+        fechaRemb: form.fechaRemb
+      });
+
+      alert('✅ Asignación actualizada correctamente');
+    } else {
+      // 🆕 Crea nueva asignación
+      const res = await axios.post('http://localhost:5050/asignacion-costos', form);
+      const asignacionId = res.data.id;
+
+      // 💾 Guarda subformulario AA Despacho
+      await axios.post(`http://localhost:5050/asignacion-costos/aa-despacho/${asignacionId}`, {
+        aaDespacho: form.aaDespacho,
+        importacionCosto: form.importacionCosto,
+        importacionVenta: form.importacionVenta,
+        almacenajesCosto: form.almacenajesCosto,
+        almacenajesVenta: form.almacenajesVenta,
+        servicioCosto: form.servicioCosto,
+        servicioVenta: form.servicioVenta,
+        tipoServicio1: form.tipoServicio1,
+        costoServicio1: form.costoServicio1,
+        ventaServicio1: form.ventaServicio1,
+        tipoServicio2: form.tipoServicio2,
+        costoServicio2: form.costoServicio2,
+        ventaServicio2: form.ventaServicio2
+      });
+
+      // 💾 Guarda subformulario Forwarder
+      await axios.post(`http://localhost:5050/asignacion-costos/forwarder/${asignacionId}`, {
+        forwarder: form.forwarder,
+        asignadoPor: form.asignadoPor,
+        consignatario: form.consignatario,
+        naviera: form.naviera,
+        fleteInternacionalCosto: form.fleteInternacionalCosto,
+        fleteInternacionalVenta: form.fleteInternacionalVenta,
+        cargosLocalesCosto: form.cargosLocalesCosto,
+        cargosLocalesVenta: form.cargosLocalesVenta,
+        demorasCosto: form.demorasCosto,
+        demorasVenta: form.demorasVenta,
+        abonado: form.abonado,
+        fechaAbon: form.fechaAbon,
+        rembolsado: form.rembolsado,
+        fechaRemb: form.fechaRemb
+      });
+
+      alert('✅ Asignación creada correctamente');
     }
-  };
+
+    navigate('/');
+  } catch (error) {
+    console.error('❌ Error al guardar:', error);
+    alert('Hubo un error al guardar la asignación');
+  }
+};
+
+
 
   return (
     <>
@@ -199,7 +327,20 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>AA Despacho</Accordion.Header>
                   <Accordion.Body>
-                    <AADespacho datos={{ aaDespacho: form.aaDespacho }} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
+                    <AADespacho datos={{ 
+                      aaDespacho: form.aaDespacho,
+                      importacionCosto: form.importacionCosto,
+                      importacionVenta: form.importacionVenta,
+                      almacenajesCosto: form.almacenajesCosto,
+                      almacenajesVenta: form.almacenajesVenta,
+                      servicioCosto: form.servicioCosto,
+                      servicioVenta: form.servicioVenta,
+                      tipoServicio1: form.tipoServicio1,
+                      costoServicio1: form.costoServicio1,
+                      ventaServicio1: form.ventaServicio1,
+                      tipoServicio2: form.tipoServicio2,
+                      costoServicio2: form.costoServicio2,
+                      ventaServicio2: form.ventaServicio2 }} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey="1">
