@@ -25,10 +25,37 @@ const FleteTerrestre = ({ datos = {}, onChange }) => {
   ];
 
   useEffect(() => {
-    if (datos && Object.keys(datos).length > 0) {
-      setData(prev => ({ ...prev, ...datos }));
-    }
-  }, [datos]);
+  if (datos && Object.keys(datos).length > 0) {
+    const {
+      proveedor = '',
+      flete = '', fleteVenta = '',
+      estadia = '', estadiaVenta = '',
+      burreo = '', burreoVenta = '',
+      sobrepeso = '', sobrepesoVenta = '',
+      apoyo = '', apoyoVenta = '',
+      pernocta = '', pernoctaVenta = '',
+      extras: extrasRecibidos = []
+    } = datos;
+
+    setData({
+      proveedor,
+      flete,
+      fleteVenta,
+      estadia,
+      estadiaVenta,
+      burreo,
+      burreoVenta,
+      sobrepeso,
+      sobrepesoVenta,
+      apoyo,
+      apoyoVenta,
+      pernocta,
+      pernoctaVenta
+    });
+
+    setExtras(extrasRecibidos);
+  }
+}, [datos]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,23 +64,60 @@ const FleteTerrestre = ({ datos = {}, onChange }) => {
     if (onChange) onChange({ ...nuevoData, extras });
   };
 
-  const handleExtraChange = (index, field, value) => {
-    const nuevos = [...extras];
-    nuevos[index] = { ...nuevos[index], [field]: value };
-    setExtras(nuevos);
-    if (onChange) onChange({ ...data, extras: nuevos });
+  const handleExtraChange = (index, campo, valor) => {
+    const nuevosExtras = [...extras];
+    nuevosExtras[index][campo] = valor;
+    setExtras(nuevosExtras);
+
+    // Además de actualizar el array local, actualiza el estado principal (form)
+    if (onChange) {
+      const extrasToForm = {};
+      nuevosExtras.forEach((extra, i) => {
+        extrasToForm[`extra${i + 1}`] = extra.concepto;
+        extrasToForm[`extra${i + 1}Costo`] = extra.costo;
+        extrasToForm[`extra${i + 1}Venta`] = extra.venta;
+      });
+      onChange(extrasToForm);
+    }
   };
 
   const agregarExtra = () => {
     if (extras.length < 6) {
-      setExtras([...extras, { concepto: '', costo: '', venta: '' }]);
+      const nuevos = [...extras, { concepto: '', costo: '', venta: '' }];
+      setExtras(nuevos);
+      if (onChange) {
+        const extrasToForm = { extras: nuevos };
+        nuevos.forEach((extra, i) => {
+          extrasToForm[`extra${i + 1}`] = extra.concepto;
+          extrasToForm[`extra${i + 1}Costo`] = extra.costo;
+          extrasToForm[`extra${i + 1}Venta`] = extra.venta;
+        });
+        onChange({ ...data, ...extrasToForm });
+      }
     }
   };
 
   const eliminarExtra = (index) => {
     const nuevos = extras.filter((_, i) => i !== index);
     setExtras(nuevos);
-    if (onChange) onChange({ ...data, extras: nuevos });
+
+    if (onChange) {
+      const extrasToForm = { extras: nuevos };
+      nuevos.forEach((extra, i) => {
+        extrasToForm[`extra${i + 1}`] = extra.concepto;
+        extrasToForm[`extra${i + 1}Costo`] = extra.costo;
+        extrasToForm[`extra${i + 1}Venta`] = extra.venta;
+      });
+
+      // Borra los que ya no existen (ej. extra4...6 si ahora solo hay 3)
+      for (let i = nuevos.length + 1; i <= 6; i++) {
+        extrasToForm[`extra${i}`] = '';
+        extrasToForm[`extra${i}Costo`] = '';
+        extrasToForm[`extra${i}Venta`] = '';
+      }
+
+      onChange({ ...data, ...extrasToForm });
+    }
   };
 
   const soloNumeros = (e) => {

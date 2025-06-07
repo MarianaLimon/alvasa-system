@@ -16,6 +16,7 @@ const procesosOperativosRoutes = require('./routes/proceso-operativo/procesosOpe
 const asignacionCostosRoutes = require('./routes/asignacion-costos/asignacionCostos');
 const aaDespachoRoutes = require('./routes/asignacion-costos/aaDespacho');
 const forwarderRoutes = require('./routes/asignacion-costos/forwarder');
+const fleteTerrestreRoutes = require('./routes/asignacion-costos/fleteTerrestre');
 
 const app = express();
 const port = 5050;
@@ -53,6 +54,7 @@ app.use('/procesos-operativos', procesosOperativosRoutes);
 app.use('/asignacion-costos', asignacionCostosRoutes);
 app.use('/asignacion-costos/aa-despacho', aaDespachoRoutes);
 app.use('/asignacion-costos/forwarder', forwarderRoutes);
+app.use('/asignacion-costos/flete-terrestre', fleteTerrestreRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

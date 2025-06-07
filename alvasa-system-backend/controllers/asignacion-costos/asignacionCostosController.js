@@ -182,11 +182,34 @@ const obtenerAsignacionCompleta = async (req, res) => {
       [asignacion.id]
     );
 
-    // 3. Armar respuesta completa
+    // 3. Flete terrestre y sus extras
+    const [fleteTerrestre] = await db.promise().query(
+      'SELECT * FROM flete_terrestre_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+    let fleteCompleto = null;
+
+    if (fleteTerrestre.length > 0) {
+      const flete = fleteTerrestre[0];
+
+      const [extras] = await db.promise().query(
+        'SELECT concepto, costo, venta FROM extras_flete_terrestre WHERE flete_terrestre_id = ?',
+        [flete.id]
+      );
+
+      fleteCompleto = {
+        ...flete,
+        extras
+      };
+    }
+
+    // 4. Armar respuesta completa
     const respuesta = {
       ...asignacion,
       aa_despacho: aaDespacho[0] || null,
       forwarder: forwarder[0] || null,
+      flete_terrestre: fleteCompleto
     };
 
     res.json(respuesta);

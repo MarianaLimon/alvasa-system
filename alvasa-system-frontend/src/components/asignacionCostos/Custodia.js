@@ -3,33 +3,31 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 const Custodia = ({ datos = {}, onChange }) => {
   const [data, setData] = useState({
-    nombreProveedor: '',
-
+    custodiaProveedor: '',
     custodiaCosto: '', custodiaVenta: '',
-    pernoctaCosto: '', pernoctaVenta: '',
-    falsoCosto: '', falsoVenta: '',
-    cancelacionCosto: '', cancelacionVenta: '',
-
-    diasCosto: '', diasVenta: '',
-    costoAlmacenaje: '', ventaAlmacenaje: '',
+    custodiaPernoctaCosto: '', custodiaPernoctaVenta: '',
+    custodiaFalsoCosto: '', custodiaFalsoVenta: '',
+    custodiaCancelacionCosto: '', custodiaCancelacionVenta: '',
+    custodiaDiasCosto: '', custodiaDiasVenta: '',
+    custodiaCostoAlmacenaje: '', custodiaVentaAlmacenaje: ''
   });
 
   useEffect(() => {
     if (datos && Object.keys(datos).length > 0) {
       setData({
-        nombreProveedor: datos.nombreProveedor ?? '',
+        custodiaProveedor: datos.custodiaProveedor ?? '',
         custodiaCosto: datos.custodiaCosto ?? '',
         custodiaVenta: datos.custodiaVenta ?? '',
-        pernoctaCosto: datos.pernoctaCosto ?? '',
-        pernoctaVenta: datos.pernoctaVenta ?? '',
-        falsoCosto: datos.falsoCosto ?? '',
-        falsoVenta: datos.falsoVenta ?? '',
-        cancelacionCosto: datos.cancelacionCosto ?? '',
-        cancelacionVenta: datos.cancelacionVenta ?? '',
-        diasCosto: datos.diasCosto ?? '',
-        diasVenta: datos.diasVenta ?? '',
-        costoAlmacenaje: datos.costoAlmacenaje ?? '',
-        ventaAlmacenaje: datos.ventaAlmacenaje ?? '',
+        custodiaPernoctaCosto: datos.custodiaPernoctaCosto ?? '',
+        custodiaPernoctaVenta: datos.custodiaPernoctaVenta ?? '',
+        custodiaFalsoCosto: datos.custodiaFalsoCosto ?? '',
+        custodiaFalsoVenta: datos.custodiaFalsoVenta ?? '',
+        custodiaCancelacionCosto: datos.custodiaCancelacionCosto ?? '',
+        custodiaCancelacionVenta: datos.custodiaCancelacionVenta ?? '',
+        custodiaDiasCosto: datos.custodiaDiasCosto ?? '',
+        custodiaDiasVenta: datos.custodiaDiasVenta ?? '',
+        custodiaCostoAlmacenaje: datos.custodiaCostoAlmacenaje ?? '',
+        custodiaVentaAlmacenaje: datos.custodiaVentaAlmacenaje ?? ''
       });
     }
   }, [datos]);
@@ -49,14 +47,13 @@ const Custodia = ({ datos = {}, onChange }) => {
 
   return (
     <div className="container-subform">
-
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
             <Form.Label>Nombre Prov.</Form.Label>
             <Form.Select
-              name="nombreProveedor"
-              value={data.nombreProveedor}
+              name="custodiaProveedor"
+              value={data.custodiaProveedor}
               onChange={handleChange}
               className="text-uppercase"
             >
@@ -74,21 +71,19 @@ const Custodia = ({ datos = {}, onChange }) => {
         <Col md={4}><strong>VENTA</strong></Col>
       </Row>
 
-      {["custodia", "pernocta", "falso", "cancelacion"].map((campo, i) => (
+      {[
+        { label: 'Custodia', base: 'custodia' },
+        { label: 'Pernocta de Custodia', base: 'custodiaPernocta' },
+        { label: 'Custodia en Falso', base: 'custodiaFalso' },
+        { label: 'Cancelación de Custodia', base: 'custodiaCancelacion' }
+      ].map(({ label, base }, i) => (
         <Row className="mb-2" key={i}>
-          <Col md={4}>
-            <Form.Label>{
-              campo === "custodia" ? "Custodia" :
-              campo === "pernocta" ? "Pernocta de Custodia" :
-              campo === "falso" ? "Custodia en Falso" :
-              "Cancelación de Custodia"
-            }</Form.Label>
-          </Col>
+          <Col md={4}><Form.Label>{label}</Form.Label></Col>
           <Col md={4}>
             <Form.Control
               type="number"
-              name={`${campo}Costo`}
-              value={data[`${campo}Costo`]}
+              name={`${base}Costo`}
+              value={data[`${base}Costo`]}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -96,8 +91,8 @@ const Custodia = ({ datos = {}, onChange }) => {
           <Col md={4}>
             <Form.Control
               type="number"
-              name={`${campo}Venta`}
-              value={data[`${campo}Venta`]}
+              name={`${base}Venta`}
+              value={data[`${base}Venta`]}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -112,8 +107,8 @@ const Custodia = ({ datos = {}, onChange }) => {
             <Form.Label>DIAS</Form.Label>
             <Form.Control
               type="number"
-              name="diasCosto"
-              value={data.diasCosto}
+              name="custodiaDiasCosto"
+              value={data.custodiaDiasCosto}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -124,8 +119,8 @@ const Custodia = ({ datos = {}, onChange }) => {
             <Form.Label>COSTO <span>MXN</span></Form.Label>
             <Form.Control
               type="number"
-              name="costoAlmacenaje"
-              value={data.costoAlmacenaje}
+              name="custodiaCostoAlmacenaje"
+              value={data.custodiaCostoAlmacenaje}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -136,8 +131,8 @@ const Custodia = ({ datos = {}, onChange }) => {
             <Form.Label>DIAS</Form.Label>
             <Form.Control
               type="number"
-              name="diasVenta"
-              value={data.diasVenta}
+              name="custodiaDiasVenta"
+              value={data.custodiaDiasVenta}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />
@@ -148,8 +143,8 @@ const Custodia = ({ datos = {}, onChange }) => {
             <Form.Label>VENTA <span>MXN</span></Form.Label>
             <Form.Control
               type="number"
-              name="ventaAlmacenaje"
-              value={data.ventaAlmacenaje}
+              name="custodiaVentaAlmacenaje"
+              value={data.custodiaVentaAlmacenaje}
               onChange={handleChange}
               onKeyDown={soloNumeros}
             />

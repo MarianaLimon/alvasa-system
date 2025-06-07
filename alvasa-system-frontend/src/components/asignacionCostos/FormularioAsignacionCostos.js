@@ -21,22 +21,49 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
   const location = useLocation();
   const [mostrarModal, setMostrarModal] = useState(modo === 'crear');
   const [form, setForm] = useState({
-    procesoOperativoId: '', clienteId: '', nombreCliente: '', folioProceso: '', cliente: '', ejecutivoCuenta: '', noContenedor: '', mercancia: '', tipoCarga: '',
-    salidaAduana: '', aaDespacho: '', forwarder: '', consignatario: '', naviera: '', valorMercancia: '',
-    importacionCosto: '', importacionVenta: '', almacenajesCosto: '', almacenajesVenta: '', servicioCosto: '',
-    servicioVenta: '', tipoServicio1: '', costoServicio1: '', ventaServicio1: '', tipoServicio2: '',
-    costoServicio2: '', ventaServicio2: '',
-    asignadoPor: '', fleteInternacionalCosto: '', fleteInternacionalVenta: '', cargosLocalesCosto: '', cargosLocalesVenta: '',
-    demorasCosto: '', demorasVenta: '', abonado: '', fechaAbon: '', rembolsado: '', fechaRemb: '',
-    nombreProveedor: '', custodiaCosto: '', custodiaVenta: '', pernoctaCosto: '', pernoctaVenta: '', falsoCosto: '',
-    falsoVenta: '', cancelacionCosto: '', cancelacionVenta: '', diasCosto: '', diasVenta: '',
+    // Datos generales
+    procesoOperativoId: '', clienteId: '', nombreCliente: '', folioProceso: '', cliente: '', ejecutivoCuenta: '',
+    noContenedor: '', mercancia: '', tipoCarga: '', salidaAduana: '', aaDespacho: '', forwarder: '',
+    consignatario: '', naviera: '', valorMercancia: '',
+
+    // AA Despacho
+    importacionCosto: '', importacionVenta: '', almacenajesCosto: '', almacenajesVenta: '',
+    servicioCosto: '', servicioVenta: '', tipoServicio1: '', costoServicio1: '', ventaServicio1: '',
+    tipoServicio2: '', costoServicio2: '', ventaServicio2: '',
+
+    // Forwarder
+    asignadoPor: '', fleteInternacionalCosto: '', fleteInternacionalVenta: '',
+    cargosLocalesCosto: '', cargosLocalesVenta: '', demorasCosto: '', demorasVenta: '',
+    abonado: '', fechaAbon: '', rembolsado: '', fechaRemb: '',
+
+    // Custodia (prefijos para evitar conflicto con Flete Terrestre)
+    custodiaProveedor: '', custodiaCosto: '', custodiaVenta: '',
+    custodiaPernoctaCosto: '', custodiaPernoctaVenta: '',
+    custodiaFalsoCosto: '', custodiaFalsoVenta: '',
+    custodiaCancelacionCosto: '', custodiaCancelacionVenta: '',
+    custodiaDiasCosto: '', custodiaDiasVenta: '',
+    custodiaCostoAlmacenaje: '', custodiaVentaAlmacenaje: '',
+
+    // Paquetería
     empresa: '', costo: '', venta: '',
+
+    // Aseguradora
     aseguradora: '', costoAseguradora: '', ventaAseguradora: '',
-    proveedor: '', flete: '', fleteVenta: '', estadia: '', estadiaVenta: '', burreo: '', burreoVenta: '',
-    sobrepeso: '', sobrepesoVenta: '', apoyo: '', apoyoVenta: '', pernoctaFlete: '', pernoctaFleteVenta: '',
+
+    // Flete Terrestre
+    proveedor: '', flete: '', fleteVenta: '',
+    estadia: '', estadiaVenta: '', burreo: '', burreoVenta: '',
+    sobrepeso: '', sobrepesoVenta: '', apoyo: '', apoyoVenta: '',
+    pernocta: '', pernoctaVenta: '',
+
+    // Extras flete terrestre (por si usas estos campos individuales aparte)
     extra1: '', extra1Costo: '', extra1Venta: '',
     extra2: '', extra2Costo: '', extra2Venta: '',
-    extra3: '', extra3Costo: '', extra3Venta: ''
+    extra3: '', extra3Costo: '', extra3Venta: '',
+    extra4: '', extra4Costo: '', extra4Venta: '',
+    extra5: '', extra5Costo: '', extra5Venta: '',
+    extra6: '', extra6Costo: '', extra6Venta: '',
+    extras: [] 
   });
 
   const cargarProcesoPorId = async (idProceso) => {
@@ -83,17 +110,17 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
     }
   };
 
+  const formatearFecha = (fecha) => {
+    if (!fecha) return '';
+    return new Date(fecha).toISOString().split('T')[0];
+  };
+
+
   useEffect(() => {
     const cargarAsignacion = async () => {
       if (modo === 'editar' && folio) {
         try {
           const { data } = await axios.get(`http://localhost:5050/asignacion-costos/completo/${folio}`);
-
-          // Función auxiliar para convertir a YYYY-MM-DD
-          const formatearFecha = (fecha) => {
-            if (!fecha) return '';
-            return new Date(fecha).toISOString().split('T')[0];
-          };
 
           // Datos principales
           setForm(prev => ({
@@ -150,6 +177,44 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
             fechaRemb: formatearFecha(fw.fecha_remb)
           }));
 
+          // Flete Terrestre
+          try {
+            const resFlete = await axios.get(`http://localhost:5050/asignacion-costos/flete-terrestre/${data.id}`);
+
+            const flete = resFlete.data;
+
+            setForm(prev => ({
+              ...prev,
+              proveedor: flete.proveedor || '',
+              flete: flete.flete || '',
+              fleteVenta: flete.flete_venta || '',
+              estadia: flete.estadia || '',
+              estadiaVenta: flete.estadia_venta || '',
+              burreo: flete.burreo || '',
+              burreoVenta: flete.burreo_venta || '',
+              sobrepeso: flete.sobrepeso || '',
+              sobrepesoVenta: flete.sobrepeso_venta || '',
+              apoyo: flete.apoyo || '',
+              apoyoVenta: flete.apoyo_venta || '',
+              pernocta: flete.pernocta || '',
+              pernoctaVenta: flete.pernocta_venta || '',
+              extras: flete.extras || [], // ⬅️ aquí agregamos los extras reales del backend
+
+              // Si sigues usando estos campos individuales (opcional)
+              extra1: flete.extras?.[0]?.concepto || '',
+              extra1Costo: flete.extras?.[0]?.costo || '',
+              extra1Venta: flete.extras?.[0]?.venta || '',
+              extra2: flete.extras?.[1]?.concepto || '',
+              extra2Costo: flete.extras?.[1]?.costo || '',
+              extra2Venta: flete.extras?.[1]?.venta || '',
+              extra3: flete.extras?.[2]?.concepto || '',
+              extra3Costo: flete.extras?.[2]?.costo || '',
+              extra3Venta: flete.extras?.[2]?.venta || ''
+            }));
+          } catch (error) {
+            console.warn('⚠️ No se encontró Flete Terrestre para esta asignación:', error?.response?.status);
+          }
+
           setMostrarModal(false);
         } catch (error) {
           console.error('❌ Error al cargar asignación completa:', error);
@@ -161,102 +226,67 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
   }, [modo, folio, location.key]);
 
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
 
-  try {
-    if (modo === 'editar') {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // 🔄 Prepara los extras desde el form
+      const extras = [];
+
+      for (let i = 1; i <= 6; i++) {
+        const concepto = form[`extra${i}`]?.trim();
+        const costo = parseFloat(form[`extra${i}Costo`]) || 0;
+        const venta = parseFloat(form[`extra${i}Venta`]) || 0;
+
+        // Solo los que tengan al menos un valor útil
+        if (concepto || costo > 0 || venta > 0) {
+          extras.push({ concepto, costo, venta });
+        }
+      }
+
+      const datosFlete = {
+        proveedor: form.proveedor,
+        flete: form.flete,
+        fleteVenta: form.fleteVenta,
+        estadia: form.estadia,
+        estadiaVenta: form.estadiaVenta,
+        burreo: form.burreo,
+        burreoVenta: form.burreoVenta,
+        sobrepeso: form.sobrepeso,
+        sobrepesoVenta: form.sobrepesoVenta,
+        apoyo: form.apoyo,
+        apoyoVenta: form.apoyoVenta,
+        pernocta: form.pernocta,
+        pernoctaVenta: form.pernoctaVenta,
+        extras: extras
+      };
+
       const asignacionId = form.asignacionId;
 
-      // 🔄 Actualiza asignación principal
-      await axios.put(`http://localhost:5050/asignacion-costos/${asignacionId}`, form);
+      if (modo === 'editar') {
+        await axios.put(`http://localhost:5050/asignacion-costos/${asignacionId}`, form);
 
-      // 🔄 Actualiza subformulario AA Despacho
-      await axios.post(`http://localhost:5050/asignacion-costos/aa-despacho/${asignacionId}`, {
-        aaDespacho: form.aaDespacho,
-        importacionCosto: form.importacionCosto,
-        importacionVenta: form.importacionVenta,
-        almacenajesCosto: form.almacenajesCosto,
-        almacenajesVenta: form.almacenajesVenta,
-        servicioCosto: form.servicioCosto,
-        servicioVenta: form.servicioVenta,
-        tipoServicio1: form.tipoServicio1,
-        costoServicio1: form.costoServicio1,
-        ventaServicio1: form.ventaServicio1,
-        tipoServicio2: form.tipoServicio2,
-        costoServicio2: form.costoServicio2,
-        ventaServicio2: form.ventaServicio2
-      });
+        // Enviar subformularios como AA Despacho y Forwarder aquí...
 
-      // 🔄 Actualiza subformulario Forwarder (✅ AHORA INCLUYE CAMPOS FALTANTES)
-      await axios.post(`http://localhost:5050/asignacion-costos/forwarder/${asignacionId}`, {
-        forwarder: form.forwarder,
-        asignadoPor: form.asignadoPor,
-        consignatario: form.consignatario,
-        naviera: form.naviera,
-        fleteInternacionalCosto: form.fleteInternacionalCosto,
-        fleteInternacionalVenta: form.fleteInternacionalVenta,
-        cargosLocalesCosto: form.cargosLocalesCosto,
-        cargosLocalesVenta: form.cargosLocalesVenta,
-        demorasCosto: form.demorasCosto,
-        demorasVenta: form.demorasVenta,
-        abonado: form.abonado,
-        fechaAbon: form.fechaAbon,
-        rembolsado: form.rembolsado,
-        fechaRemb: form.fechaRemb
-      });
+        await axios.post(`http://localhost:5050/asignacion-costos/flete-terrestre/${asignacionId}`, datosFlete);
+        alert('✅ Asignación actualizada correctamente');
+      } else {
+        const res = await axios.post('http://localhost:5050/asignacion-costos', form);
+        const nuevaId = res.data.id;
 
-      alert('✅ Asignación actualizada correctamente');
-    } else {
-      // 🆕 Crea nueva asignación
-      const res = await axios.post('http://localhost:5050/asignacion-costos', form);
-      const asignacionId = res.data.id;
+        // Enviar subformularios como AA Despacho y Forwarder aquí...
 
-      // 💾 Guarda subformulario AA Despacho
-      await axios.post(`http://localhost:5050/asignacion-costos/aa-despacho/${asignacionId}`, {
-        aaDespacho: form.aaDespacho,
-        importacionCosto: form.importacionCosto,
-        importacionVenta: form.importacionVenta,
-        almacenajesCosto: form.almacenajesCosto,
-        almacenajesVenta: form.almacenajesVenta,
-        servicioCosto: form.servicioCosto,
-        servicioVenta: form.servicioVenta,
-        tipoServicio1: form.tipoServicio1,
-        costoServicio1: form.costoServicio1,
-        ventaServicio1: form.ventaServicio1,
-        tipoServicio2: form.tipoServicio2,
-        costoServicio2: form.costoServicio2,
-        ventaServicio2: form.ventaServicio2
-      });
+        await axios.post(`http://localhost:5050/asignacion-costos/flete-terrestre/${nuevaId}`, datosFlete);
+        alert('✅ Asignación creada correctamente');
+      }
 
-      // 💾 Guarda subformulario Forwarder
-      await axios.post(`http://localhost:5050/asignacion-costos/forwarder/${asignacionId}`, {
-        forwarder: form.forwarder,
-        asignadoPor: form.asignadoPor,
-        consignatario: form.consignatario,
-        naviera: form.naviera,
-        fleteInternacionalCosto: form.fleteInternacionalCosto,
-        fleteInternacionalVenta: form.fleteInternacionalVenta,
-        cargosLocalesCosto: form.cargosLocalesCosto,
-        cargosLocalesVenta: form.cargosLocalesVenta,
-        demorasCosto: form.demorasCosto,
-        demorasVenta: form.demorasVenta,
-        abonado: form.abonado,
-        fechaAbon: form.fechaAbon,
-        rembolsado: form.rembolsado,
-        fechaRemb: form.fechaRemb
-      });
-
-      alert('✅ Asignación creada correctamente');
+      navigate('/');
+    } catch (error) {
+      console.error('❌ Error al guardar:', error);
+      alert('Hubo un error al guardar la asignación');
     }
-
-    navigate('/');
-  } catch (error) {
-    console.error('❌ Error al guardar:', error);
-    alert('Hubo un error al guardar la asignación');
-  }
-};
-
+  };
 
 
   return (
@@ -352,7 +382,7 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                 <Accordion.Item eventKey="2">
                   <Accordion.Header>Flete Terrestre</Accordion.Header>
                   <Accordion.Body>
-                    <FleteTerrestre datos={form} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
+                    <FleteTerrestre datos={form} onChange={(nuevosCampos) => setForm(prev => ({ ...prev, ...nuevosCampos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey="3">
