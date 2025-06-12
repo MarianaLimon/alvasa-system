@@ -8,17 +8,18 @@ const Aseguradora = ({ datos = {}, onChange }) => {
     costo: '',
     venta: ''
   });
-
+  
   useEffect(() => {
     if (datos && Object.keys(datos).length > 0) {
       setData({
         aseguradora: datos.aseguradora ?? '',
-        valorMercancia: datos.valorMercancia ?? '',
+        valorMercancia: datos.valorMercancia ?? datos.valor_mercancia ?? '',
         costo: datos.costo ?? '',
         venta: datos.venta ?? ''
       });
     }
   }, [datos]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +36,6 @@ const Aseguradora = ({ datos = {}, onChange }) => {
 
   return (
     <div className="container-subform">
-
       <Row className="mb-3">
         <Col md={4}>
           <Form.Label>Aseguradora</Form.Label>

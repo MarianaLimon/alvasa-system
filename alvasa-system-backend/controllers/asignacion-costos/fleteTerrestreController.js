@@ -1,11 +1,15 @@
 const db = require('../../config/db');
 
-// Función para convertir vacío en 0
-const parseDecimal = (val) => val === '' || val === undefined || val === null ? 0 : parseFloat(val);
+// Función segura para convertir valores vacíos o inválidos a 0
+const parseDecimal = (val) => {
+  const num = parseFloat(val);
+  return isNaN(num) ? 0 : num;
+};
 
 // Guardar o actualizar Flete Terrestre
 const guardarFleteTerrestre = async (req, res) => {
-    console.log('📦 Datos recibidos para guardar flete terrestre:', req.body);
+  console.log('📦 Datos recibidos para guardar flete terrestre:', req.body);
+
   const asignacionId = req.params.id;
   const {
     proveedor,
@@ -18,31 +22,29 @@ const guardarFleteTerrestre = async (req, res) => {
     extras = []
   } = req.body;
 
-  console.log('📦 Datos recibidos para guardar flete terrestre:', req.body);
+  const datos = [
+    proveedor,
+    parseDecimal(flete),
+    parseDecimal(fleteVenta),
+    parseDecimal(estadia),
+    parseDecimal(estadiaVenta),
+    parseDecimal(burreo),
+    parseDecimal(burreoVenta),
+    parseDecimal(sobrepeso),
+    parseDecimal(sobrepesoVenta),
+    parseDecimal(apoyo),
+    parseDecimal(apoyoVenta),
+    parseDecimal(pernocta),
+    parseDecimal(pernoctaVenta)
+  ];
+
+  console.log('🧮 Valores convertidos antes del insert:', datos);
 
   try {
-    // Verifica si ya existe un registro para esa asignación
     db.query('SELECT id FROM flete_terrestre_costos WHERE asignacion_id = ?', [asignacionId], (err, resultados) => {
       if (err) return res.status(500).json({ error: 'Error al buscar Flete Terrestre' });
 
-    const datos = [
-        proveedor,
-        parseDecimal(flete),
-        parseDecimal(fleteVenta),
-        parseDecimal(estadia),
-        parseDecimal(estadiaVenta),
-        parseDecimal(burreo),
-        parseDecimal(burreoVenta),
-        parseDecimal(sobrepeso),
-        parseDecimal(sobrepesoVenta),
-        parseDecimal(apoyo),
-        parseDecimal(apoyoVenta),
-        parseDecimal(pernocta),
-        parseDecimal(pernoctaVenta)
-        ];
-
       if (resultados.length > 0) {
-        // Ya existe → actualizar
         const idFlete = resultados[0].id;
         db.query(
           `UPDATE flete_terrestre_costos SET 
@@ -55,13 +57,14 @@ const guardarFleteTerrestre = async (req, res) => {
            WHERE asignacion_id = ?`,
           [...datos, asignacionId],
           (err) => {
-            if (err) return res.status(500).json({ error: 'Error al actualizar Flete Terrestre' });
+            if (err) {
+              console.error('❌ Error al actualizar Flete Terrestre:', err);
+              return res.status(500).json({ error: 'Error al actualizar Flete Terrestre' });
+            }
             actualizarExtras(idFlete, extras, res);
           }
         );
       } else {
-        // No existe → insertar
-
         console.log('🧪 Insertando flete terrestre con:', [asignacionId, ...datos]);
         db.query(
           `INSERT INTO flete_terrestre_costos 
@@ -70,10 +73,12 @@ const guardarFleteTerrestre = async (req, res) => {
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [asignacionId, ...datos],
           (err, result) => {
-            if (err) return res.status(500).json({ error: 'Error al guardar Flete Terrestre' });
+            if (err) {
+              console.error('❌ Error al insertar Flete Terrestre:', err);
+              return res.status(500).json({ error: 'Error al guardar Flete Terrestre' });
+            }
 
             const nuevoId = result.insertId;
-
             console.log('Extras a guardar:', extras);
             actualizarExtras(nuevoId, extras, res);
           }
@@ -81,7 +86,7 @@ const guardarFleteTerrestre = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error al guardar Flete Terrestre:', error);
+    console.error('❌ Error inesperado al guardar Flete Terrestre:', error);
     res.status(500).json({ error: 'Error en el servidor' });
   }
 };

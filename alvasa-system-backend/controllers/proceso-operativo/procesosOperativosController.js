@@ -25,11 +25,19 @@ const logoData = (() => {
 
 // Función para generar folio
 const generarFolioProceso = (callback) => {
-  const sql = 'SELECT COUNT(*) AS total FROM procesos_operativos';
+  const sql = 'SELECT folio_proceso FROM procesos_operativos ORDER BY id DESC LIMIT 1';
   db.query(sql, (err, result) => {
     if (err) return callback(err);
-    const numero = result[0].total + 1;
-    const folio = `PROC-${numero.toString().padStart(4, '0')}`;
+
+    let nuevoNumero = 1;
+
+    if (result.length > 0 && result[0].folio_proceso) {
+      const ultimoFolio = result[0].folio_proceso; // ej. PROC-0010
+      const numero = parseInt(ultimoFolio.split('-')[1]); // 10
+      nuevoNumero = numero + 1;
+    }
+
+    const folio = `PROC-${nuevoNumero.toString().padStart(4, '0')}`;
     callback(null, folio);
   });
 };
@@ -65,7 +73,7 @@ exports.crearProcesoOperativo = (req, res) => {
     db.query(sqlPrincipal, [
       folioProceso, clienteId, docPO, mercancia, fechaAlta,
       tipoImportacion, ejecutivoCuenta, tipoCarga, valorMercancia,
-      etd, cotizacion_id_final, observaciones, linksDrive
+      linksDrive, etd, cotizacion_id_final, observaciones 
     ], (err, result) => {
       if (err) {
         console.error('Error al insertar proceso operativo:', err);

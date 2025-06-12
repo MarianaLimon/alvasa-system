@@ -36,19 +36,13 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
     cargosLocalesCosto: '', cargosLocalesVenta: '', demorasCosto: '', demorasVenta: '',
     abonado: '', fechaAbon: '', rembolsado: '', fechaRemb: '',
 
-    // Custodia (prefijos para evitar conflicto con Flete Terrestre)
+    // Custodia 
     custodiaProveedor: '', custodiaCosto: '', custodiaVenta: '',
     custodiaPernoctaCosto: '', custodiaPernoctaVenta: '',
     custodiaFalsoCosto: '', custodiaFalsoVenta: '',
     custodiaCancelacionCosto: '', custodiaCancelacionVenta: '',
     custodiaDiasCosto: '', custodiaDiasVenta: '',
     custodiaCostoAlmacenaje: '', custodiaVentaAlmacenaje: '',
-
-    // Paquetería
-    empresa: '', costo: '', venta: '',
-
-    // Aseguradora
-    aseguradora: '', costoAseguradora: '', ventaAseguradora: '',
 
     // Flete Terrestre
     proveedor: '', flete: '', fleteVenta: '',
@@ -63,7 +57,13 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
     extra4: '', extra4Costo: '', extra4Venta: '',
     extra5: '', extra5Costo: '', extra5Venta: '',
     extra6: '', extra6Costo: '', extra6Venta: '',
-    extras: [] 
+    extras: [] ,
+
+    // Paquetería
+    empresa: '', costo: '', venta: '',
+
+    // Aseguradora
+    aseguradora: '', costoAseguradora: '', ventaAseguradora: ''
   });
 
   const cargarProcesoPorId = async (idProceso) => {
@@ -82,6 +82,9 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
           const resProceso = await axios.get(`http://localhost:5050/procesos-operativos/${idProceso}`);
           const proceso = resProceso.data;
 
+          console.log("✅ Valor de la mercancía precargado:", proceso.valor_mercancia);
+          console.log('📦 Proceso recibido:', proceso);
+
           setForm(prev => ({
             ...prev,
             procesoOperativoId: proceso.id || '',
@@ -97,7 +100,8 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
             aaDespacho: proceso.datos_pedimento?.aa_despacho || '',
             forwarder: proceso.informacion_embarque?.forwarde || '',
             consignatario: proceso.informacion_embarque?.consignatario || '',
-            naviera: proceso.informacion_embarque?.naviera || ''
+            naviera: proceso.informacion_embarque?.naviera || '',
+            valorMercancia: proceso.valor_mercancia || '',
           }));
 
           setMostrarModal(false);
@@ -180,7 +184,6 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
           // Flete Terrestre
           try {
             const resFlete = await axios.get(`http://localhost:5050/asignacion-costos/flete-terrestre/${data.id}`);
-
             const flete = resFlete.data;
 
             setForm(prev => ({
@@ -198,9 +201,7 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
               apoyoVenta: flete.apoyo_venta || '',
               pernocta: flete.pernocta || '',
               pernoctaVenta: flete.pernocta_venta || '',
-              extras: flete.extras || [], // ⬅️ aquí agregamos los extras reales del backend
-
-              // Si sigues usando estos campos individuales (opcional)
+              extras: flete.extras || [],
               extra1: flete.extras?.[0]?.concepto || '',
               extra1Costo: flete.extras?.[0]?.costo || '',
               extra1Venta: flete.extras?.[0]?.venta || '',
@@ -214,80 +215,285 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
           } catch (error) {
             console.warn('⚠️ No se encontró Flete Terrestre para esta asignación:', error?.response?.status);
           }
+          
+          // Custodia
+          const custodia = data.custodia || {};
+          setForm(prev => ({
+            ...prev,
+            custodiaProveedor: custodia.custodia_proveedor || '',
+            custodiaCosto: custodia.custodia_costo || '',
+            custodiaVenta: custodia.custodia_venta || '',
+            custodiaPernoctaCosto: custodia.custodia_pernocta_costo || '',
+            custodiaPernoctaVenta: custodia.custodia_pernocta_venta || '',
+            custodiaFalsoCosto: custodia.custodia_falso_costo || '',
+            custodiaFalsoVenta: custodia.custodia_falso_venta || '',
+            custodiaCancelacionCosto: custodia.custodia_cancelacion_costo || '',
+            custodiaCancelacionVenta: custodia.custodia_cancelacion_venta || '',
+            custodiaDiasCosto: custodia.custodia_dias_costo || '',
+            custodiaDiasVenta: custodia.custodia_dias_venta || '',
+            custodiaCostoAlmacenaje: custodia.custodia_costo_almacenaje || '',
+            custodiaVentaAlmacenaje: custodia.custodia_venta_almacenaje || ''
+          }));
+
+          // Paquetería
+          try {
+            const resPaqueteria = await axios.get(`http://localhost:5050/asignacion-costos/paqueteria/${data.id}`);
+            const paqueteria = resPaqueteria.data;
+
+            setForm(prev => ({
+              ...prev,
+              empresa: paqueteria.empresa || '',
+              costo: paqueteria.costo || '',
+              venta: paqueteria.venta || ''
+            }));
+          } catch (error) {
+            console.warn('⚠️ No se encontró Paquetería para esta asignación:', error?.response?.status);
+          }
+
+          // Aseguradora
+          try {
+            const resAseguradora = await axios.get(`http://localhost:5050/asignacion-costos/aseguradora/${data.id}`);
+            const aseguradora = resAseguradora.data;
+
+            setForm(prev => ({
+              ...prev,
+              aseguradora: aseguradora.aseguradora || '',
+              costoAseguradora: aseguradora.costo || '',
+              ventaAseguradora: aseguradora.venta || '',
+              valorMercancia: aseguradora.valor_mercancia || ''
+            }));
+          } catch (error) {
+            console.warn('⚠️ No se encontró Aseguradora para esta asignación:', error?.response?.status);
+          }
+
 
           setMostrarModal(false);
         } catch (error) {
           console.error('❌ Error al cargar asignación completa:', error);
         }
       }
+
+      // En modo crear, verificar si ya hay asignación para este folio
+      if (modo === 'crear' && folio) {
+        try {
+          const { data } = await axios.get(`http://localhost:5050/asignacion-costos/folio/${folio}`);
+          if (data?.id) {
+            navigate(`/asignacion-costos/editar/${data.folio_proceso}`);
+          }
+        } catch (error) {
+          if (error.response?.status === 404) {
+            try {
+              const resProceso = await axios.get(`http://localhost:5050/procesos-operativos/folio/${folio}`);
+              const proceso = resProceso.data;
+
+              setForm(prev => ({
+                ...prev,
+                procesoOperativoId: proceso.id,
+                folioProceso: proceso.folio_proceso,
+                clienteId: proceso.cliente_id,
+                nombreCliente: proceso.cliente,
+                ejecutivoCuenta: proceso.ejecutivo_cuenta,
+                noContenedor: proceso.informacion_embarque?.no_contenedor || '',
+                mercancia: proceso.mercancia,
+                tipoCarga: proceso.tipo_carga,
+                salidaAduana: proceso.salida_retorno_contenedor?.salida_aduana || '',
+                valorMercancia: proceso.valor_mercancia || ''
+              }));
+
+              console.log('✅ Valor de la mercancía precargado:', proceso.valor_mercancia);
+
+              setMostrarModal(false);
+            } catch (e) {
+              console.error('❌ Error al cargar proceso operativo por folio:', e);
+            }
+          } else {
+            console.error('❌ Error al verificar asignación existente:', error);
+          }
+        }
+      }
     };
 
     cargarAsignacion();
-  }, [modo, folio, location.key]);
-
+  }, [modo, folio, location.key, navigate]);
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      // 🔄 Prepara los extras desde el form
-      const extras = [];
+  try {
+    // ─────────────────────────────────────────────────────
+    // 1️⃣ Crear o actualizar la asignación principal
+    // ─────────────────────────────────────────────────────
+    // Sanitizar valorMercancia
+    const valorMercanciaLimpio =
+      form.valorMercancia?.toString().trim() !== "" && !isNaN(form.valorMercancia)
+        ? form.valorMercancia
+        : 0;
+    const formLimpio = { ...form, valorMercancia: valorMercanciaLimpio };
 
-      for (let i = 1; i <= 6; i++) {
-        const concepto = form[`extra${i}`]?.trim();
-        const costo = parseFloat(form[`extra${i}Costo`]) || 0;
-        const venta = parseFloat(form[`extra${i}Venta`]) || 0;
-
-        // Solo los que tengan al menos un valor útil
-        if (concepto || costo > 0 || venta > 0) {
-          extras.push({ concepto, costo, venta });
-        }
-      }
-
-      const datosFlete = {
-        proveedor: form.proveedor,
-        flete: form.flete,
-        fleteVenta: form.fleteVenta,
-        estadia: form.estadia,
-        estadiaVenta: form.estadiaVenta,
-        burreo: form.burreo,
-        burreoVenta: form.burreoVenta,
-        sobrepeso: form.sobrepeso,
-        sobrepesoVenta: form.sobrepesoVenta,
-        apoyo: form.apoyo,
-        apoyoVenta: form.apoyoVenta,
-        pernocta: form.pernocta,
-        pernoctaVenta: form.pernoctaVenta,
-        extras: extras
-      };
-
-      const asignacionId = form.asignacionId;
-
-      if (modo === 'editar') {
-        await axios.put(`http://localhost:5050/asignacion-costos/${asignacionId}`, form);
-
-        // Enviar subformularios como AA Despacho y Forwarder aquí...
-
-        await axios.post(`http://localhost:5050/asignacion-costos/flete-terrestre/${asignacionId}`, datosFlete);
-        alert('✅ Asignación actualizada correctamente');
-      } else {
-        const res = await axios.post('http://localhost:5050/asignacion-costos', form);
-        const nuevaId = res.data.id;
-
-        // Enviar subformularios como AA Despacho y Forwarder aquí...
-
-        await axios.post(`http://localhost:5050/asignacion-costos/flete-terrestre/${nuevaId}`, datosFlete);
-        alert('✅ Asignación creada correctamente');
-      }
-
-      navigate('/');
-    } catch (error) {
-      console.error('❌ Error al guardar:', error);
-      alert('Hubo un error al guardar la asignación');
+    let asignacionId;
+    if (modo === "editar") {
+      console.log("🟠 Actualizando asignación ID:", form.asignacionId);
+      await axios.put(
+        `http://localhost:5050/asignacion-costos/${form.asignacionId}`,
+        formLimpio
+      );
+      asignacionId = form.asignacionId;
+    } else {
+      console.log("🟡 Creando nueva asignación:", formLimpio);
+      const res = await axios.post(
+        "http://localhost:5050/asignacion-costos",
+        formLimpio
+      );
+      asignacionId = res.data.id;
+      console.log("🆔 Nueva asignación ID:", asignacionId);
     }
-  };
 
+    // ─────────────────────────────────────────────────────
+    // 2️⃣ AA Despacho
+    // ─────────────────────────────────────────────────────
+    const datosAADespacho = {
+      aaDespacho: form.aaDespacho,
+      importacionCosto: parseFloat(form.importacionCosto) || 0,
+      importacionVenta: parseFloat(form.importacionVenta) || 0,
+      almacenajesCosto: parseFloat(form.almacenajesCosto) || 0,
+      almacenajesVenta: parseFloat(form.almacenajesVenta) || 0,
+      servicioCosto: parseFloat(form.servicioCosto) || 0,
+      servicioVenta: parseFloat(form.servicioVenta) || 0,
+      tipoServicio1: form.tipoServicio1,
+      costoServicio1: parseFloat(form.costoServicio1) || 0,
+      ventaServicio1: parseFloat(form.ventaServicio1) || 0,
+      tipoServicio2: form.tipoServicio2,
+      costoServicio2: parseFloat(form.costoServicio2) || 0,
+      ventaServicio2: parseFloat(form.ventaServicio2) || 0,
+    };
+    console.log("📤 AA Despacho:", datosAADespacho);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/aa-despacho/${asignacionId}`,
+      datosAADespacho
+    );
+
+    // ─────────────────────────────────────────────────────
+    // 3️⃣ Forwarder
+    // ─────────────────────────────────────────────────────
+    const datosForwarder = {
+      asignadoPor: form.asignadoPor,
+      fleteInternacionalCosto: parseFloat(form.fleteInternacionalCosto) || 0,
+      fleteInternacionalVenta: parseFloat(form.fleteInternacionalVenta) || 0,
+      cargosLocalesCosto: parseFloat(form.cargosLocalesCosto) || 0,
+      cargosLocalesVenta: parseFloat(form.cargosLocalesVenta) || 0,
+      demorasCosto: parseFloat(form.demorasCosto) || 0,
+      demorasVenta: parseFloat(form.demorasVenta) || 0,
+      abonado: form.abonado,
+      fechaAbon: form.fechaAbon,
+      rembolsado: form.rembolsado,
+      fechaRemb: form.fechaRemb,
+      consignatario: form.consignatario,
+      naviera: form.naviera,
+      forwarder: form.forwarder,
+    };
+    console.log("📤 Forwarder:", datosForwarder);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/forwarder/${asignacionId}`,
+      datosForwarder
+    );
+
+    // ─────────────────────────────────────────────────────
+    // 4️⃣ Flete Terrestre
+    // ─────────────────────────────────────────────────────
+    const extras = [];
+    for (let i = 1; i <= 6; i++) {
+      const c = form[`extra${i}`]?.trim();
+      const co = parseFloat(form[`extra${i}Costo`]) || 0;
+      const ve = parseFloat(form[`extra${i}Venta`]) || 0;
+      if (c || co > 0 || ve > 0) extras.push({ concepto: c, costo: co, venta: ve });
+    }
+    const datosFlete = {
+      proveedor: form.proveedor,
+      flete: parseFloat(form.flete) || 0,
+      fleteVenta: parseFloat(form.fleteVenta) || 0,
+      estadia: parseFloat(form.estadia) || 0,
+      estadiaVenta: parseFloat(form.estadiaVenta) || 0,
+      burreo: parseFloat(form.burreo) || 0,
+      burreoVenta: parseFloat(form.burreoVenta) || 0,
+      sobrepeso: parseFloat(form.sobrepeso) || 0,
+      sobrepesoVenta: parseFloat(form.sobrepesoVenta) || 0,
+      apoyo: parseFloat(form.apoyo) || 0,
+      apoyoVenta: parseFloat(form.apoyoVenta) || 0,
+      pernocta: parseFloat(form.pernocta) || 0,
+      pernoctaVenta: parseFloat(form.pernoctaVenta) || 0,
+      extras,
+    };
+    console.log("📤 Flete Terrestre:", datosFlete);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/flete-terrestre/${asignacionId}`,
+      datosFlete
+    );
+
+    // ─────────────────────────────────────────────────────
+    // 5️⃣ Custodia
+    // ─────────────────────────────────────────────────────
+    const datosCustodia = {
+      custodiaProveedor: form.custodiaProveedor,
+      custodiaCosto: parseFloat(form.custodiaCosto) || 0,
+      custodiaVenta: parseFloat(form.custodiaVenta) || 0,
+      custodiaPernoctaCosto: parseFloat(form.custodiaPernoctaCosto) || 0,
+      custodiaPernoctaVenta: parseFloat(form.custodiaPernoctaVenta) || 0,
+      custodiaFalsoCosto: parseFloat(form.custodiaFalsoCosto) || 0,
+      custodiaFalsoVenta: parseFloat(form.custodiaFalsoVenta) || 0,
+      custodiaCancelacionCosto: parseFloat(form.custodiaCancelacionCosto) || 0,
+      custodiaCancelacionVenta: parseFloat(form.custodiaCancelacionVenta) || 0,
+      custodiaDiasCosto: parseFloat(form.custodiaDiasCosto) || 0,
+      custodiaDiasVenta: parseFloat(form.custodiaDiasVenta) || 0,
+      custodiaCostoAlmacenaje: parseFloat(form.custodiaCostoAlmacenaje) || 0,
+      custodiaVentaAlmacenaje: parseFloat(form.custodiaVentaAlmacenaje) || 0,
+    };
+    console.log("📤 Custodia:", datosCustodia);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/custodia/${asignacionId}`,
+      datosCustodia
+    );
+
+    // ─────────────────────────────────────────────────────
+    // 6️⃣ Paquetería
+    // ─────────────────────────────────────────────────────
+    const datosPaqueteria = {
+      empresa: form.empresa,
+      costo: parseFloat(form.costo) || 0,
+      venta: parseFloat(form.venta) || 0,
+    };
+    console.log("📤 Paquetería:", datosPaqueteria);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/paqueteria/${asignacionId}`,
+      datosPaqueteria
+    );
+
+    // ─────────────────────────────────────────────────────
+    // 7️⃣ Aseguradora
+    // ─────────────────────────────────────────────────────
+    const datosAseguradora = {
+      aseguradora: form.aseguradora,
+      costo: parseFloat(form.costoAseguradora) || 0,
+      venta: parseFloat(form.ventaAseguradora) || 0,
+      valorMercancia: parseFloat(form.valorMercancia) || 0
+    };
+
+    console.log("📤 Aseguradora:", datosAseguradora);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/aseguradora/${asignacionId}`,
+      datosAseguradora
+    );
+
+    // ─────────────────────────────────────────────────────
+    alert("✅ Asignación y subformularios guardados correctamente");
+    navigate("/");
+  } catch (error) {
+    console.error("❌ Error al guardar:", error);
+    alert("Hubo un error al guardar la asignación");
+  }
+};
+
+  console.log("🧾 form.valorMercancia:", form.valorMercancia);
 
   return (
     <>
@@ -400,7 +606,23 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                 <Accordion.Item eventKey="5">
                   <Accordion.Header>Aseguradora</Accordion.Header>
                   <Accordion.Body>
-                    <Aseguradora datos={form} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
+                    <Aseguradora
+                      datos={{
+                        aseguradora: form.aseguradora,
+                        costo: form.costoAseguradora,
+                        venta: form.ventaAseguradora,
+                        valorMercancia: form.valorMercancia
+                      }}
+                      onChange={(datos) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          aseguradora: datos.aseguradora,
+                          costoAseguradora: datos.costo,
+                          ventaAseguradora: datos.venta,
+                          valorMercancia: datos.valorMercancia
+                        }))
+                      }
+                    />
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>

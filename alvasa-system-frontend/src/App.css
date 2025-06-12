@@ -182,6 +182,9 @@ body {
 .border-proximamente { border-left-color: #6c757d; }
 .border-proximamente .icon { color: #6c757d; }
 
+.border-asignaciones { border-left-color: rgb(25, 135, 84); }
+.border-asignaciones .icon { color:  rgb(25, 135, 84);; }
+
 .separator {
   width: 2px;
   background-color: #ccc;

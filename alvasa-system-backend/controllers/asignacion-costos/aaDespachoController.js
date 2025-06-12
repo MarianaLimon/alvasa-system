@@ -51,11 +51,18 @@ const guardarAADespacho = (req, res) => {
 
   const valores = [
     asignacionId, aaDespacho,
-    importacionCosto, importacionVenta,
-    almacenajesCosto, almacenajesVenta,
-    servicioCosto, servicioVenta,
-    tipoServicio1, costoServicio1, ventaServicio1,
-    tipoServicio2, costoServicio2, ventaServicio2
+    parseFloat(importacionCosto) || 0,
+    parseFloat(importacionVenta) || 0,
+    parseFloat(almacenajesCosto) || 0,
+    parseFloat(almacenajesVenta) || 0,
+    parseFloat(servicioCosto) || 0,
+    parseFloat(servicioVenta) || 0,
+    tipoServicio1,
+    parseFloat(costoServicio1) || 0,
+    parseFloat(ventaServicio1) || 0,
+    tipoServicio2,
+    parseFloat(costoServicio2) || 0,
+    parseFloat(ventaServicio2) || 0
   ];
 
   db.query(sql, valores, (err, result) => {

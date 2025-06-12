@@ -8,16 +8,28 @@ router.post('/', controller.crearProcesoOperativo);
 
 // Obtener el siguiente folio disponible
 router.get('/siguiente-folio', (req, res) => {
-  db.query('SELECT MAX(id) AS ultimo_id FROM procesos_operativos', (err, resultado) => {
-    if (err) {
-      console.error('Error al generar el folio del proceso:', err);
-      return res.status(500).json({ error: 'Error al generar folio' });
-    }
+  db.query(
+    `SELECT folio_proceso 
+    FROM procesos_operativos 
+    ORDER BY CAST(SUBSTRING(folio_proceso, 6) AS UNSIGNED) DESC 
+    LIMIT 1`,
+    (err, resultado) => {
+      if (err) {
+        console.error('Error al generar el folio del proceso:', err);
+        return res.status(500).json({ error: 'Error al generar folio' });
+      }
 
-    const siguienteId = (resultado[0].ultimo_id || 0) + 1;
-    const folio = `PROC-${String(siguienteId).padStart(4, '0')}`;
-    res.json({ folio });
-  });
+      let nuevoFolio = 'PROC-0001';
+
+      if (resultado.length > 0 && resultado[0].folio_proceso) {
+        const ultimoFolio = resultado[0].folio_proceso; // Ej: "PROC-0011"
+        const numero = parseInt(ultimoFolio.split('-')[1]) + 1;
+        nuevoFolio = `PROC-${String(numero).padStart(4, '0')}`;
+      }
+
+      res.json({ folio: nuevoFolio });
+    }
+  );
 });
 
 // Permitir la edición (PUT)

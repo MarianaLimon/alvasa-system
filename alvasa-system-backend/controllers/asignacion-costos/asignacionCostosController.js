@@ -182,7 +182,6 @@ const obtenerAsignacionCompleta = async (req, res) => {
       [asignacion.id]
     );
 
-    // 3. Flete terrestre y sus extras
     const [fleteTerrestre] = await db.promise().query(
       'SELECT * FROM flete_terrestre_costos WHERE asignacion_id = ?',
       [asignacion.id]
@@ -204,12 +203,31 @@ const obtenerAsignacionCompleta = async (req, res) => {
       };
     }
 
-    // 4. Armar respuesta completa
+    const [custodia] = await db.promise().query(
+      'SELECT * FROM custodia_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+    const [paqueteria] = await db.promise().query(
+      'SELECT empresa, costo, venta FROM paqueteria_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+    const [aseguradora] = await db.promise().query(
+      'SELECT * FROM aseguradora_costos WHERE asignacion_id = ?',
+      [asignacion.id]
+    );
+
+
+    // 3. Armar respuesta completa
     const respuesta = {
       ...asignacion,
       aa_despacho: aaDespacho[0] || null,
       forwarder: forwarder[0] || null,
-      flete_terrestre: fleteCompleto
+      flete_terrestre: fleteCompleto,
+      custodia: custodia[0] || null,
+      paqueteria: paqueteria[0] || null,
+      aseguradora: aseguradora[0] || null
     };
 
     res.json(respuesta);

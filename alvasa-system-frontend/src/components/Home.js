@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Row, Col } from 'react-bootstrap';
-import { BsCalculator, BsClipboard, BsPeople } from 'react-icons/bs';
+import { BsCalculator, BsClipboard, BsPeople, BsCurrencyDollar } from 'react-icons/bs';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5050';
 
@@ -13,33 +13,34 @@ const Home = () => {
   const [authorizedCount, setAuthorizedCount] = useState(0);
   const [procesosCount, setProcesosCount] = useState(0);
   const [procesos, setProcesos] = useState([]);
+  const [asignacionesCount, setAsignacionesCount] = useState(0);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [clientesRes, cotizacionesRes, procesosRes] = await Promise.all([
+        const [clientesRes, cotizacionesRes, procesosRes, asignacionesRes] = await Promise.all([
           axios.get(`${API_URL}/clientes`),
           axios.get(`${API_URL}/cotizaciones`),
-          axios.get(`${API_URL}/procesos-operativos`)
+          axios.get(`${API_URL}/procesos-operativos`),
+          axios.get(`${API_URL}/asignacion-costos`)
         ]);
 
         const clientes = Array.isArray(clientesRes.data) ? clientesRes.data : [];
         const cotizaciones = Array.isArray(cotizacionesRes.data) ? cotizacionesRes.data : [];
         const procesos = Array.isArray(procesosRes.data) ? procesosRes.data : [];
+        const asignaciones = Array.isArray(asignacionesRes.data) ? asignacionesRes.data : [];
 
         setClientsCount(clientes.length);
         setQuotesCount(cotizaciones.length);
         setProcesos(procesos);
         setProcesosCount(procesos.length);
-        setDeliveredCount(
-          cotizaciones.filter(c => c.estatus === 'Entregado a cliente').length
-        );
-        setNegotiationCount(
-          cotizaciones.filter(c => c.estatus === 'En negociación').length
-        );
-        setAuthorizedCount(
-          cotizaciones.filter(c => c.estatus === 'Autorizada').length
-        );
+
+        setDeliveredCount(cotizaciones.filter(c => c.estatus === 'Entregado a cliente').length);
+        setNegotiationCount(cotizaciones.filter(c => c.estatus === 'En negociación').length);
+        setAuthorizedCount(cotizaciones.filter(c => c.estatus === 'Autorizada').length);
+
+        setAsignacionesCount(asignaciones.length);
+
       } catch (error) {
         console.error('Error al cargar datos del dashboard:', error);
       }
@@ -115,6 +116,18 @@ const Home = () => {
                   <div className="col-md-8">
                     <Card.Title className="dashboard-card-key-title">Procesos</Card.Title>
                     <Card.Text className="dashboard-card-key-number">{procesosCount}</Card.Text>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col md={12}>
+              <Card className="dashboard-card border-asignaciones">
+                <Card.Body className="d-flex align-items-center">
+                  <div className="col-md-4"><BsCurrencyDollar className="icon" /></div>
+                  <div className="col-md-8">
+                    <Card.Title className="dashboard-card-key-title">Asignaciones</Card.Title>
+                    <Card.Text className="dashboard-card-key-number">{asignacionesCount}</Card.Text>
                   </div>
                 </Card.Body>
               </Card>
