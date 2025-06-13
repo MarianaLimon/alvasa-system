@@ -221,7 +221,19 @@ const ListaProcesosOperativos = () => {
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => window.open(`http://localhost:5050/asignacion-costos/pdf/${proc.folio_proceso}`, '_blank')}
+                      onClick={async () => {
+                        try {
+                          const res = await axios.get(`http://localhost:5050/asignacion-costos/proceso/${proc.id}`);
+                          const asignacionId = res.data.id;
+
+                          window.open(`http://localhost:5050/asignacion-costos/pdf/${asignacionId}`, '_blank');
+                        } catch (error) {
+                          console.error('Error al obtener ID de asignación:', error);
+                          setToastVariant('danger');
+                          setToastMsg('Error al generar PDF de asignación');
+                          setShowToast(true);
+                        }
+                      }}
                     >
                       <BsPrinter />
                     </Button>

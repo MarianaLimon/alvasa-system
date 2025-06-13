@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <title>PDF Asignación de Costos - <%= asignacion.folio_proceso %></title>
+    <style>
+        @page { size: A4; margin: 10mm; }
+        body { font-family: Arial, sans-serif; font-size: 10px; color: #333; }
+        h2 { margin: 16px 0 8px; border-bottom: 1px solid #888; padding-bottom: 4px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        th, td { border: 1px solid #888; padding: 4px 8px; text-align: left; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .flex-row { display: flex; gap: 24px; }
+        .flex-row > div { flex: 1; }
+        .datos-dos-columnas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .datos-dos-columnas div { width: 48%; }
+    </style>
+    </head>
+    <body>
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <% if (logo) { %>
+            <img src="<%= logo %>" alt="Grupo ALVASA" style="height: 60px;">
+            <% } %>
+            <div>
+            <p><strong>Folio Proceso:</strong> <%= asignacion.folio_proceso %></p>
+            </div>
+        </header>
+
+        <h2>Datos Generales</h2>
+        <div class="datos-dos-columnas">
+            <div><strong>Cliente:</strong> <%= asignacion.nombre_cliente %></div>
+            <div><strong>Ejecutivo Cuenta:</strong> <%= asignacion.ejecutivo_cuenta %></div>
+            <div><strong>Mercancía:</strong> <%= asignacion.mercancia %></div>
+            <div><strong>No. Contenedor:</strong> <%= asignacion.no_contenedor %></div>
+            <div><strong>Tipo Carga:</strong> <%= asignacion.tipo_carga %></div>
+            <div><strong>Salida Aduana:</strong> <%= asignacion.salida_aduana %></div>
+        </div>
+
+
+        <div style="display: flex; gap: 20px; align-items: flex-start; margin-top: 20px;">
+            <!-- AA Despacho -->
+            <div style="flex: 1;">
+                <h2>AA Despacho</h2>
+                <p><strong>Nom. Proveedor:</strong> <%= asignacion.aa_despacho?.aa_despacho || '—' %></p>
+
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Servicios</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center">Importación</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.importacion_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.importacion_venta) %></td>
+                    </tr>
+                    <tr>
+                    <td class="text-center">Almacenajes</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.almacenajes_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.almacenajes_venta) %></td>
+                    </tr>
+                    <tr>
+                    <td class="text-center">Serv. PRG. MO EJEC.</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.servicio_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.servicio_venta) %></td>
+                    </tr>
+                </tbody>
+                </table>
+
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Servicios Adicionales</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.aa_despacho?.tipo_servicio1 || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.costo_servicio1) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.venta_servicio1) %></td>
+                    </tr>
+                    <tr>
+                    <td class="text-center"><%= asignacion.aa_despacho?.tipo_servicio2 || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.costo_servicio2) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aa_despacho?.venta_servicio2) %></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+
+            <!-- Forwarder -->
+            <div style="flex: 1;">
+                <h2>Forwarder</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-bottom: 10px;">
+                    <div style="margin: 0;"><strong>Forwarder:</strong> <%= asignacion.forwarder?.forwarder %></div>
+                    <div style="margin: 0;"><strong>Consignatario:</strong> <%= asignacion.forwarder?.consignatario %></div>
+                    <div style="margin: 0;"><strong>Asignado por:</strong> <%= asignacion.forwarder?.asignado_por %></div>
+                    <div style="margin: 0;"><strong>Naviera:</strong> <%= asignacion.forwarder?.naviera %></div>
+                </div>
+
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Servicios</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center">Flete Internacional</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.flete_internacional_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.flete_internacional_venta) %></td>
+                    </tr>
+                    <tr>
+                    <td class="text-center">Cargos Locales</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.cargos_locales_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.cargos_locales_venta) %></td>
+                    </tr>
+                    <tr>
+                    <td class="text-center">Demoras</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.demoras_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.demoras_venta) %></td>
+                    </tr>
+                </tbody>
+                </table>
+
+                <h4>Garantías</h4>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Abonado</th>
+                    <th class="text-center">Fecha Abono</th>
+                    <th class="text-center">Reembolsado</th>
+                    <th class="text-center">Fecha Reembolso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.abonado) %></td>
+                    <td class="text-center"><%= asignacion.forwarder?.fecha_abon?.split('T')[0] || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.rembolsado) %></td>
+                    <td class="text-center"><%= asignacion.forwarder?.fecha_remb?.split('T')[0] || '—' %></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+        </div><br>
+
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        
+            <!-- Columna Flete Terrestre -->
+            <div>
+                <h2>Flete Terrestre</h2>
+                <p><strong>Nom. Proveedor:</strong> <%= asignacion.flete_terrestre?.proveedor || '—' %></p>
+
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Servicios</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí tus filas normales -->
+                    <tr>
+                    <td class="text-center">Flete</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.flete_terrestre?.flete) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.flete_terrestre?.flete_venta) %></td>
+                    </tr>
+                    <!-- Resto de filas... -->
+                </tbody>
+                </table>
+
+                <% if (asignacion.flete_terrestre?.extras?.length > 0) { %>
+                <h4>Servicios Extras</h4>
+                <table>
+                    <thead>
+                    <tr>
+                        <th class="text-center">Concepto</th>
+                        <th class="text-center">Costo</th>
+                        <th class="text-center">Venta</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% asignacion.flete_terrestre.extras.forEach(extra => { %>
+                        <tr>
+                        <td class="text-center"><%= extra.concepto %></td>
+                        <td class="text-center"><%= formatoMoneda(extra.costo) %></td>
+                        <td class="text-center"><%= formatoMoneda(extra.venta) %></td>
+                        </tr>
+                    <% }) %>
+                    </tbody>
+                </table>
+                <% } %>
+            </div>
+
+            <!-- Columna Custodia -->
+            <div>
+                <h2>Custodia</h2>
+                <p><strong>Proveedor:</strong> <%= asignacion.custodia?.custodia_proveedor || '—' %></p>
+
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Servicio</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center">Servicio Base</td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.custodia?.custodia_costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.custodia?.custodia_venta) %></td>
+                    </tr>
+                    <!-- Resto de filas... -->
+                </tbody>
+                </table>
+
+                <h4>Almacenaje</h4>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Días (Costo)</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Días (Venta)</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.custodia?.custodia_dias_costo || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.custodia?.custodia_costo_almacenaje) %></td>
+                    <td class="text-center"><%= asignacion.custodia?.custodia_dias_venta || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.custodia?.custodia_venta_almacenaje) %></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+
+            <!-- Columna Paquetería -->
+            <div>
+                <h2>Paquetería</h2>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Empresa</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.paqueteria?.empresa || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.paqueteria?.costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.paqueteria?.venta) %></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+
+            <!-- Columna Aseguradora -->
+            <div>
+                <h2>Aseguradora</h2>
+                <p><strong>Valor Mercancía:</strong> <%= formatoMoneda(asignacion.aseguradora?.valor_mercancia) %></p>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Aseguradora</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.aseguradora?.aseguradora || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aseguradora?.costo) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.aseguradora?.venta) %></td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+
+        </div>
+    </body>
+</html>
