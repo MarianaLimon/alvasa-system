@@ -1,7 +1,7 @@
 import React from 'react';
 import { Nav } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import {BsCalculator, BsHouse, BsPeople, BsClipboard, BsPlus} from 'react-icons/bs';
+import {BsCalculator, BsHouse, BsPeople, BsClipboard} from 'react-icons/bs';
 
 const Sidebar = () => {
   const linkClass = ({ isActive }) =>
@@ -30,10 +30,10 @@ const Sidebar = () => {
         </NavLink>
         {/* <NavLink to="/procesos-operativos/nuevo" className={linkClass}>
           <BsPlus className="icon" /> Nuevo Proceso
-        </NavLink> */}
+        </NavLink> 
         <NavLink to="/asignacion-costos/nuevo" className={linkClass}>
           <BsPlus className="icon" /> Nueva Asignación
-        </NavLink>
+        </NavLink>*/}
       </Nav>
     </div>
   );

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, InputGroup, Toast, ToastContainer } from 'react-bootstrap';
-import { BsEye, BsPencil, BsSearch, BsPrinter } from 'react-icons/bs';
+import { BsEye, BsPencil, BsTrash, BsSearch, BsPrinter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 const ListaProcesosOperativos = () => {
   const [procesos, setProcesos] = useState([]);
@@ -33,7 +32,6 @@ const ListaProcesosOperativos = () => {
   const manejarVer = id => navigate(`/procesos-operativos/${id}`);
   const manejarEditar = id => navigate(`/procesos-operativos/editar/${id}`);
 
-  /*
   const manejarEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este proceso?')) return;
     try {
@@ -49,11 +47,6 @@ const ListaProcesosOperativos = () => {
       setShowToast(true);
     }
   };
-  */
-
-  const renderTooltip = (msg) => (
-    <Tooltip className='tooltip-lista'>{msg}</Tooltip>
-  );
 
   const manejarImprimir = async (id) => {
     try {
@@ -174,11 +167,11 @@ const ListaProcesosOperativos = () => {
             <th>Folio</th>
             <th>Cliente</th>
             <th>Ejecutivo</th>
-            <th>Mercancía</th>
+            <th>Naviera</th>
             <th>Contenedor</th>
+            <th>País Origen</th>
             <th>Fecha</th>
-            <th>Acciones Proceso</th>
-            <th>Acciones Costos</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -187,76 +180,23 @@ const ListaProcesosOperativos = () => {
               <td>{proc.folio_proceso}</td>
               <td>{proc.cliente}</td>
               <td>{proc.ejecutivo_cuenta || '—'}</td>
-              <td>{proc.mercancia}</td>
+              <td>{proc.naviera}</td>
               <td>{proc.no_contenedor}</td>
+              <td>{proc.pais_origen}</td>
               <td>{formatoFechaBonita(proc.fecha_alta)}</td>
-
-              {/* Acciones del proceso */}
               <td className="text-center">
-                <Button variant="primary" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
-                <Button variant="primary" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
-                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button>
-              </td>
-
-              {/* Acciones de asignación de costos */}
-              <td className="text-center">
-                {proc.tiene_asignacion ? (
-                  <>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => navigate(`/asignacion-costos/ver/${proc.folio_proceso}`)}
-                    >
-                      <BsEye />
-                    </Button>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => navigate(`/asignacion-costos/editar/${proc.folio_proceso}`)}
-                    >
-                      <BsPencil />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => window.open(`http://localhost:5050/asignacion-costos/pdf/${proc.folio_proceso}`, '_blank')}
-                    >
-                      <BsPrinter />
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
-                        <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsEye />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
-                        <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsPencil />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block" style={{ opacity: 0.5 }}>
-                        <Button variant="secondary" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsPrinter />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                  </>
-                )}
+                <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
+                <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
+                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button> 
+                {/* <Button variant="success" size="sm" className="me-2" onClick={() => navigate(`/asignacion-costos/crear/${proc.id}`)}>
+                  <BsCurrencyDollar />
+                </Button>*/}
+                <Button variant="danger" size="sm" className="me-2" onClick={() => manejarEliminar(proc.id)}><BsTrash /></Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
-
 
       <ToastContainer position="top-end" className="p-3">
         <Toast bg={toastVariant} onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>

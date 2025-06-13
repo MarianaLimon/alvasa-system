@@ -187,10 +187,15 @@ exports.obtenerProcesosOperativos = (req, res) => {
       po.fecha_alta,
       ie.no_contenedor,
       ie.naviera,
-      ie.pais_origen
+      ie.pais_origen,
+      CASE 
+        WHEN ac.id IS NOT NULL THEN 1
+        ELSE 0
+      END AS tiene_asignacion
     FROM procesos_operativos po
     LEFT JOIN clientes c ON po.cliente_id = c.id
     LEFT JOIN informacion_embarque ie ON po.id = ie.proceso_operativo_id
+    LEFT JOIN asignacion_costos ac ON po.id = ac.proceso_operativo_id
     ORDER BY po.fecha_alta DESC
   `;
 
@@ -208,9 +213,14 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
   const { id } = req.params;
 
   const consultaProceso = `
-    SELECT po.*, c.nombre AS cliente
+    SELECT po.*, c.nombre AS cliente,
+      CASE 
+        WHEN ac.id IS NOT NULL THEN 1
+        ELSE 0
+      END AS tiene_asignacion
     FROM procesos_operativos po
     LEFT JOIN clientes c ON po.cliente_id = c.id
+    LEFT JOIN asignacion_costos ac ON po.id = ac.proceso_operativo_id
     WHERE po.id = ?
   `;
 

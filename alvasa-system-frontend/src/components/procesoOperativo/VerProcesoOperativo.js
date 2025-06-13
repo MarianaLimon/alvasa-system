@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, Spinner, Button, Row, Col, Accordion} from 'react-bootstrap';
-import { BsArrowLeft, BsPrinter, BsPencil, BsGoogle } from 'react-icons/bs';
+import { Card, Spinner, Button, Row, Col, Accordion, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import { BsArrowLeft, BsPrinter, BsPencil, BsGoogle, BsEye } from 'react-icons/bs';
 
 const VerProcesoOperativo = () => {
   const { id } = useParams();
@@ -186,17 +186,49 @@ const VerProcesoOperativo = () => {
           </Col>
         </Row>
 
-        <div className="d-flex justify-content-center gap-3 mt-4">
-          <Button variant="secondary" onClick={() => navigate('/procesos-operativos')}>
-            <BsArrowLeft className="me-2" /> Volver a la lista
-          </Button>
-          <Button variant="primary" onClick={manejarImprimir}>
-            <BsPrinter className="me-2" /> Imprimir
-          </Button>
-          <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
-            <BsPencil className="me-2" />
-            Editar proceso operativo
-          </Button>
+        <div className="d-flex flex-column align-items-center gap-2 mt-4">
+          <div className="d-flex gap-3">
+            <Button variant="primary" onClick={manejarImprimir}>
+              <BsPrinter className="me-2" /> Imprimir
+            </Button>
+            <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
+              <BsPencil className="me-2" /> Editar proceso operativo
+            </Button>
+            
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                !proceso.tiene_asignacion ? (
+                  <Tooltip id={`tooltip-${proceso.id}`}>
+                    Este proceso aún no tiene asignación de costos
+                  </Tooltip>
+                ) : <></>
+              }
+            >
+              <span className="d-inline-block">
+                <Button
+                  variant={proceso.tiene_asignacion ? 'info' : 'secondary'}
+                  disabled={!proceso.tiene_asignacion}
+                  onClick={() => {
+                    if (proceso.tiene_asignacion) {
+                      navigate(`/asignacion-costos/ver/${proceso.folio_proceso}`);
+                    }
+                  }}
+                  style={!proceso.tiene_asignacion ? { pointerEvents: 'none' } : {}}
+                >
+                  <BsEye className="me-2" />
+                  Ver asignación de costos
+                </Button>
+              </span>
+            </OverlayTrigger>
+          
+          </div>
+
+          <div>
+            <Button variant="secondary" className="mt-2" onClick={() => navigate('/procesos-operativos')}>
+              <BsArrowLeft className="me-2" /> Volver a la lista
+            </Button>
+          </div>
         </div>
       </Card.Body>
     </Card>

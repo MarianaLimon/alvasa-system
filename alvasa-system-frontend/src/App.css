@@ -380,3 +380,36 @@ body {
   color: #ffffff !important;
   font-weight: bold;
 }
+
+/* Fondo y texto del tooltip */
+.tooltip .tooltip-inner {
+  background-color: #5751AB !important; 
+  color: white;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Flecha del tooltip (parte visible) */
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: #5f27cd !important;
+}
+
+
+/* Ver Asignacion */
+.thead-ver-asignacion th {
+   background-color: #5751AB;
+  color: #fff !important;
+  text-align: center;
+}
