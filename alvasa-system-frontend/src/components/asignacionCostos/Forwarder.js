@@ -15,6 +15,10 @@ const Forwarder = ({ datos = {}, onChange }) => {
     demorasCosto: '',
     demorasVenta: '',
 
+    tipoServicioExtra: '',
+    costoServicioExtra: '',
+    ventaServicioExtra: '',
+
     abonado: '',
     fechaAbon: '',
     rembolsado: '',
@@ -41,6 +45,10 @@ const Forwarder = ({ datos = {}, onChange }) => {
         cargosLocalesVenta: datos.cargosLocalesVenta ?? '',
         demorasCosto: datos.demorasCosto ?? '',
         demorasVenta: datos.demorasVenta ?? '',
+
+        tipoServicioExtra: datos.tipoServicioExtra ?? '',
+        costoServicioExtra: datos.costoServicioExtra ?? '',
+        ventaServicioExtra: datos.ventaServicioExtra ?? '',
 
         abonado: datos.abonado ?? '',
         fechaAbon: datos.fechaAbon ?? '',
@@ -78,12 +86,11 @@ const Forwarder = ({ datos = {}, onChange }) => {
 
         <Col md={6}>
           <Form.Group>
-            <Form.Label>Asignado por</Form.Label>
+            <Form.Label>¿A quién pagamos?</Form.Label>
             <Form.Select name="asignadoPor" value={data.asignadoPor} onChange={handleChange} className="text-uppercase">
               <option value="">Seleccione...</option>
-              <option value="TRADING SOLUTIONS">TRADING SOLUTIONS</option>
-              <option value="WEPORT">WEPORT</option>
-              <option value="MEXPROUD">MEXPROUD</option>
+              <option value="FORWARDER">FORWARDER</option>
+              <option value="NAVIERA">NAVIERA</option>
             </Form.Select>
           </Form.Group>
         </Col>
@@ -137,6 +144,50 @@ const Forwarder = ({ datos = {}, onChange }) => {
         </Col>
         <Col md={5}>
           <Form.Control type="number" name="demorasVenta" value={data.demorasVenta} onChange={handleChange} onKeyDown={soloNumeros} />
+        </Col>
+      </Row>
+
+      <hr className="my-4" />
+      <h6 className="mb-3">Servicio extra</h6>
+
+      <Row className="mb-3">
+        <Col md={4}>
+          <Form.Group>
+            <Form.Label>Tipo de Servicio</Form.Label>
+            <Form.Select
+              name="tipoServicioExtra"
+              value={data.tipoServicioExtra || ''}
+              onChange={handleChange}
+              className="text-uppercase"
+            >
+              <option value="">Seleccione...</option>
+              <option value="CANCELACION DE FLETE">CANCELACIÓN DE FLETE</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group>
+            <Form.Label>Costo</Form.Label>
+            <Form.Control
+              type="number"
+              name="costoServicioExtra"
+              value={data.costoServicioExtra || ''}
+              onChange={handleChange}
+              onKeyDown={soloNumeros}
+            />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group>
+            <Form.Label>Venta</Form.Label>
+            <Form.Control
+              type="number"
+              name="ventaServicioExtra"
+              value={data.ventaServicioExtra || ''}
+              onChange={handleChange}
+              onKeyDown={soloNumeros}
+            />
+          </Form.Group>
         </Col>
       </Row>
 

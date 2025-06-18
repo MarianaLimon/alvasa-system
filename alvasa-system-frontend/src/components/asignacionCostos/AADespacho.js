@@ -164,9 +164,9 @@ const AADespacho = ({ datos = {}, onChange }) => {
               className="text-uppercase"
             >
               <option value="">Seleccione...</option>
-              <option value="GRUPO ADUANAL">GRUPO ADUANAL</option>
-              <option value="BAJA IMPORT">BAJA IMPORT</option>
-              <option value="VANSAC">VANSAC</option>
+              <option value="INBOND">INBOND</option>
+              <option value="APOYO CITA">APOYO CITA</option>
+              <option value="UTILIDAD SERGIO">UTILIDAD SERGIO</option>
             </Form.Select>
           </Form.Group>
         </Col>

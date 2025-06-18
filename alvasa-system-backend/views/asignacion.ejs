@@ -100,7 +100,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin-bottom: 10px;">
                     <div style="margin: 0;"><strong>Forwarder:</strong> <%= asignacion.forwarder?.forwarder %></div>
                     <div style="margin: 0;"><strong>Consignatario:</strong> <%= asignacion.forwarder?.consignatario %></div>
-                    <div style="margin: 0;"><strong>Asignado por:</strong> <%= asignacion.forwarder?.asignado_por %></div>
+                    <div style="margin: 0;"><strong>¿A quién pagamos?</strong> <%= asignacion.forwarder?.asignado_por %></div>
                     <div style="margin: 0;"><strong>Naviera:</strong> <%= asignacion.forwarder?.naviera %></div>
                 </div>
 
@@ -127,6 +127,24 @@
                     <td class="text-center">Demoras</td>
                     <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.demoras_costo) %></td>
                     <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.demoras_venta) %></td>
+                    </tr>
+                </tbody>
+                </table>
+
+                <h4>Servicio Extra</h4>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Tipo</th>
+                    <th class="text-center">Costo</th>
+                    <th class="text-center">Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.forwarder?.tipo_servicio_extra || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.costo_servicio_extra) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.forwarder?.venta_servicio_extra) %></td>
                     </tr>
                 </tbody>
                 </table>

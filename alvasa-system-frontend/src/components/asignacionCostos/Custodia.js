@@ -100,57 +100,60 @@ const Custodia = ({ datos = {}, onChange }) => {
         </Row>
       ))}
 
-      <Row className="mt-4 align-items-end">
-        <Col md={4}><Form.Label>Almacenaje</Form.Label></Col>
-        <Col md={2}>
-          <Form.Group>
-            <Form.Label>DIAS</Form.Label>
-            <Form.Control
-              type="number"
-              name="custodiaDiasCosto"
-              value={data.custodiaDiasCosto}
-              onChange={handleChange}
-              onKeyDown={soloNumeros}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={2}>
-          <Form.Group>
-            <Form.Label>COSTO <span>MXN</span></Form.Label>
-            <Form.Control
-              type="number"
-              name="custodiaCostoAlmacenaje"
-              value={data.custodiaCostoAlmacenaje}
-              onChange={handleChange}
-              onKeyDown={soloNumeros}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={2}>
-          <Form.Group>
-            <Form.Label>DIAS</Form.Label>
-            <Form.Control
-              type="number"
-              name="custodiaDiasVenta"
-              value={data.custodiaDiasVenta}
-              onChange={handleChange}
-              onKeyDown={soloNumeros}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={2}>
-          <Form.Group>
-            <Form.Label>VENTA <span>MXN</span></Form.Label>
-            <Form.Control
-              type="number"
-              name="custodiaVentaAlmacenaje"
-              value={data.custodiaVentaAlmacenaje}
-              onChange={handleChange}
-              onKeyDown={soloNumeros}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+      {/* 🔒 Sección de Almacenaje comentada temporalmente */}
+{/*
+<Row className="mt-4 align-items-end">
+  <Col md={4}><Form.Label>Almacenaje</Form.Label></Col>
+  <Col md={2}>
+    <Form.Group>
+      <Form.Label>DIAS</Form.Label>
+      <Form.Control
+        type="number"
+        name="custodiaDiasCosto"
+        value={data.custodiaDiasCosto}
+        onChange={handleChange}
+        onKeyDown={soloNumeros}
+      />
+    </Form.Group>
+  </Col>
+  <Col md={2}>
+    <Form.Group>
+      <Form.Label>COSTO <span>MXN</span></Form.Label>
+      <Form.Control
+        type="number"
+        name="custodiaCostoAlmacenaje"
+        value={data.custodiaCostoAlmacenaje}
+        onChange={handleChange}
+        onKeyDown={soloNumeros}
+      />
+    </Form.Group>
+  </Col>
+  <Col md={2}>
+    <Form.Group>
+      <Form.Label>DIAS</Form.Label>
+      <Form.Control
+        type="number"
+        name="custodiaDiasVenta"
+        value={data.custodiaDiasVenta}
+        onChange={handleChange}
+        onKeyDown={soloNumeros}
+      />
+    </Form.Group>
+  </Col>
+  <Col md={2}>
+    <Form.Group>
+      <Form.Label>VENTA <span>MXN</span></Form.Label>
+      <Form.Control
+        type="number"
+        name="custodiaVentaAlmacenaje"
+        value={data.custodiaVentaAlmacenaje}
+        onChange={handleChange}
+        onKeyDown={soloNumeros}
+      />
+    </Form.Group>
+  </Col>
+</Row>
+*/}
     </div>
   );
 };

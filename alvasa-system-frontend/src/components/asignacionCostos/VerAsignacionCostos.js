@@ -125,7 +125,7 @@ const VerAsignacionCostos = () => {
                 <Accordion.Body>
                     <Row className="mb-2">
                         <Col md={6}><strong>Forwarder:</strong> {asignacion.forwarder?.forwarder}</Col>
-                        <Col md={6}><strong>Asignado por:</strong> {asignacion.forwarder?.asignado_por}</Col>
+                        <Col md={6}><strong>¿A quién pagamos?</strong> {asignacion.forwarder?.asignado_por}</Col>
                     </Row>
                     <Row className="mb-2">
                         <Col md={6}><strong>Consignatario:</strong> {asignacion.forwarder?.consignatario}</Col>
@@ -157,6 +157,24 @@ const VerAsignacionCostos = () => {
                                 <td className="text-center">{formatoMoneda(asignacion.forwarder?.demoras_venta)}</td>
                             </tr>
                         </tbody>
+                    </Table>
+
+                    <p><strong>Servicio Extra</strong></p>
+                    <Table bordered size="sm">
+                    <thead className="thead-ver-asignacion">
+                        <tr>
+                        <th className="text-center">Servicio</th>
+                        <th className="text-center">Costo</th>
+                        <th className="text-center">Venta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td className="text-center">{asignacion.forwarder?.tipo_servicio_extra || '—'}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.forwarder?.costo_servicio_extra)}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.forwarder?.venta_servicio_extra)}</td>
+                        </tr>
+                    </tbody>
                     </Table>
                     
                     <p><strong>Garantias</strong></p>
@@ -373,7 +391,7 @@ const VerAsignacionCostos = () => {
             </div>
 
             <div>
-                <Button variant="secondary" className="mt-2" onClick={() => navigate('/asignacion-costos')}>
+                <Button variant="secondary" className="mt-2" onClick={() => navigate('/procesos-operativos')}>
                 <BsArrowLeft className="me-2" /> Volver a la lista
                 </Button>
             </div>

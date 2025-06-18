@@ -46,7 +46,7 @@ const Aseguradora = ({ datos = {}, onChange }) => {
             className="text-uppercase"
           >
             <option value="">Seleccione...</option>
-            <option value="LAVAP SEGUROS">LAVAP SEGUROS</option>
+            <option value="NAVAP SEGUROS">NAVAP SEGUROS</option>
           </Form.Select>
         </Col>
         <Col md={4}>

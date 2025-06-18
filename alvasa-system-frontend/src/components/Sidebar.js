@@ -26,7 +26,7 @@ const Sidebar = () => {
           <BsPlus className="icon" /> Nueva Cotización
         </NavLink> */}
         <NavLink to="/procesos-operativos" className={linkClass} end>
-          <BsClipboard className="icon" /> Procesos Operativos
+          <BsClipboard className="icon" /> Alta de Embarques
         </NavLink>
         {/* <NavLink to="/procesos-operativos/nuevo" className={linkClass}>
           <BsPlus className="icon" /> Nuevo Proceso

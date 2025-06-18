@@ -175,6 +175,9 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
             cargosLocalesVenta: fw.cargos_locales_venta || '',
             demorasCosto: fw.demoras_costo || '',
             demorasVenta: fw.demoras_venta || '',
+            tipoServicioExtra: fw.tipo_servicio_extra || '',
+            costoServicioExtra: fw.costo_servicio_extra || '',
+            ventaServicioExtra: fw.venta_servicio_extra || '',
             abonado: fw.abonado || '',
             fechaAbon: formatearFecha(fw.fecha_abon),
             rembolsado: fw.rembolsado || '',
@@ -384,6 +387,9 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
       cargosLocalesVenta: parseFloat(form.cargosLocalesVenta) || 0,
       demorasCosto: parseFloat(form.demorasCosto) || 0,
       demorasVenta: parseFloat(form.demorasVenta) || 0,
+      tipoServicioExtra: form.tipoServicioExtra,
+      costoServicioExtra: form.costoServicioExtra,
+      ventaServicioExtra: form.ventaServicioExtra,
       abonado: form.abonado,
       fechaAbon: form.fechaAbon,
       rembolsado: form.rembolsado,
@@ -486,7 +492,7 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
 
     // ─────────────────────────────────────────────────────
     alert("✅ Asignación y subformularios guardados correctamente");
-    navigate("/");
+    navigate("/procesos-operativos");
   } catch (error) {
     console.error("❌ Error al guardar:", error);
     alert("Hubo un error al guardar la asignación");
@@ -632,9 +638,9 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                   <BsSave className="me-2" />
                   Guardar Asignación de Costos
                 </Button>
-                <Button variant="warning" onClick={() => navigate('/')}>
+                <Button variant="warning" onClick={() => navigate('/procesos-operativos')}>
                   <BsListUl className="me-2" />
-                  Volver al Inicio
+                  Volver a la lista
                 </Button>
               </div>
             </Card.Body>
