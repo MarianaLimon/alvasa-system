@@ -3,13 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Spinner, Button, Row, Col, Accordion, Table } from 'react-bootstrap';
 import { BsArrowLeft, BsPrinter, BsPencil, BsEye } from 'react-icons/bs';
 import axios from 'axios';
-
 const VerAsignacionCostos = () => {
   const { folio } = useParams();
   const navigate = useNavigate();
   const [asignacion, setAsignacion] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchAsignacion = async () => {
       try {
@@ -23,7 +21,6 @@ const VerAsignacionCostos = () => {
     };
     fetchAsignacion();
   }, [folio]);
-
   const formatoMoneda = (valor) => {
     if (!valor) return '—';
     return `$${parseFloat(valor).toLocaleString('es-MX', {
@@ -31,15 +28,27 @@ const VerAsignacionCostos = () => {
       maximumFractionDigits: 2,
     })}`;
   };
+const manejarVerCotizacion = async () => {
+  try {
+    const folioCotizacion = asignacion.despacho?.cotizacion_folio;
+    if (!folioCotizacion) return;
+    const res = await axios.get(`http://localhost:5050/cotizaciones/folio/${folioCotizacion}`);
+    console.log('📦 RES.DATA:', res.data);
+    const id = res.data?.id;
+    if (!id) throw new Error('No se encontró el ID de la cotización');
+    navigate(`/cotizaciones/${id}`);
+  } catch (err) {
+    console.error('Error al obtener ID de la cotización:', err);
+    alert('No se pudo cargar la cotización.');
+  }
+};
 
   if (loading) return <div className="text-center mt-4"><Spinner animation="border" /></div>;
   if (!asignacion) return <div className="text-center mt-4">Asignación no encontrada</div>;
-
   const manejarImprimir = () => {
     const url = `http://localhost:5050/asignacion-costos/pdf/${asignacion.id}`;
     window.open(url, '_blank');
   };
-
   return (
     <Card className="detalle-card">
       <Card.Body>
@@ -50,7 +59,6 @@ const VerAsignacionCostos = () => {
             </Col>
           </Row>
         </Card.Title>
-
         <Row>
           <Col md={4}>
             <h5 className="detalle-title-datosgenerales">Datos Generales</h5>
@@ -60,15 +68,32 @@ const VerAsignacionCostos = () => {
                 <p><strong>No. Contenedor:</strong> {asignacion.no_contenedor}</p>
                 <p><strong>Tipo de Carga:</strong> {asignacion.tipo_carga}</p>
                 <p><strong>Salida Aduana:</strong> {asignacion.salida_aduana}</p>
+                <div className="container-menu-detalle d-flex flex-column gap-2">
+                    <Button variant="primary" className="w-100" onClick={manejarImprimir}>
+                    <BsPrinter className="me-2" /> Imprimir
+                    </Button>
+                    <Button variant="success" className="w-100" onClick={() => navigate(`/asignacion-costos/editar/${folio}`)}>
+                    <BsPencil className="me-2" /> Editar Costos
+                    </Button>
+                    <Button variant="info" className="w-100" onClick={() => navigate(`/procesos-operativos/${asignacion.proceso_operativo_id}`)}>
+                    <BsEye className="me-2" /> Ver Proceso
+                    </Button>
+                    {asignacion.despacho?.cotizacion_folio && (
+                    <Button variant="warning" className="w-100" onClick={manejarVerCotizacion}>
+                        <BsEye className="me-2" /> Ver cotización
+                    </Button>
+                    )}
+                    <Button variant="secondary" className="w-100" onClick={() => navigate('/procesos-operativos')}>
+                    <BsArrowLeft className="me-2" /> Volver a la lista
+                    </Button>
+                </div>
           </Col>
-
           <Col md={8}>
             <Accordion defaultActiveKey="0">
               <Accordion.Item eventKey="0">
                 <Accordion.Header>AA Despacho</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Nom. Proveedor:</strong> {asignacion.aa_despacho?.aa_despacho}</p>
-
                     <Table bordered size="sm">
                         <thead className='thead-ver-asignacion'>
                             <tr>
@@ -95,7 +120,6 @@ const VerAsignacionCostos = () => {
                             </tr>
                         </tbody>
                     </Table>
-
                     <Table bordered size="sm">
                         <thead className='thead-ver-asignacion'>
                             <tr>
@@ -119,7 +143,6 @@ const VerAsignacionCostos = () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Forwarder</Accordion.Header>
                 <Accordion.Body>
@@ -131,7 +154,6 @@ const VerAsignacionCostos = () => {
                         <Col md={6}><strong>Consignatario:</strong> {asignacion.forwarder?.consignatario}</Col>
                         <Col md={6}><strong>Naviera:</strong> {asignacion.forwarder?.naviera}</Col>
                     </Row>
-
                     <Table bordered size="sm">
                         <thead className='thead-ver-asignacion'>
                             <tr>
@@ -158,7 +180,6 @@ const VerAsignacionCostos = () => {
                             </tr>
                         </tbody>
                     </Table>
-
                     <p><strong>Servicio Extra</strong></p>
                     <Table bordered size="sm">
                     <thead className="thead-ver-asignacion">
@@ -198,7 +219,6 @@ const VerAsignacionCostos = () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="2">
                 <Accordion.Header>Flete Terrestre</Accordion.Header>
                 <Accordion.Body>
@@ -244,7 +264,6 @@ const VerAsignacionCostos = () => {
                             </tr>
                         </tbody>
                     </Table>
-
                     {asignacion.flete_terrestre?.extras?.length > 0 && (
                     <>
                         <Table bordered size="sm">
@@ -269,12 +288,10 @@ const VerAsignacionCostos = () => {
                     )}
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="3">
                 <Accordion.Header>Custodia</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Proveedor:</strong> {asignacion.custodia?.custodia_proveedor}</p>
-
                     <Table bordered size="sm">
                         <thead className="thead-ver-asignacion">
                             <tr>
@@ -306,9 +323,8 @@ const VerAsignacionCostos = () => {
                             </tr>
                         </tbody>
                         </Table>
-
-                        <h6 className="mt-3"><strong>Almacenaje</strong></h6>
-                        <Table bordered size="sm">
+                        {/*<h6 className="mt-3"><strong>Almacenaje</strong></h6>
+                         <Table bordered size="sm">
                             <thead className="thead-ver-asignacion">
                                 <tr>
                                 <th className="text-center">Días</th>
@@ -325,10 +341,9 @@ const VerAsignacionCostos = () => {
                                 <td className="text-center">{formatoMoneda(asignacion.custodia?.custodia_venta_almacenaje)}</td>
                                 </tr>
                             </tbody>
-                        </Table>
+                        </Table> */}
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="4">
                 <Accordion.Header>Paquetería</Accordion.Header>
                 <Accordion.Body>
@@ -350,7 +365,6 @@ const VerAsignacionCostos = () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-
               <Accordion.Item eventKey="5">
                 <Accordion.Header>Aseguradora</Accordion.Header>
                 <Accordion.Body>
@@ -373,34 +387,51 @@ const VerAsignacionCostos = () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
+              <Accordion.Item eventKey="6">
+                <Accordion.Header>Despacho</Accordion.Header>
+                <Accordion.Body>
+                    <Table bordered size="sm">
+                    <thead className="thead-ver-asignacion">
+                        <tr>
+                        <th className="text-center">Facturación</th>
+                        <th className="text-center">Comisión Socio</th>
+                        <th className="text-center">Propuesta Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.facturacion)}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_socio)}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.propuesta_costo)}</td>
+                        </tr>
+                    </tbody>
+                    </Table>
+                    <h6 className="mt-3"><strong>Datos de Cotización</strong></h6>
+                    <Table bordered size="sm">
+                    <thead className="thead-ver-asignacion">
+                        <tr>
+                        <th className="text-center">Folio Cotización</th>
+                        <th className="text-center">Propuesta</th>
+                        <th className="text-center">Comisión Intermediario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td className="text-center">{asignacion.despacho?.cotizacion_folio || '—'}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.propuesta_cotizacion)}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_intermediario)}</td>
+                        </tr>
+                    </tbody>
+                    </Table>
+                </Accordion.Body>
+                </Accordion.Item>
             </Accordion>
           </Col>
         </Row>
         
-        <div className="d-flex flex-column align-items-center gap-2 mt-4">
-            <div className="d-flex gap-3">
-                <Button variant="primary" onClick={manejarImprimir}>
-                    <BsPrinter className="me-2" /> Imprimir
-                </Button>
-                <Button variant="warning" onClick={() => navigate(`/asignacion-costos/editar/${folio}`)}>
-                    <BsPencil className="me-2" /> Editar asignación de costos
-                </Button>
-                <Button variant="info" onClick={() => navigate(`/procesos-operativos/${asignacion.proceso_operativo_id}`)}>
-                    <BsEye className="me-2" /> Ver proceso operativo
-                </Button>
-            </div>
-
-            <div>
-                <Button variant="secondary" className="mt-2" onClick={() => navigate('/procesos-operativos')}>
-                <BsArrowLeft className="me-2" /> Volver a la lista
-                </Button>
-            </div>
-        </div>
-
+        
       </Card.Body>
     </Card>
   );
 };
-
 export default VerAsignacionCostos;
-

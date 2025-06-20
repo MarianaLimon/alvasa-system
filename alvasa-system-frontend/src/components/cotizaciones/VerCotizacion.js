@@ -5,7 +5,7 @@ import { Card, Spinner, Button, Row, Col, Accordion, Badge } from 'react-bootstr
 import { BsArrowLeft, BsPencil, BsPrinter } from 'react-icons/bs';
 
 const VerCotizacion = () => {
-  const { id } = useParams();
+  const { id} = useParams();
   const navigate = useNavigate();
   const [cotizacion, setCotizacion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,13 +15,14 @@ const VerCotizacion = () => {
       try {
         const response = await axios.get(`http://localhost:5050/cotizaciones/${id}`);
         setCotizacion(response.data);
-        setLoading(false);
       } catch (error) {
         console.error('Error al obtener la cotización:', error);
+      } finally {
         setLoading(false);
       }
     };
-    obtenerCotizacion();
+
+    if (id) obtenerCotizacion();
   }, [id]);
 
   if (loading) return <div className="text-center mt-4"><Spinner animation="border" /></div>;
@@ -276,7 +277,10 @@ const VerCotizacion = () => {
           <Button variant="primary" onClick={handlePrint}>
             <BsPrinter className="me-2" /> Imprimir
           </Button>
-          <Button variant="warning" onClick={() => navigate(`/cotizaciones/editar/${id}`)}>
+          <Button variant="warning" onClick={() => {
+            const cotId = cotizacion?.id || id;
+            navigate(`/cotizaciones/editar/${cotId}`);
+          }}>
             <BsPencil className="me-2" />
             Editar cotización
           </Button>

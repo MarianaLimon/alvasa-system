@@ -13,6 +13,7 @@ import FleteTerrestre from './FleteTerrestre';
 import Custodia from './Custodia';
 import Paqueteria from './Paqueteria';
 import Aseguradora from './Aseguradora';
+import Despacho from './Despacho';
 
 const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
   console.log("Modo del formulario:", modo);
@@ -63,7 +64,11 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
     empresa: '', costo: '', venta: '',
 
     // Aseguradora
-    aseguradora: '', costoAseguradora: '', ventaAseguradora: ''
+    aseguradora: '', costoAseguradora: '', ventaAseguradora: '',
+
+    // Despacho
+    facturacion: '', comisionSocio: '', propuestaCosto: '',
+    cotizacionFolio: '', propuestaCotizacion: '', comisionIntermediario: '',
   });
 
   const cargarProcesoPorId = async (idProceso) => {
@@ -269,6 +274,23 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
             console.warn('⚠️ No se encontró Aseguradora para esta asignación:', error?.response?.status);
           }
 
+          // Despacho
+          try {
+            const resDespacho = await axios.get(`http://localhost:5050/asignacion-costos/despacho/${data.id}`);
+            const despacho = resDespacho.data;
+
+            setForm(prev => ({
+              ...prev,
+              facturacion: despacho.facturacion || '',
+              comisionSocio: despacho.comision_socio || '',
+              propuestaCosto: despacho.propuesta_costo || '',
+              cotizacionFolio: despacho.cotizacion_folio || '',
+              propuestaCotizacion: despacho.propuesta || '',
+              comisionIntermediario: despacho.comision_intermediario || ''
+            }));
+          } catch (error) {
+            console.warn('⚠️ No se encontró Despacho para esta asignación:', error?.response?.status);
+          }
 
           setMostrarModal(false);
         } catch (error) {
@@ -491,6 +513,23 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
     );
 
     // ─────────────────────────────────────────────────────
+    // 8️⃣ Despacho
+    // ─────────────────────────────────────────────────────
+    const datosDespacho = {
+      facturacion: parseFloat(form.facturacion) || 0,
+      comisionSocio: parseFloat(form.comisionSocio) || 0,
+      propuestaCosto: parseFloat(form.propuestaCosto) || 0,
+      cotizacionFolio: form.cotizacionFolio || '',
+      propuestaCotizacion: parseFloat(form.propuestaCotizacion) || 0,
+      comisionIntermediario: parseFloat(form.comisionIntermediario) || 0
+    };
+    console.log("📤 Despacho:", datosDespacho);
+    await axios.post(
+      `http://localhost:5050/asignacion-costos/despacho/${asignacionId}`,
+      datosDespacho
+    );
+
+    // ─────────────────────────────────────────────────────
     alert("✅ Asignación y subformularios guardados correctamente");
     navigate("/procesos-operativos");
   } catch (error) {
@@ -631,7 +670,24 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                     />
                   </Accordion.Body>
                 </Accordion.Item>
+                <Accordion.Item eventKey="6">
+                  <Accordion.Header>Despacho</Accordion.Header>
+                  <Accordion.Body>
+                    <Despacho
+                      datos={{
+                        facturacion: form.facturacion,
+                        comisionSocio: form.comisionSocio,
+                        propuestaCosto: form.propuestaCosto,
+                        cotizacionFolio: form.cotizacionFolio,
+                        propuestaCotizacion: form.propuestaCotizacion,
+                        comisionIntermediario: form.comisionIntermediario
+                      }}
+                      onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))}
+                    />
+                  </Accordion.Body>
+                </Accordion.Item>
               </Accordion>
+              
 
               <div className="d-flex justify-content-center gap-3">
                 <Button type="submit" variant="success">
