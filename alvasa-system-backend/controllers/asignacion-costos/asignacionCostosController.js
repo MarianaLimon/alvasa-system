@@ -218,6 +218,20 @@ const obtenerAsignacionCompleta = async (req, res) => {
       [asignacion.id]
     );
 
+    const [despacho] = await db.promise().query(`
+      SELECT 
+        d.facturacion,
+        d.comision_socio,
+        d.propuesta_costo,
+        d.cotizacion_folio,
+        c.propuesta AS propuesta_cotizacion,
+        c.monto_comisionista AS comision_intermediario
+      FROM despacho_costos d
+      LEFT JOIN cotizaciones c ON d.cotizacion_folio = c.folio
+      WHERE d.asignacion_id = ? 
+      LIMIT 1
+    `, [asignacion.id]);
+
 
     // 3. Armar respuesta completa
     const respuesta = {
@@ -227,7 +241,8 @@ const obtenerAsignacionCompleta = async (req, res) => {
       flete_terrestre: fleteCompleto,
       custodia: custodia[0] || null,
       paqueteria: paqueteria[0] || null,
-      aseguradora: aseguradora[0] || null
+      aseguradora: aseguradora[0] || null,
+       despacho: despacho[0] || null,
     };
 
     res.json(respuesta);

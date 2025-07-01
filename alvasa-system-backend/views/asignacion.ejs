@@ -287,10 +287,7 @@
                     </tr>
                 </tbody>
                 </table>
-            </div>
 
-            <!-- Columna Aseguradora -->
-            <div>
                 <h2>Aseguradora</h2>
                 <p><strong>Valor Mercancía:</strong> <%= formatoMoneda(asignacion.aseguradora?.valor_mercancia) %></p>
                 <table>
@@ -311,6 +308,46 @@
                 </table>
             </div>
 
+            <!-- Columna Despacho -->
+            <div>
+                <% if (asignacion.despacho) { %>
+                <h2>Despacho</h2>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Facturación</th>
+                    <th class="text-center">Comisión Socio</th>
+                    <th class="text-center">Propuesta Costo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= formatoMoneda(asignacion.despacho.facturacion) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.despacho.comision_socio) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.despacho.propuesta_costo) %></td>
+                    </tr>
+                </tbody>
+                </table>
+
+                <h4>Datos de Cotización</h4>
+                <table>
+                <thead>
+                    <tr>
+                    <th class="text-center">Folio Cotización</th>
+                    <th class="text-center">Propuesta</th>
+                    <th class="text-center">Comisión Intermediario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td class="text-center"><%= asignacion.despacho.cotizacion_folio || '—' %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.despacho.propuesta_cotizacion) %></td>
+                    <td class="text-center"><%= formatoMoneda(asignacion.despacho.comision_intermediario) %></td>
+                    </tr>
+                </tbody>
+                </table>
+            <% } %>
+            </div>
         </div>
     </body>
 </html>

@@ -413,3 +413,78 @@ body {
   color: #fff !important;
   text-align: center;
 }
+
+/* === PAGOS A PROVEEDORES - GRUPOS EXPANDIBLES === */
+.card.pagos-grupo {
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  background-color: white;
+}
+
+.card.pagos-grupo:hover {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+.card.pagos-grupo .card-header {
+  background-color: #f0f2f5;
+  color: #5751ab;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.card.pagos-grupo .card-header:hover {
+  background-color: #e0e2e9;
+}
+
+.card.pagos-grupo .collapse-wrapper {
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.card.pagos-grupo .collapse-wrapper.collapsed {
+  max-height: 0;
+}
+
+.card.pagos-grupo .collapse-wrapper.expanded {
+  max-height: 1000px; /* Suficiente para la mayoría de los casos */
+}
+
+.card.pagos-grupo table {
+  margin: 0;
+}
+
+.card.pagos-grupo .table th {
+  background-color: #f8f9fa;
+  color: #333;
+  text-align: left;
+}
+
+.card.pagos-grupo .table td, 
+.card.pagos-grupo .table th {
+  padding: 0.6rem 1rem;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.collapse-wrapper {
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.collapse-wrapper.collapsed {
+  max-height: 0;
+}
+
+.collapse-wrapper.expanded {
+  max-height: 1000px;
+}

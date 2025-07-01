@@ -12,20 +12,36 @@ exports.guardarForwarder = (req, res) => {
     abonado, fechaAbon, rembolsado, fechaRemb
   } = req.body;
 
+  // Limpieza de valores opcionales
+  const tipoServicioExtraLimpio = tipoServicioExtra?.trim() || null;
+  const costoServicioExtraLimpio = parseFloat(costoServicioExtra) || 0;
+  const ventaServicioExtraLimpio = parseFloat(ventaServicioExtra) || 0;
+
+  const valores = [
+    forwarder || '',
+    asignadoPor || '',
+    consignatario || '',
+    naviera || '',
+    parseFloat(fleteInternacionalCosto) || 0,
+    parseFloat(fleteInternacionalVenta) || 0,
+    parseFloat(cargosLocalesCosto) || 0,
+    parseFloat(cargosLocalesVenta) || 0,
+    parseFloat(demorasCosto) || 0,
+    parseFloat(demorasVenta) || 0,
+    tipoServicioExtraLimpio,
+    costoServicioExtraLimpio,
+    ventaServicioExtraLimpio,
+    parseFloat(abonado) || 0,
+    fechaAbon || null,
+    parseFloat(rembolsado) || 0,
+    fechaRemb || null,
+    asignacionId
+  ];
+
   const sqlVerificar = 'SELECT id FROM forwarder_costos WHERE asignacion_id = ? LIMIT 1';
 
   db.query(sqlVerificar, [asignacionId], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Error al verificar forwarder' });
-
-    const valores = [
-      forwarder, asignadoPor, consignatario, naviera,
-      fleteInternacionalCosto, fleteInternacionalVenta,
-      cargosLocalesCosto, cargosLocalesVenta,
-      demorasCosto, demorasVenta,
-      tipoServicioExtra, costoServicioExtra, ventaServicioExtra,
-      abonado, fechaAbon, rembolsado, fechaRemb,
-      asignacionId
-    ];
 
     if (rows.length > 0) {
       console.log('🔄 Actualizando forwarder con:', valores);

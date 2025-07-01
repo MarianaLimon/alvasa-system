@@ -55,7 +55,7 @@ const manejarVerCotizacion = async () => {
         <Card.Title>
           <Row>
             <Col md={6}>
-              <p className="detalle-title">Folio de Proceso Operativo: {asignacion.folio_proceso}</p>
+                <p className="detalle-title">Detalle de Costos: {asignacion.folio_proceso}</p>
             </Col>
           </Row>
         </Card.Title>

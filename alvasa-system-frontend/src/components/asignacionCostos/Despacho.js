@@ -43,7 +43,7 @@ const Despacho = ({ datos = {}, onChange }) => {
       const res = await axios.get(`http://localhost:5050/cotizaciones/folio/${folio}`);
       const cotizacion = res.data;
       nuevoForm.propuestaCotizacion = cotizacion.propuesta ?? '';
-      nuevoForm.comisionIntermediario = cotizacion.comision_intermediario ?? '';
+      nuevoForm.comisionIntermediario = cotizacion.monto_comisionista ?? '';
     } catch (err) {
       console.error('Error al obtener cotización:', err);
     }
