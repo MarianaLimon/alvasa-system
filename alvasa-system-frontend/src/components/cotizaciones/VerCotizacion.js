@@ -73,6 +73,7 @@ const VerCotizacion = () => {
             <p><strong>Régimen:</strong> {cotizacion.regimen}</p>
             <p><strong>Aduana:</strong> {cotizacion.aduana}</p>
             <p><strong>Tipo de Envío:</strong> {cotizacion.tipo_envio}</p>
+            <p><strong>Incoterm:</strong> {cotizacion.incoterm}</p>
             <p><strong>Cantidad:</strong> {cotizacion.cantidad}</p>
             <p><strong>Estatus:</strong> {cotizacion.estatus}</p>
 
@@ -80,6 +81,7 @@ const VerCotizacion = () => {
 
             <h5 className="detalle-title-resumen">Resumen</h5>
             <p><strong>Fracción IGI:</strong> {cotizacion.fraccion_igi}</p>
+            <p><strong>Costo Despacho:</strong> ${Number(cotizacion.costo_despacho || 0).toFixed(2)}</p>
             <p><strong>Monto Comisionista:</strong> ${Number(cotizacion.monto_comisionista || 0).toFixed(2)}</p>
             <p><strong>Notas:</strong> {cotizacion.notas}</p>
             <p className='detalle-totalgral'><strong>Total:</strong> ${Number(cotizacion.total || 0).toFixed(2)}</p>
@@ -102,6 +104,11 @@ const VerCotizacion = () => {
                   <p><strong>Concepto 1:</strong> {cotizacion.flete_concepto_1} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_1 || 0).toFixed(2)}</p>
                   <p><strong>Concepto 2:</strong> {cotizacion.flete_concepto_2} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_2 || 0).toFixed(2)}</p>
                   <p><strong>Concepto 3:</strong> {cotizacion.flete_concepto_3} - <strong>Valor:</strong> ${Number(cotizacion.flete_valor_3 || 0).toFixed(2)}</p>
+                  {cotizacion.flete_seguro_mercancia === 1 && (
+                    <p className="mb-3">
+                      <strong>Seguro de mercancía:</strong> 0.60% + IVA
+                    </p>
+                  )}
                   <p className='detalle-subformulario'><strong>Total Flete:</strong> ${Number(cotizacion.flete_total || 0).toFixed(2)}</p>
                 </Accordion.Body>
               </Accordion.Item>
@@ -202,7 +209,7 @@ const VerCotizacion = () => {
                         <p><strong>Inspección y Peritaje:</strong> ${Number(servicio.inspeccion_peritaje || 0).toFixed(2)}</p>
                         <p><strong>Documentación de Importación:</strong> ${Number(servicio.documentacion_importacion || 0).toFixed(2)}</p>
                         <p><strong>Garantía de Contenedores:</strong> ${Number(servicio.garantia_contenedores || 0).toFixed(2)}</p>
-                        <p><strong>Distribución:</strong> ${Number(servicio.distribucion || 0).toFixed(2)}</p>
+                        <p><strong>INBOND:</strong> ${Number(servicio.distribucion || 0).toFixed(2)}</p>
                         <p><strong>Serenty PREMIUM:</strong> ${Number(servicio.serenty_premium || 0).toFixed(2)}</p>
                         <p className='detalle-subformulario'><strong>Total Servicios:</strong> <u>${Number(servicio.total_servicios || 0).toFixed(2)}</u></p>
                       </div>

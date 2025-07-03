@@ -162,7 +162,7 @@ const VerProcesoOperativo = () => {
                 </Accordion.Header>
                 <Accordion.Body>
                   <p><strong>Pedimento:</strong> {proceso.datos_pedimento?.pedimento}</p>
-                  <p><strong>Pago Pedimento:</strong> {proceso.datos_pedimento?.pago_pedimento || '—'}</p>
+                  <p><strong>Pago Pedimento:</strong> {formatoFecha(proceso.datos_pedimento?.pago_pedimento)}</p>
                   <p><strong>Régimen:</strong> {proceso.datos_pedimento?.regimen}</p>
                   <p><strong>AA Despacho:</strong> {proceso.datos_pedimento?.aa_despacho}</p>
                   <p><strong>Agente Aduanal:</strong> {proceso.datos_pedimento?.agente_aduanal}</p>

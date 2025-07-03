@@ -153,7 +153,7 @@ const InformacionEmbarque = ({ onChange, datos = {} }) => {
             <Form.Label>POD</Form.Label>
             <Form.Select name="pod" value={form.pod} onChange={handleChange} className="text-uppercase">
               <option value="">Seleccionar</option>
-              {['LZC','N/A','CDMX','PUEBLA','TOLUCA','SAN DIEGO','GUANAJUATO','LB','LA','VERACRUZ'].map(op => (
+              {['LZC','N/A','CDMX','PUEBLA','TOLUCA','SAN DIEGO','GUANAJUATO','LONG BEACH','LOS ANGELES','VERACRUZ'].map(op => (
                 <option key={op} value={op}>{op}</option>
               ))}
             </Form.Select>

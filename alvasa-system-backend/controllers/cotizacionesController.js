@@ -8,7 +8,8 @@ exports.crearCotizacion = (req, res) => {
     folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
     cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta, total,
     ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
-    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+    flete_seguro_mercancia = false, incoterm, costo_despacho
   } = req.body;
 
   const sql = `
@@ -17,21 +18,24 @@ exports.crearCotizacion = (req, res) => {
       tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista,
       notas, propuesta, total, ahorro,
       flete_origen_destino, flete_concepto_1, flete_valor_1,
-      flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+      flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+      flete_seguro_mercancia, incoterm, costo_despacho
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(sql, [
     folio, cliente_id, empresa, fecha, mercancia, regimen, aduana,
     tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta,
     total, ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
-    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+    flete_seguro_mercancia, incoterm, costo_despacho
   ], (err, result) => {
     if (err) return res.status(500).json({ error: 'Error al guardar cotización' });
     res.status(201).json({ message: 'Cotización guardada', id: result.insertId });
   });
 };
+
 
 // ==============================
 // OBTENER TODAS LAS COTIZACIONES
@@ -50,12 +54,15 @@ exports.obtenerTodas = (req, res) => {
       cot.tipo_envio,
       cot.cantidad,
       cot.estatus,
+      cot.incoterm,
       cot.fraccion_igi,
       cot.monto_comisionista,
       cot.notas,
       cot.propuesta,
+      cot.costo_despacho,
       cot.total,
       cot.ahorro,
+      cot.flete_seguro_mercancia,
       cot.fecha_creacion
     FROM cotizaciones cot
     LEFT JOIN clientes cli ON cot.cliente_id = cli.id
@@ -132,7 +139,8 @@ exports.actualizarCotizacion = (req, res) => {
     folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
     cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta, total,
     ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
-    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total
+    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+    flete_seguro_mercancia = false, incoterm, costo_despacho
   } = req.body;
 
   const sql = `
@@ -141,7 +149,8 @@ exports.actualizarCotizacion = (req, res) => {
       tipo_envio = ?, cantidad = ?, estatus = ?, fraccion_igi = ?, monto_comisionista = ?, notas = ?,
       propuesta = ?, total = ?, ahorro = ?,
       flete_origen_destino = ?, flete_concepto_1 = ?, flete_valor_1 = ?,
-      flete_concepto_2 = ?, flete_valor_2 = ?, flete_concepto_3 = ?, flete_valor_3 = ?, flete_total = ?
+      flete_concepto_2 = ?, flete_valor_2 = ?, flete_concepto_3 = ?, flete_valor_3 = ?, flete_total = ?,
+      flete_seguro_mercancia = ?, incoterm = ?, costo_despacho = ?
     WHERE id = ?
   `;
 
@@ -150,12 +159,14 @@ exports.actualizarCotizacion = (req, res) => {
     tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta,
     total, ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
     flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
+    flete_seguro_mercancia, incoterm, costo_despacho,
     id
   ], (err, result) => {
     if (err) return res.status(500).json({ error: 'Error al actualizar cotización' });
     res.status(200).json({ message: 'Cotización actualizada correctamente' });
   });
 };
+
 
 // ==============================
 // ELIMINAR COTIZACIÓN
@@ -177,7 +188,7 @@ exports.obtenerPorFolio = (req, res) => {
   const folio = req.params.folio;
 
   const sql = `
-    SELECT id, propuesta, monto_comisionista
+    SELECT id, propuesta, monto_comisionista, flete_seguro_mercancia
     FROM cotizaciones
     WHERE folio = ?
     LIMIT 1

@@ -16,6 +16,7 @@ export const guardarCotizacion = async ({
   const cotizacionCompleta = {
     ...form,
     propuesta: resumen.propuesta,
+    costo_despacho: resumen.costo_despacho,
     total: resumen.total,
     ahorro: resumen.ahorro,
     fraccion_igi: resumen.fraccion_igi,
@@ -28,6 +29,7 @@ export const guardarCotizacion = async ({
     flete_valor_2: flete.valor2,
     flete_concepto_3: flete.concepto3,
     flete_valor_3: flete.valor3,
+    flete_seguro_mercancia: flete.seguroMercancia ? 1 : 0,
     flete_total: flete.total,
   };
 

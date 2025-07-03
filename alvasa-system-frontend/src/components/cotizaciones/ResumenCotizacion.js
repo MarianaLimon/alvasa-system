@@ -7,6 +7,7 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
   const [monto_comisionista, setMontoComisionista] = useState('');
   const [notas, setNotas] = useState('');
   const [ahorro, setAhorro] = useState(0);
+  const [costo_despacho, setCostoDespacho] = useState('');
 
   const parseNumber = (val) => parseFloat(val) || 0;
 
@@ -18,6 +19,7 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
       setMontoComisionista(datos.monto_comisionista ?? '');
       setNotas(datos.notas ?? '');
       setAhorro(parseFloat(datos.ahorro ?? 0));
+      setCostoDespacho(datos.costo_despacho ?? '');
     }
   }, [datos]);
 
@@ -45,6 +47,7 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
         fraccion_igi,
         monto_comisionista,
         notas,
+        costo_despacho
       });
     }
   }, [
@@ -54,6 +57,7 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
     monto_comisionista,
     notas,
     ahorro,
+    costo_despacho,
     onResumenChange,
   ]);
 
@@ -82,18 +86,29 @@ const ResumenCotizacion = ({ datosTotales, onResumenChange, datos = {} }) => {
             <Form.Label>Propuesta</Form.Label>
             <Form.Control
               type="number"
+              placeholder="$"
               value={propuesta}
               onChange={(e) => setPropuesta(e.target.value)}
               onKeyDown={soloNumeros}
             />
           </Form.Group>
-        </Col>
-        <Col md={4} className="d-flex align-items-end">
           {parseNumber(propuesta) > 0 ? (
             <strong>Ahorro: ${ahorro.toFixed(2)} MXN</strong>
           ) : (
             <span className="text-muted">Introduce una propuesta para calcular el ahorro</span>
           )}
+        </Col>
+        <Col md={4} >
+          <Form.Group>
+            <Form.Label>Costo Despacho</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="$"
+              value={costo_despacho}
+              onChange={(e) => setCostoDespacho(e.target.value)}
+              onKeyDown={soloNumeros}
+            />
+          </Form.Group>
         </Col>
       </Row>
 

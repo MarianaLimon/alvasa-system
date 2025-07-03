@@ -17,17 +17,6 @@ const FormularioDatosGenerales = ({ form, handleChange, clientes, setForm }) => 
           </Form.Select>
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Empresa</Form.Label>
-          <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Fecha</Form.Label>
-          <Form.Control type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
-        </Form.Group>
-      </Col>
-
-      <Col md={4}>
-        <Form.Group className="mb-3">
           <Form.Label>Mercancía</Form.Label>
           <Form.Control type="text" name="mercancia" value={form.mercancia} onChange={handleChange} required />
         </Form.Group>
@@ -38,6 +27,28 @@ const FormularioDatosGenerales = ({ form, handleChange, clientes, setForm }) => 
             <option value="A1">A1</option>
             <option value="A4">A4</option>
           </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Estatus</Form.Label>
+          <Form.Select name="estatus" value={form.estatus} onChange={handleChange} required>
+            <option value="">Seleccionar...</option>
+            <option value="Autorizada">Autorizada</option>
+            <option value="En negociación">En negociación</option>
+            <option value="Entregado a cliente">Entregado a cliente</option>
+            <option value="Declinada">Declinada</option>
+          </Form.Select>
+        </Form.Group>
+
+      </Col>
+
+      <Col md={4}>
+      <Form.Group className="mb-3">
+        <Form.Label>Empresa</Form.Label>
+          <Form.Control type="text" name="empresa" value={form.empresa} onChange={handleChange} />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Cantidad</Form.Label>
+          <Form.Control type="number" name="cantidad" value={form.cantidad} onChange={handleChange} min={0} required />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Aduana</Form.Label>
@@ -56,6 +67,10 @@ const FormularioDatosGenerales = ({ form, handleChange, clientes, setForm }) => 
 
       <Col md={4}>
         <Form.Group className="mb-3">
+          <Form.Label>Fecha</Form.Label>
+          <Form.Control type="date" name="fecha" value={form.fecha} onChange={handleChange} required />
+        </Form.Group>
+        <Form.Group className="mb-3">
           <Form.Label>Tipo de Envío</Form.Label>
           <Form.Select
             name="tipo_envio"
@@ -68,27 +83,28 @@ const FormularioDatosGenerales = ({ form, handleChange, clientes, setForm }) => 
             <option value="Contenedor">Contenedor</option>
           </Form.Select>
         </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Cantidad</Form.Label>
-          <Form.Control
-            type="number"
-            name="cantidad"
-            value={form.cantidad}
-            onChange={handleChange}
-            min={0}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Estatus</Form.Label>
-          <Form.Select name="estatus" value={form.estatus} onChange={handleChange} required>
-            <option value="">Seleccionar...</option>
-            <option value="Autorizada">Autorizada</option>
-            <option value="En negociación">En negociación</option>
-            <option value="Entregado a cliente">Entregado a cliente</option>
-            <option value="Declinada">Declinada</option>
+         <Form.Group className="mb-3">
+          <Form.Label>INCOTERM</Form.Label>
+          <Form.Select
+            name="incoterm"
+            value={form.incoterm || ''}
+            onChange={(e) => setForm({ ...form, incoterm: e.target.value })}
+          >
+            <option value="">Selecciona un INCOTERM</option>
+            <option value="EXW">EXW</option>
+            <option value="FCA">FCA</option>
+            <option value="FAS">FAS</option>
+            <option value="FOB">FOB</option>
+            <option value="CFR">CFR</option>
+            <option value="CIF">CIF</option>
+            <option value="CPT">CPT</option>
+            <option value="CIP">CIP</option>
+            <option value="DAT">DAT</option>
+            <option value="DAP">DAP</option>
+            <option value="DDP">DDP</option>
           </Form.Select>
         </Form.Group>
+        
       </Col>
     </Row>
   );

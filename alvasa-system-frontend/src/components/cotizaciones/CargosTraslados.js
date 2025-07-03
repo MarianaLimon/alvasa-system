@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
 const CargosTraslados = ({ onCargosChange, datos = {} }) => {
@@ -9,24 +9,41 @@ const CargosTraslados = ({ onCargosChange, datos = {} }) => {
     total: 0,
   });
 
+  const yaPrecargado = useRef(false);
+
   useEffect(() => {
     const tieneDatos = Object.keys(datos).length > 0;
-    if (tieneDatos) {
-      setCargos({
+
+    if (tieneDatos && !yaPrecargado.current) {
+      yaPrecargado.current = true;
+
+      const actualizado = {
         terrestre: datos.terrestre ?? '',
         aereo: datos.aereo ?? '',
         custodia: datos.custodia ?? '',
-        total:
-          parseFloat(datos.terrestre || 0) +
-          parseFloat(datos.aereo || 0) +
-          parseFloat(datos.custodia || 0),
+      };
+
+      actualizado.total =
+        parseFloat(actualizado.terrestre || 0) +
+        parseFloat(actualizado.aereo || 0) +
+        parseFloat(actualizado.custodia || 0);
+
+      setCargos(actualizado);
+
+      onCargosChange?.({
+        terrestre: parseFloat(actualizado.terrestre || 0),
+        aereo: parseFloat(actualizado.aereo || 0),
+        custodia: parseFloat(actualizado.custodia || 0),
+        total: actualizado.total,
       });
     }
-  }, [datos]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datos]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const actualizados = { ...cargos, [name]: value };
+
     actualizados.total =
       parseFloat(actualizados.terrestre || 0) +
       parseFloat(actualizados.aereo || 0) +

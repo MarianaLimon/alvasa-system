@@ -18,7 +18,7 @@ const DatosPedimento = ({ onChange, datos = {} }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const nuevoValor = value.toUpperCase();
+    const nuevoValor = name === 'pagoPedimento' ? value : value.toUpperCase();
     const nuevoForm = { ...form, [name]: nuevoValor };
     setForm(nuevoForm);
     if (onChange) onChange(nuevoForm);
@@ -30,7 +30,12 @@ const DatosPedimento = ({ onChange, datos = {} }) => {
         <Col md={6}>
           <Form.Group>
             <Form.Label>Pedimento</Form.Label>
-            <Form.Control name="pedimento" value={form.pedimento} onChange={handleChange} className="text-uppercase" />
+            <Form.Control
+              name="pedimento"
+              value={form.pedimento}
+              onChange={handleChange}
+              className="text-uppercase"
+            />
           </Form.Group>
         </Col>
 
@@ -38,10 +43,10 @@ const DatosPedimento = ({ onChange, datos = {} }) => {
           <Form.Group>
             <Form.Label>Pago Pedimento</Form.Label>
             <Form.Control
+              type="date"
               name="pagoPedimento"
               value={form.pagoPedimento}
               onChange={handleChange}
-              className="text-uppercase"
             />
           </Form.Group>
         </Col>

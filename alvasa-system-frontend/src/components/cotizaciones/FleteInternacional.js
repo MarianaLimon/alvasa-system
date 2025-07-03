@@ -10,12 +10,12 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
     valor2: datos.valor2 || '',
     concepto3: datos.concepto3 || '',
     valor3: datos.valor3 || '',
+    seguroMercancia: datos.seguroMercancia || false,
     total: 0,
   });
 
   const parseNumber = (val) => parseFloat(val) || 0;
 
-  // Precargar datos en modo edición
   useEffect(() => {
     const actualizado = {
       origenDestino: datos.origenDestino || '',
@@ -25,6 +25,7 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
       valor2: datos.valor2 || '',
       concepto3: datos.concepto3 || '',
       valor3: datos.valor3 || '',
+      seguroMercancia: datos.seguroMercancia || false,
     };
 
     actualizado.total =
@@ -36,10 +37,12 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
   }, [datos]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    const actualizado = { ...flete, [name]: value };
+    const { name, value, type, checked } = e.target;
+    const actualizado = {
+      ...flete,
+      [name]: type === 'checkbox' ? checked : value,
+    };
 
-    // Si se borró el concepto, también reseteamos el valor
     if (name.startsWith('concepto') && value === '') {
       const valorKey = `valor${name.slice(-1)}`;
       actualizado[valorKey] = '';
@@ -99,6 +102,8 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                   <>
                     <option value="40">40</option>
                     <option value="20">20</option>
+                    <option value="Flete Marítimo">Flete Marítimo</option>
+                    <option value="Flete Aéreo">Flete Aéreo</option>
                   </>
                 )}
                 {i === 2 && (
@@ -111,8 +116,8 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
                 {i === 3 && (
                   <>
                     <option value="Liberación">Liberación</option>
-                    <option value="Seguro (mercancia)">Seguro (mercancia)</option>
                     <option value="Cargos locales">Cargos locales</option>
+                    {/* Seguro mercancía eliminado */}
                   </>
                 )}
               </Form.Select>
@@ -130,6 +135,25 @@ const FleteInternacional = ({ onFleteChange, datos = {} }) => {
               />
             </Form.Group>
           </Col>
+
+          {i === 3 && (
+            <Col md={12} className="mt-4">
+              <Form.Check
+                type="checkbox"
+                name="seguroMercancia"
+                onChange={handleChange}
+                checked={flete.seguroMercancia || false}
+                label={
+                  <>
+                    Seguro de mercancía
+                    {flete.seguroMercancia && (
+                      <span className="ms-2 text-muted">0.60% + IVA</span>
+                    )}
+                  </>
+                }
+              />
+            </Col>
+          )}
         </Row>
       ))}
 

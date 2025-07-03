@@ -1,5 +1,8 @@
 const db = require('../config/db');
 
+// ==========================
+// OBTENER TODOS LOS CLIENTES
+// ==========================
 exports.getClientes = (req, res) => {
   db.query('SELECT * FROM clientes', (err, results) => {
     if (err) {
@@ -10,8 +13,16 @@ exports.getClientes = (req, res) => {
   });
 };
 
+// ==========================
+// CREAR CLIENTE
+// ==========================
 exports.createCliente = (req, res) => {
-  const { nombre, direccion, telefono, email } = req.body;
+  const { nombre, direccion = '', telefono = '', email = '' } = req.body;
+
+  if (!nombre || nombre.trim() === '') {
+    return res.status(400).json({ error: 'El nombre es obligatorio' });
+  }
+
   const query = 'INSERT INTO clientes (nombre, direccion, telefono, email) VALUES (?, ?, ?, ?)';
   db.query(query, [nombre, direccion, telefono, email], (err, results) => {
     if (err) {
@@ -22,9 +33,17 @@ exports.createCliente = (req, res) => {
   });
 };
 
+// ==========================
+// ACTUALIZAR CLIENTE
+// ==========================
 exports.updateCliente = (req, res) => {
   const { id } = req.params;
-  const { nombre, direccion, telefono, email } = req.body;
+  const { nombre, direccion = '', telefono = '', email = '' } = req.body;
+
+  if (!nombre || nombre.trim() === '') {
+    return res.status(400).json({ error: 'El nombre es obligatorio' });
+  }
+
   const query = 'UPDATE clientes SET nombre = ?, direccion = ?, telefono = ?, email = ? WHERE id = ?';
   db.query(query, [nombre, direccion, telefono, email, id], (err, results) => {
     if (err) {
@@ -38,6 +57,9 @@ exports.updateCliente = (req, res) => {
   });
 };
 
+// ==========================
+// ELIMINAR CLIENTE
+// ==========================
 exports.deleteCliente = (req, res) => {
   const { id } = req.params;
   const query = 'DELETE FROM clientes WHERE id = ?';

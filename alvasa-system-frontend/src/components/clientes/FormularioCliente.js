@@ -39,15 +39,15 @@ const FormularioCliente = ({ onClienteAgregado }) => {
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Dirección</Form.Label>
-            <Form.Control type="text" name="direccion" value={cliente.direccion} onChange={handleChange} required />
+            <Form.Control type="text" name="direccion" value={cliente.direccion} onChange={handleChange} />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Teléfono</Form.Label>
-            <Form.Control type="text" name="telefono" value={cliente.telefono} onChange={handleChange} required />
+            <Form.Control type="text" name="telefono" value={cliente.telefono} onChange={handleChange} />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
-            <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} required />
+            <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} />
           </Form.Group>
           <div className="d-flex justify-content-center mt-3">
             <Button type="submit" variant="success">

@@ -31,6 +31,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     regimen: '',
     aduana: '',
     tipo_envio: '',
+    incoterm: '',
     cantidad: 0,
     estatus: 'En negociación',
   });
@@ -44,6 +45,7 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     valor2: '',
     concepto3: '',
     valor3: '',
+    seguroMercancia: false,
     total: 0,
   });
   const [cargos, setCargos] = useState({});

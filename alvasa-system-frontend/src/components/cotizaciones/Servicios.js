@@ -182,7 +182,7 @@ const Servicios = ({ onServiciosChange, datos = {} }) => {
         </Col>
         <Col md={6}>
           <Form.Group>
-            <Form.Label>T. Distribución</Form.Label>
+            <Form.Label>INBOND</Form.Label>
             <Form.Control
               type="number"
               name="distribucion"

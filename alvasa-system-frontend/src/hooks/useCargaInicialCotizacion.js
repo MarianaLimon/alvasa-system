@@ -56,13 +56,15 @@ export const useCargaInicialCotizacion = ({
           aduana: cot.aduana,
           tipo_envio: cot.tipo_envio,
           cantidad: cot.cantidad,
+          incoterm: cot.incoterm || '',
           estatus: cot.estatus,
           propuesta: cot.propuesta || '',
           total: cot.total || 0,
           ahorro: cot.ahorro || 0,
           fraccion_igi: cot.fraccion_igi || '',
           monto_comisionista: cot.monto_comisionista || '',
-          notas: cot.notas || ''
+          notas: cot.notas || '',
+          costo_despacho: cot.costo_despacho || 0
         });
 
         setFlete({
@@ -73,6 +75,7 @@ export const useCargaInicialCotizacion = ({
           valor2: cot.flete_valor_2,
           concepto3: cot.flete_concepto_3,
           valor3: cot.flete_valor_3,
+          seguroMercancia: cot.flete_seguro_mercancia === 1, 
           total: parseFloat(cot.flete_valor_1 || 0) + parseFloat(cot.flete_valor_2 || 0) + parseFloat(cot.flete_valor_3 || 0),
         });
 
@@ -105,5 +108,6 @@ export const useCargaInicialCotizacion = ({
     } else if (modo === 'editar' && id) {
       obtenerDatosEdicion();
     }
-  }, [modo, id, setForm, setFlete, setCargos, setCargosExtra, setServicios, setCuentaGastos, setPedimento, setImpuestos]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [modo, id]);
 };
