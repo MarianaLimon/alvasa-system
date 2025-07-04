@@ -1,0 +1,34 @@
+thead tr.listapagos-titles th {
+  background-color: #414180 !important;
+  color: white !important;
+}
+
+tr.table-giros{
+ background-color: #F8F8F8 !important;
+}
+
+.giro-header-cell {
+  background-color: #b4b4f3 !important;
+  transition: background-color 0.3s;
+  color: #2e2e2e !important;
+  cursor: pointer;
+}
+
+.giro-header-cell:hover {
+  background-color: #9191e2 !important;
+}
+
+td.fila-pago {
+  background-color: #dfeafc !important;
+  color: #1a1a1a !important;
+  transition: background-color 0.3s ease;
+  border: solid #fff 1.5px;
+}
+
+td.fila-pago:hover {
+  background-color: rgb(188, 200, 228) !important;
+}
+
+tr:hover td.fila-pago {
+  background-color: rgb(188, 200, 228) !important;
+}

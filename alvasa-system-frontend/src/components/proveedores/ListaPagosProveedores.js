@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
-import { BsBoxSeam, BsCalendar, BsPerson } from 'react-icons/bs';
+import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
+import './ListaPagosProveedores.css';
 
 const ListaPagosProveedores = () => {
   const [pagos, setPagos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [gruposAbiertos, setGruposAbiertos] = useState({});
+  const [girosAbiertosPorGrupo, setGirosAbiertosPorGrupo] = useState({});
 
   useEffect(() => {
     const fetchPagos = async () => {
@@ -27,6 +29,14 @@ const ListaPagosProveedores = () => {
     setGruposAbiertos((prev) => ({
       ...prev,
       [grupo]: !prev[grupo],
+    }));
+  };
+
+  const toggleGiro = (grupo, giro) => {
+    const clave = `${grupo}|${giro}`;
+    setGirosAbiertosPorGrupo((prev) => ({
+      ...prev,
+      [clave]: !prev[clave],
     }));
   };
 
@@ -75,7 +85,7 @@ const ListaPagosProveedores = () => {
                 <Card key={grupo} className="m-3">
                   <Card.Header
                     onClick={() => toggleGrupo(grupo)}
-                    style={{ cursor: 'pointer', background: '#f8f9fa' }}
+                    style={{ cursor: 'pointer', background: '#5751AB', color: '#fff'}}
                   >
                      <strong>{grupo}</strong>
                       <span className="mx-3">|</span>
@@ -90,9 +100,9 @@ const ListaPagosProveedores = () => {
                     <span style={{ float: 'right' }}>{abierto ? '▼' : '▶'}</span>
                   </Card.Header>
                   <div className={`collapse-wrapper ${abierto ? 'expanded' : 'collapsed'}`}>
-                    <Table striped bordered hover responsive className="mb-0">
+                    <Table bordered responsive className="mb-0 custom-pagos-table">
                       <thead>
-                        <tr>
+                        <tr className="listapagos-titles">
                           <th># Control</th>
                           <th>Giro</th>
                           <th>Proveedor</th>
@@ -101,15 +111,42 @@ const ListaPagosProveedores = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {pagosGrupo.map((pago, idx) => (
-                          <tr key={idx}>
-                            <td>{pago.numero_control}</td>
-                            <td>{pago.giro}</td>
-                            <td>{pago.proveedor}</td>
-                            <td>{pago.concepto}</td>
-                            <td>${parseFloat(pago.monto).toFixed(2)}</td>
-                          </tr>
-                        ))}
+                        {Object.entries(
+                          pagosGrupo.reduce((acc, pago) => {
+                            if (!acc[pago.giro]) acc[pago.giro] = [];
+                            acc[pago.giro].push(pago);
+                            return acc;
+                          }, {})
+                        ).map(([giro, pagosPorGiro]) => {
+                          const clave = `${grupo}|${giro}`;
+                          const abiertoGiro = girosAbiertosPorGrupo[clave] || false;
+
+                          return (
+                            <React.Fragment key={clave}>
+                              <tr onClick={() => toggleGiro(grupo, giro)}>
+                                <td
+                                  colSpan="5"
+                                  className="giro-header-cell"
+                                >
+                                  <strong>{giro}</strong>
+                                  <span style={{ float: 'right' }}>
+                                    {abiertoGiro ? <BsDashCircle color="#414180" /> : <BsPlusCircle color="#414180" />}
+                                  </span>
+                                </td>
+                              </tr>
+                              {abiertoGiro &&
+                                pagosPorGiro.map((pago, idx) => (
+                                   <tr key={`${pago.numero_control}-${idx}`}>
+    <td className="fila-pago">{pago.numero_control}</td>
+    <td className="fila-pago">{pago.giro}</td>
+    <td className="fila-pago">{pago.proveedor}</td>
+    <td className="fila-pago">{pago.concepto}</td>
+    <td className="fila-pago">${parseFloat(pago.monto).toFixed(2)}</td>
+  </tr>
+                                ))}
+                            </React.Fragment>
+                          );
+                        })}
                       </tbody>
                     </Table>
                   </div>
