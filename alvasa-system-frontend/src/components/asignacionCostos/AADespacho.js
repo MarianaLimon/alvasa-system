@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-const AADespacho = ({ datos = {}, onChange }) => {
+const AADespacho = ({ datos = {}, onChange, costoDespachoCot = '', propuestaCot = '' }) => {
   const [data, setData] = useState({
     aaDespacho: '',
     importacionCosto: '',
@@ -19,32 +19,38 @@ const AADespacho = ({ datos = {}, onChange }) => {
   });
 
   useEffect(() => {
-    const sinDatos =
-      !data.importacionCosto && !data.importacionVenta &&
-      !data.almacenajesCosto && !data.almacenajesVenta &&
-      !data.servicioCosto && !data.servicioVenta &&
-      !data.tipoServicio1 && !data.costoServicio1 && !data.ventaServicio1 &&
-      !data.tipoServicio2 && !data.costoServicio2 && !data.ventaServicio2;
+  console.log('📦 datos:', datos);
+  console.log('💰 costoDespachoCot:', costoDespachoCot);
+  console.log('📈 propuestaCot:', propuestaCot);
+}, [datos, costoDespachoCot, propuestaCot]);
 
-    if (sinDatos && datos && Object.keys(datos).length > 0) {
-      setData({
-        aaDespacho: datos.aaDespacho ?? '',
-        importacionCosto: datos.importacionCosto ?? '',
-        importacionVenta: datos.importacionVenta ?? '',
-        almacenajesCosto: datos.almacenajesCosto ?? '',
-        almacenajesVenta: datos.almacenajesVenta ?? '',
-        servicioCosto: datos.servicioCosto ?? '',
-        servicioVenta: datos.servicioVenta ?? '',
-        tipoServicio1: datos.tipoServicio1 ?? '',
-        costoServicio1: datos.costoServicio1 ?? '',
-        ventaServicio1: datos.ventaServicio1 ?? '',
-        tipoServicio2: datos.tipoServicio2 ?? '',
-        costoServicio2: datos.costoServicio2 ?? '',
-        ventaServicio2: datos.ventaServicio2 ?? '',
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datos]);
+useEffect(() => {
+  let nuevosDatos = {};
+
+  if (datos && Object.keys(datos).length > 0) {
+    nuevosDatos = { ...datos };
+  }
+
+  if (costoDespachoCot) {
+    nuevosDatos.importacionCosto = costoDespachoCot;
+  }
+
+  if (propuestaCot) {
+    nuevosDatos.importacionVenta = propuestaCot;
+  }
+
+  if (Object.keys(nuevosDatos).length > 0) {
+    setData(prev => {
+      const actualizado = { ...prev, ...nuevosDatos };
+      if (onChange) onChange(actualizado);
+      return actualizado;
+    });
+  }    // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [JSON.stringify(datos), costoDespachoCot, propuestaCot]);
+
+    
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +67,6 @@ const AADespacho = ({ datos = {}, onChange }) => {
 
   return (
     <div className="container-subform">
-
       <Row className="mb-3">
         <Col md={6}>
           <Form.Group>
@@ -90,8 +95,8 @@ const AADespacho = ({ datos = {}, onChange }) => {
             type="number"
             name="importacionCosto"
             value={data.importacionCosto}
-            onChange={handleChange}
-            onKeyDown={soloNumeros}
+            disabled
+            readOnly
           />
         </Col>
         <Col md={5}>
@@ -99,8 +104,8 @@ const AADespacho = ({ datos = {}, onChange }) => {
             type="number"
             name="importacionVenta"
             value={data.importacionVenta}
-            onChange={handleChange}
-            onKeyDown={soloNumeros}
+            disabled
+            readOnly
           />
         </Col>
       </Row>
@@ -152,7 +157,6 @@ const AADespacho = ({ datos = {}, onChange }) => {
       <hr className="my-4" />
       <h6 className="mb-3">Servicios adicionales</h6>
 
-      {/* Servicio adicional 1 */}
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>
@@ -196,7 +200,6 @@ const AADespacho = ({ datos = {}, onChange }) => {
         </Col>
       </Row>
 
-      {/* Servicio adicional 2 */}
       <Row className="mb-3">
         <Col md={4}>
           <Form.Group>

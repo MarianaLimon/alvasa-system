@@ -188,7 +188,7 @@ exports.obtenerPorFolio = (req, res) => {
   const folio = req.params.folio;
 
   const sql = `
-    SELECT id, propuesta, monto_comisionista, flete_seguro_mercancia
+    SELECT id, propuesta, monto_comisionista, flete_seguro_mercancia, costo_despacho
     FROM cotizaciones
     WHERE folio = ?
     LIMIT 1

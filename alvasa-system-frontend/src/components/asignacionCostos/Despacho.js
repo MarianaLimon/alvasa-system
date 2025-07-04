@@ -6,10 +6,11 @@ const Despacho = ({ datos = {}, onChange }) => {
   const [form, setForm] = useState({
     facturacion: '',
     comisionSocio: '',
-    propuestaCosto: '',
     cotizacionFolio: '',
-    propuestaCotizacion: '',
     comisionIntermediario: '',
+    // 👇 necesarios para AADespacho aunque no se muestran
+    propuestaCotizacion: '',
+    costo_despacho: ''
   });
 
   const [foliosCotizaciones, setFoliosCotizaciones] = useState([]);
@@ -42,7 +43,10 @@ const Despacho = ({ datos = {}, onChange }) => {
     try {
       const res = await axios.get(`http://localhost:5050/cotizaciones/folio/${folio}`);
       const cotizacion = res.data;
+
+      // Estos datos son necesarios aunque no se vean
       nuevoForm.propuestaCotizacion = cotizacion.propuesta ?? '';
+      nuevoForm.costo_despacho = cotizacion.costo_despacho ?? '';
       nuevoForm.comisionIntermediario = cotizacion.monto_comisionista ?? '';
     } catch (err) {
       console.error('Error al obtener cotización:', err);
@@ -54,44 +58,6 @@ const Despacho = ({ datos = {}, onChange }) => {
 
   return (
     <div className="container-subform">
-      <h5 className="mb-3">Despacho</h5>
-      <Row className="mb-3">
-        <Col md={4}>
-          <Form.Group>
-            <Form.Label>Facturación</Form.Label>
-            <Form.Control
-              type="number"
-              name="facturacion"
-              value={form.facturacion}
-              onChange={handleChange}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={4}>
-          <Form.Group>
-            <Form.Label>Comisión socio</Form.Label>
-            <Form.Control
-              type="number"
-              name="comisionSocio"
-              value={form.comisionSocio}
-              onChange={handleChange}
-            />
-          </Form.Group>
-        </Col>
-        <Col md={4}>
-          <Form.Group>
-            <Form.Label>Propuesta-costo</Form.Label>
-            <Form.Control
-              type="number"
-              name="propuestaCosto"
-              value={form.propuestaCosto}
-              onChange={handleChange}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-
-      <h6 className="mt-4 mb-3">Datos de Cotización</h6>
       <Row className="mb-3">
         <Col md={6}>
           <Form.Group>
@@ -108,23 +74,40 @@ const Despacho = ({ datos = {}, onChange }) => {
             </Form.Select>
           </Form.Group>
         </Col>
-        <Col md={3}>
-          <Form.Group>
-            <Form.Label>Propuesta</Form.Label>
-            <Form.Control
-              type="number"
-              value={form.propuestaCotizacion}
-              readOnly
-            />
-          </Form.Group>
-        </Col>
-        <Col md={3}>
+        <Col md={6}>
           <Form.Group>
             <Form.Label>Comisión Intermediario</Form.Label>
             <Form.Control
               type="number"
               value={form.comisionIntermediario}
+              disabled
               readOnly
+              className="bg-light"
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row className="mb-3">
+        <Col md={6}>
+          <Form.Group>
+            <Form.Label>Facturación</Form.Label>
+            <Form.Control
+              type="number"
+              name="facturacion"
+              value={form.facturacion}
+              onChange={handleChange}
+            />
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group>
+            <Form.Label>Comisión socio</Form.Label>
+            <Form.Control
+              type="number"
+              name="comisionSocio"
+              value={form.comisionSocio}
+              onChange={handleChange}
             />
           </Form.Group>
         </Col>

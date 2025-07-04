@@ -91,6 +91,41 @@ const manejarVerCotizacion = async () => {
           <Col md={8}>
             <Accordion defaultActiveKey="0">
               <Accordion.Item eventKey="0">
+                <Accordion.Header>Despacho</Accordion.Header>
+                <Accordion.Body>
+                    <Table bordered size="sm">
+                    <thead className="thead-ver-asignacion">
+                        <tr>
+                        <th className="text-center">Folio Cotización</th>
+                        <th className="text-center">Comisión Intermediario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td className="text-center">{asignacion.despacho?.cotizacion_folio || '—'}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_intermediario)}</td>
+                        </tr>
+                    </tbody>
+                    </Table>
+                    <Table bordered size="sm">
+                    <thead className="thead-ver-asignacion">
+                        <tr>
+                        <th className="text-center">Facturación</th>
+                        <th className="text-center">Comisión Socio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.facturacion)}</td>
+                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_socio)}</td>
+                        </tr>
+                    </tbody>
+                    </Table>
+                    
+                    
+                </Accordion.Body>
+              </Accordion.Item>
+              <Accordion.Item eventKey="1">
                 <Accordion.Header>AA Despacho</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Nom. Proveedor:</strong> {asignacion.aa_despacho?.aa_despacho}</p>
@@ -143,7 +178,7 @@ const manejarVerCotizacion = async () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="1">
+              <Accordion.Item eventKey="2">
                 <Accordion.Header>Forwarder</Accordion.Header>
                 <Accordion.Body>
                     <Row className="mb-2">
@@ -219,7 +254,7 @@ const manejarVerCotizacion = async () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="2">
+              <Accordion.Item eventKey="3">
                 <Accordion.Header>Flete Terrestre</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Nom. Proveedor: :</strong> {asignacion.flete_terrestre?.proveedor}</p>
@@ -288,7 +323,7 @@ const manejarVerCotizacion = async () => {
                     )}
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="3">
+              <Accordion.Item eventKey="4">
                 <Accordion.Header>Custodia</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Proveedor:</strong> {asignacion.custodia?.custodia_proveedor}</p>
@@ -344,7 +379,7 @@ const manejarVerCotizacion = async () => {
                         </Table> */}
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="4">
+              <Accordion.Item eventKey="5">
                 <Accordion.Header>Paquetería</Accordion.Header>
                 <Accordion.Body>
                     <Table bordered size="sm">
@@ -365,7 +400,7 @@ const manejarVerCotizacion = async () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="5">
+              <Accordion.Item eventKey="6">
                 <Accordion.Header>Aseguradora</Accordion.Header>
                 <Accordion.Body>
                     <p><strong>Valor Mercancía:</strong> {formatoMoneda(asignacion.aseguradora?.valor_mercancia)}</p>
@@ -387,44 +422,7 @@ const manejarVerCotizacion = async () => {
                     </Table>
                 </Accordion.Body>
               </Accordion.Item>
-              <Accordion.Item eventKey="6">
-                <Accordion.Header>Despacho</Accordion.Header>
-                <Accordion.Body>
-                    <Table bordered size="sm">
-                    <thead className="thead-ver-asignacion">
-                        <tr>
-                        <th className="text-center">Facturación</th>
-                        <th className="text-center">Comisión Socio</th>
-                        <th className="text-center">Propuesta Costo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                        <td className="text-center">{formatoMoneda(asignacion.despacho?.facturacion)}</td>
-                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_socio)}</td>
-                        <td className="text-center">{formatoMoneda(asignacion.despacho?.propuesta_costo)}</td>
-                        </tr>
-                    </tbody>
-                    </Table>
-                    <h6 className="mt-3"><strong>Datos de Cotización</strong></h6>
-                    <Table bordered size="sm">
-                    <thead className="thead-ver-asignacion">
-                        <tr>
-                        <th className="text-center">Folio Cotización</th>
-                        <th className="text-center">Propuesta</th>
-                        <th className="text-center">Comisión Intermediario</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                        <td className="text-center">{asignacion.despacho?.cotizacion_folio || '—'}</td>
-                        <td className="text-center">{formatoMoneda(asignacion.despacho?.propuesta_cotizacion)}</td>
-                        <td className="text-center">{formatoMoneda(asignacion.despacho?.comision_intermediario)}</td>
-                        </tr>
-                    </tbody>
-                    </Table>
-                </Accordion.Body>
-                </Accordion.Item>
+              
             </Accordion>
           </Col>
         </Row>

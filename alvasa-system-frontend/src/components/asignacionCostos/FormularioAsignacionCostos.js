@@ -152,18 +152,18 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
           setForm(prev => ({
             ...prev,
             aaDespacho: aa.aa_despacho || '',
-            importacionCosto: aa.importacion_costo || '',
-            importacionVenta: aa.importacion_venta || '',
-            almacenajesCosto: aa.almacenajes_costo || '',
-            almacenajesVenta: aa.almacenajes_venta || '',
-            servicioCosto: aa.servicio_costo || '',
-            servicioVenta: aa.servicio_venta || '',
+            importacionCosto: parseFloat(aa.importacion_costo) || 0,
+            importacionVenta: parseFloat(aa.importacion_venta) || 0,
+            almacenajesCosto: parseFloat(aa.almacenajes_costo) || 0,
+            almacenajesVenta: parseFloat(aa.almacenajes_venta) || 0,
+            servicioCosto: parseFloat(aa.servicio_costo) || 0,
+            servicioVenta: parseFloat(aa.servicio_venta) || 0,
+            costoServicio1: parseFloat(aa.costo_servicio1) || 0,
+            ventaServicio1: parseFloat(aa.venta_servicio1) || 0,
+            costoServicio2: parseFloat(aa.costo_servicio2) || 0,
+            ventaServicio2: parseFloat(aa.venta_servicio2) || 0,
             tipoServicio1: aa.tipo_servicio1 || '',
-            costoServicio1: aa.costo_servicio1 || '',
-            ventaServicio1: aa.venta_servicio1 || '',
-            tipoServicio2: aa.tipo_servicio2 || '',
-            costoServicio2: aa.costo_servicio2 || '',
-            ventaServicio2: aa.venta_servicio2 || ''
+            tipoServicio2: aa.tipo_servicio2 || ''
           }));
 
           // Forwarder
@@ -285,7 +285,7 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
               comisionSocio: despacho.comision_socio || '',
               propuestaCosto: despacho.propuesta_costo || '',
               cotizacionFolio: despacho.cotizacion_folio || '',
-              propuestaCotizacion: despacho.propuesta || '',
+              propuestaCotizacion: parseFloat(despacho.propuesta) || 0,
               comisionIntermediario: despacho.comision_intermediario || ''
             }));
           } catch (error) {
@@ -605,50 +605,74 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
               </Row>
 
               <Accordion defaultActiveKey="0" className="mb-4 text-uppercase">
+
                 <Accordion.Item eventKey="0">
-                  <Accordion.Header>AA Despacho</Accordion.Header>
+                  <Accordion.Header>Despacho</Accordion.Header>
                   <Accordion.Body>
-                    <AADespacho datos={{ 
-                      aaDespacho: form.aaDespacho,
-                      importacionCosto: form.importacionCosto,
-                      importacionVenta: form.importacionVenta,
-                      almacenajesCosto: form.almacenajesCosto,
-                      almacenajesVenta: form.almacenajesVenta,
-                      servicioCosto: form.servicioCosto,
-                      servicioVenta: form.servicioVenta,
-                      tipoServicio1: form.tipoServicio1,
-                      costoServicio1: form.costoServicio1,
-                      ventaServicio1: form.ventaServicio1,
-                      tipoServicio2: form.tipoServicio2,
-                      costoServicio2: form.costoServicio2,
-                      ventaServicio2: form.ventaServicio2 }} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
+                    <Despacho
+                      datos={{
+                        facturacion: form.facturacion,
+                        comisionSocio: form.comisionSocio,
+                        propuestaCosto: form.propuestaCosto,
+                        cotizacionFolio: form.cotizacionFolio,
+                        propuestaCotizacion: form.propuestaCotizacion,
+                        comisionIntermediario: form.comisionIntermediario
+                      }}
+                      onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))}
+                    />
                   </Accordion.Body>
                 </Accordion.Item>
+
                 <Accordion.Item eventKey="1">
+                  <Accordion.Header>AA Despacho</Accordion.Header>
+                  <Accordion.Body>
+                    <AADespacho
+                      datos={{
+                        aaDespacho: form.aaDespacho,
+                        importacionCosto: form.importacionCosto,
+                        importacionVenta: form.importacionVenta,
+                        almacenajesCosto: form.almacenajesCosto,
+                        almacenajesVenta: form.almacenajesVenta,
+                        servicioCosto: form.servicioCosto,
+                        servicioVenta: form.servicioVenta,
+                        tipoServicio1: form.tipoServicio1,
+                        costoServicio1: form.costoServicio1,
+                        ventaServicio1: form.ventaServicio1,
+                        tipoServicio2: form.tipoServicio2,
+                        costoServicio2: form.costoServicio2,
+                        ventaServicio2: form.ventaServicio2,
+                      }}
+                      costoDespachoCot={form.costo_despacho}
+                      propuestaCot={form.propuestaCotizacion}
+                      onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))}
+                    />
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="2">
                   <Accordion.Header>Forwarder</Accordion.Header>
                   <Accordion.Body>
                     <Forwarder datos={form} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
-                <Accordion.Item eventKey="2">
+                <Accordion.Item eventKey="3">
                   <Accordion.Header>Flete Terrestre</Accordion.Header>
                   <Accordion.Body>
                     <FleteTerrestre datos={form} onChange={(nuevosCampos) => setForm(prev => ({ ...prev, ...nuevosCampos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
-                <Accordion.Item eventKey="3">
+                <Accordion.Item eventKey="4">
                   <Accordion.Header>Custodia</Accordion.Header>
                   <Accordion.Body>
                     <Custodia datos={form} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
-                <Accordion.Item eventKey="4">
+                <Accordion.Item eventKey="5">
                   <Accordion.Header>Empresa Paquetería</Accordion.Header>
                   <Accordion.Body>
                     <Paqueteria datos={form} onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))} />
                   </Accordion.Body>
                 </Accordion.Item>
-                <Accordion.Item eventKey="5">
+                <Accordion.Item eventKey="6">
                   <Accordion.Header>Aseguradora</Accordion.Header>
                   <Accordion.Body>
                     <Aseguradora
@@ -669,23 +693,7 @@ const FormularioAsignacionCostos = ({ modo = 'crear' }) => {
                       }
                     />
                   </Accordion.Body>
-                </Accordion.Item>
-                <Accordion.Item eventKey="6">
-                  <Accordion.Header>Despacho</Accordion.Header>
-                  <Accordion.Body>
-                    <Despacho
-                      datos={{
-                        facturacion: form.facturacion,
-                        comisionSocio: form.comisionSocio,
-                        propuestaCosto: form.propuestaCosto,
-                        cotizacionFolio: form.cotizacionFolio,
-                        propuestaCotizacion: form.propuestaCotizacion,
-                        comisionIntermediario: form.comisionIntermediario
-                      }}
-                      onChange={(datos) => setForm(prev => ({ ...prev, ...datos }))}
-                    />
-                  </Accordion.Body>
-                </Accordion.Item>
+                </Accordion.Item>            
               </Accordion>
               
 
