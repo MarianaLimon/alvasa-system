@@ -21,18 +21,23 @@ const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
     setSaldoRestante((saldo - value).toFixed(2));
   };
 
-  const handleGuardar = () => {
+  const handleGuardar = async () => {
     if (!abono || !fechaPago || !tipoTransaccion) return alert('Completa todos los campos');
+
+    if (parseFloat(abono) > parseFloat(saldo)) {
+        return alert('El abono no puede ser mayor al saldo actual');
+    }
+
     const nuevoPago = {
-      numero_control: numeroControl,
-      abono,
-      fecha_pago: fechaPago,
-      tipo_transaccion: tipoTransaccion,
-      saldo_restante: saldoRestante
+        numero_control: numeroControl,
+        abono,
+        fecha_pago: fechaPago,
+        tipo_transaccion: tipoTransaccion,
+        saldo_restante: saldoRestante
     };
-    onGuardar(nuevoPago);
-    onCerrar();
-  };
+
+    await onGuardar(nuevoPago); 
+    };
 
   return (
     <Modal show={mostrar} onHide={onCerrar} centered>

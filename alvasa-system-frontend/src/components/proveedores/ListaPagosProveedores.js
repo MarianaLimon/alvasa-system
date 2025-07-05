@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
@@ -13,19 +14,42 @@ const ListaPagosProveedores = () => {
   const [girosAbiertosPorGrupo, setGirosAbiertosPorGrupo] = useState({});
   const [valoresExtras, setValoresExtras] = useState({});
   const [mostrarModalPago, setMostrarModalPago] = useState(false);
-const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
+  const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
+  const navigate = useNavigate();
+
+  const fetchPagos = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('http://localhost:5050/pagos-proveedores');
+      const pagos = res.data;
+
+      // Obtener los abonos por cada numero_control
+      const valoresConAbonos = {};
+
+      for (const pago of pagos) {
+        const numero = pago.numero_control;
+        const responseAbonos = await axios.get(`http://localhost:5050/pagos-proveedores/abonos/total/${numero}`);
+        const totalAbonado = responseAbonos.data?.total ?? 0;
+
+
+        valoresConAbonos[numero] = {
+          tipoMoneda: '',
+          tipoCambio: '',
+          abonado: totalAbonado
+        };
+      }
+
+      setValoresExtras(valoresConAbonos);
+      setPagos(pagos);
+    } catch (error) {
+      console.error('Error al cargar la lista de pagos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
-    const fetchPagos = async () => {
-      try {
-        const res = await axios.get('http://localhost:5050/pagos-proveedores');
-        setPagos(res.data);
-      } catch (error) {
-        console.error('Error al cargar pagos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPagos();
   }, []);
 
@@ -54,11 +78,29 @@ const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
     setPagoSeleccionado(null);
   };
 
-  const guardarPago = (pago) => {
-    console.log('Pago guardado:', pago);
-    // Aquí iría tu lógica de axios.post() al backend cuando lo tengas listo
-  };
+  const guardarPago = async (pago) => {
+    try {
+      if (parseFloat(pago.abono) > parseFloat(pago.saldo_restante)) {
+        return alert('El abono no puede ser mayor al saldo restante');
+      }
 
+      await axios.post('http://localhost:5050/pagos-proveedores/abonos', {
+        numero_control: pago.numero_control,
+        abono: pago.abono,
+        fecha_pago: pago.fecha_pago,
+        tipo_transaccion: pago.tipo_transaccion
+      });
+
+      cerrarModalPago();
+      alert('Pago guardado correctamente');
+      
+      await fetchPagos(); // 🔄 Refrescar la lista de pagos
+
+    } catch (error) {
+      console.error('Error al guardar el abono:', error);
+      alert('Error al guardar el abono');
+    }
+  };
 
   const pagosFiltrados = pagos.filter((p) =>
     p.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -178,7 +220,7 @@ const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
                                         const monto = parseFloat(pago.monto);
                                         const tipoCambio = parseFloat(valores.tipoCambio);
                                         const pesos = tipoCambio ? (monto * tipoCambio).toFixed(2) : monto.toFixed(2);
-                                        const pagosRealizados = 0; // Luego lo reemplazarás por la suma real desde el backend
+                                        const pagosRealizados = parseFloat(valores.abonado) || 0;
                                         const saldoActual = (pesos - pagosRealizados).toFixed(2);
 
                                         const handleChange = (campo, valor) => {
@@ -226,23 +268,17 @@ const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
                                               >
                                                 Pagar
                                               </button>
-                                              <button className="btn btn-sm btn-outline-primary">Pagos</button>
+                                              <button
+                                                className="btn btn-sm btn-outline-primary"
+                                                onClick={() => navigate(`/pagos-proveedores/${pago.numero_control}`)}
+                                              >
+                                                Pagos
+                                              </button>
                                             </td>
-
-                                            {pagoSeleccionado && (
-                                              <ModalPago
-                                                mostrar={mostrarModalPago}
-                                                onCerrar={cerrarModalPago}
-                                                numeroControl={pagoSeleccionado.numeroControl}
-                                                saldo={pagoSeleccionado.saldo}
-                                                onGuardar={guardarPago}
-                                              />
-                                            )}
                                           </> 
                                         );
                                       })()}
                                     </tr>
-
                                 ))}
                             </React.Fragment>
                           );
@@ -256,6 +292,15 @@ const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
           </div>
         )}
       </Card.Body>
+      {pagoSeleccionado && (
+        <ModalPago
+          mostrar={mostrarModalPago}
+          onCerrar={cerrarModalPago}
+          numeroControl={pagoSeleccionado.numeroControl}
+          saldo={pagoSeleccionado.saldo}
+          onGuardar={guardarPago}
+        />
+      )}
     </Card>
   );
 };

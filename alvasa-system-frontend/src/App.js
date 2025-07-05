@@ -18,6 +18,7 @@ import VerProcesoOperativo from './components/procesoOperativo/VerProcesoOperati
 import FormularioAsignacionCostos from './components/asignacionCostos/FormularioAsignacionCostos';
 import VerAsignacionCostos from './components/asignacionCostos/VerAsignacionCostos';
 import ListaPagosProveedores from './components/proveedores/ListaPagosProveedores';
+import ListaAbonos from './components/proveedores/ListaAbonos';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route path="/asignacion-costos/editar/:folio" element={<FormularioAsignacionCostos modo="editar" />} />
             <Route path="/asignacion-costos/ver/:folio" element={<VerAsignacionCostos />} />
             <Route path="/pagos-proveedores" element={<ListaPagosProveedores />} />
+            <Route path="/pagos-proveedores/:numero_control" element={<ListaAbonos />} />
           </Routes>
         </div>
       </div>

@@ -11,6 +11,8 @@ function formatearFecha(fechaISO) {
   return `${dia} ${mesCapitalizado} ${anio}`;
 }
 
+// Lista proveedores
+
 exports.obtenerListaPagosProveedores = async (req, res) => {
   try {
     const [procesos] = await db.promise().query(`
@@ -244,5 +246,66 @@ exports.obtenerListaPagosProveedores = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener lista de pagos:', error);
     res.status(500).json({ message: 'Error al obtener lista de pagos' });
+  }
+};
+
+
+// Nuevo: guardar un abono
+
+exports.registrarAbono = async (req, res) => {
+  try {
+    const { numero_control, abono, fecha_pago, tipo_transaccion } = req.body;
+
+    if (!numero_control || !abono || !fecha_pago || !tipo_transaccion) {
+      return res.status(400).json({ message: 'Faltan datos obligatorios.' });
+    }
+
+    await db.promise().query(`
+      INSERT INTO abonos_pagos (numero_control, abono, fecha_pago, tipo_transaccion)
+      VALUES (?, ?, ?, ?)
+    `, [numero_control, abono, fecha_pago, tipo_transaccion]);
+
+    res.status(200).json({ message: 'Pago registrado correctamente.' });
+  } catch (error) {
+    console.error('Error al guardar abono:', error);
+    res.status(500).json({ message: 'Error al guardar el pago.' });
+  }
+};
+
+// Obtener abonos por número de control
+exports.obtenerAbonosPorNumeroControl = async (req, res) => {
+  const { numero_control } = req.params;
+
+  try {
+    const [abonos] = await db.promise().query(
+      `SELECT numero_control, abono, fecha_pago, tipo_transaccion 
+       FROM abonos_pagos 
+       WHERE numero_control = ? 
+       ORDER BY fecha_pago ASC`,
+      [numero_control]
+    );
+
+    res.status(200).json(abonos);
+  } catch (error) {
+    console.error('Error al obtener abonos:', error);
+    res.status(500).json({ message: 'Error al obtener abonos' });
+  }
+};
+
+exports.obtenerTotalAbonos = async (req, res) => {
+  const { numero_control } = req.params;
+
+  try {
+    const [result] = await db.promise().query(`
+      SELECT SUM(abono) AS total_abonos 
+      FROM abonos_pagos 
+      WHERE numero_control = ?
+    `, [numero_control]);
+
+    const total = result[0].total_abonos || 0;
+    res.json({ total });
+  } catch (error) {
+    console.error('Error al obtener total de abonos:', error);
+    res.status(500).json({ message: 'Error al obtener abonos' });
   }
 };
