@@ -3,6 +3,7 @@ import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import './ListaPagosProveedores.css';
+import ModalPago from './ModalPago';
 
 const ListaPagosProveedores = () => {
   const [pagos, setPagos] = useState([]);
@@ -10,6 +11,9 @@ const ListaPagosProveedores = () => {
   const [busqueda, setBusqueda] = useState('');
   const [gruposAbiertos, setGruposAbiertos] = useState({});
   const [girosAbiertosPorGrupo, setGirosAbiertosPorGrupo] = useState({});
+  const [valoresExtras, setValoresExtras] = useState({});
+  const [mostrarModalPago, setMostrarModalPago] = useState(false);
+const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
 
   useEffect(() => {
     const fetchPagos = async () => {
@@ -39,6 +43,22 @@ const ListaPagosProveedores = () => {
       [clave]: !prev[clave],
     }));
   };
+
+  const abrirModalPago = (numeroControl, saldo) => {
+    setPagoSeleccionado({ numeroControl, saldo });
+    setMostrarModalPago(true);
+  };
+
+  const cerrarModalPago = () => {
+    setMostrarModalPago(false);
+    setPagoSeleccionado(null);
+  };
+
+  const guardarPago = (pago) => {
+    console.log('Pago guardado:', pago);
+    // Aquí iría tu lógica de axios.post() al backend cuando lo tengas listo
+  };
+
 
   const pagosFiltrados = pagos.filter((p) =>
     p.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -106,10 +126,16 @@ const ListaPagosProveedores = () => {
                           <th># Control</th>
                           <th>Giro</th>
                           <th>Proveedor</th>
-                          <th>Concepto</th>
+                          <th>Concepto de Pago</th>
                           <th>Monto</th>
+                          <th className="col-moneda">T. Moneda</th>
+                          <th className="col-cambio">T. Cambio</th>
+                          <th>Pesos</th>
+                          <th>Saldo</th>
+                          <th>Acciones</th>
                         </tr>
                       </thead>
+
                       <tbody>
                         {Object.entries(
                           pagosGrupo.reduce((acc, pago) => {
@@ -125,7 +151,7 @@ const ListaPagosProveedores = () => {
                             <React.Fragment key={clave}>
                               <tr onClick={() => toggleGiro(grupo, giro)}>
                                 <td
-                                  colSpan="5"
+                                  colSpan="10"
                                   className="giro-header-cell"
                                 >
                                   <strong>{giro}</strong>
@@ -137,12 +163,86 @@ const ListaPagosProveedores = () => {
                               {abiertoGiro &&
                                 pagosPorGiro.map((pago, idx) => (
                                    <tr key={`${pago.numero_control}-${idx}`}>
-    <td className="fila-pago">{pago.numero_control}</td>
-    <td className="fila-pago">{pago.giro}</td>
-    <td className="fila-pago">{pago.proveedor}</td>
-    <td className="fila-pago">{pago.concepto}</td>
-    <td className="fila-pago">${parseFloat(pago.monto).toFixed(2)}</td>
-  </tr>
+                                      <td>{pago.numero_control}</td>
+                                      <td>{pago.giro}</td>
+                                      <td>{pago.proveedor}</td>
+                                      <td>{pago.concepto}</td>
+                                      <td>${parseFloat(pago.monto).toFixed(2)}</td>
+
+                                      {(() => {
+                                        const clave = pago.numero_control;
+                                        const valores = valoresExtras[clave] || {
+                                          tipoMoneda: '',
+                                          tipoCambio: ''
+                                        };
+                                        const monto = parseFloat(pago.monto);
+                                        const tipoCambio = parseFloat(valores.tipoCambio);
+                                        const pesos = tipoCambio ? (monto * tipoCambio).toFixed(2) : monto.toFixed(2);
+                                        const pagosRealizados = 0; // Luego lo reemplazarás por la suma real desde el backend
+                                        const saldoActual = (pesos - pagosRealizados).toFixed(2);
+
+                                        const handleChange = (campo, valor) => {
+                                          setValoresExtras(prev => ({
+                                            ...prev,
+                                            [clave]: {
+                                              ...prev[clave],
+                                              [campo]: campo === 'tipoMoneda' ? valor.toUpperCase() : valor
+                                            }
+                                          }));
+                                        };
+
+                                        return (
+                                          <>
+                                            <td>
+                                              <input
+                                                type="text"
+                                                className="form-control form-control-sm text-uppercase"
+                                                value={valores.tipoMoneda}
+                                                onChange={(e) => handleChange('tipoMoneda', e.target.value)}
+                                              />
+                                            </td>
+                                            <td>
+                                              <input
+                                                type="number"
+                                                className="form-control form-control-sm"
+                                                value={valores.tipoCambio}
+                                                onChange={(e) => handleChange('tipoCambio', e.target.value)}
+                                              />
+                                            </td>
+                                            <td>${pesos}</td>
+                                            <td>
+                                              ${saldoActual}{' '}
+                                              {saldoActual <= 0 ? (
+                                                <span className="badge bg-success ms-2">Saldado</span>
+                                              ) : (
+                                                <span className="badge bg-warning text-dark ms-2">Pendiente</span>
+                                              )}
+                                            </td>
+
+                                            <td>
+                                              <button
+                                                className="btn btn-sm btn-success me-1"
+                                                onClick={() => abrirModalPago(pago.numero_control, pesos)}
+                                              >
+                                                Pagar
+                                              </button>
+                                              <button className="btn btn-sm btn-outline-primary">Pagos</button>
+                                            </td>
+
+                                            {pagoSeleccionado && (
+                                              <ModalPago
+                                                mostrar={mostrarModalPago}
+                                                onCerrar={cerrarModalPago}
+                                                numeroControl={pagoSeleccionado.numeroControl}
+                                                saldo={pagoSeleccionado.saldo}
+                                                onGuardar={guardarPago}
+                                              />
+                                            )}
+                                          </> 
+                                        );
+                                      })()}
+                                    </tr>
+
                                 ))}
                             </React.Fragment>
                           );

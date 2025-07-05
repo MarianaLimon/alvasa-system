@@ -32,3 +32,12 @@ td.fila-pago:hover {
 tr:hover td.fila-pago {
   background-color: rgb(188, 200, 228) !important;
 }
+
+
+.col-moneda,
+.col-cambio {
+  width: 9rem; 
+  min-width: 70px;
+  max-width: 120px;
+  text-align: center;
+}
