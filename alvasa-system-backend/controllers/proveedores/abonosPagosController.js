@@ -118,6 +118,7 @@ const eliminarAbono = async (req, res) => {
   }
 };
 
+const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
@@ -129,11 +130,23 @@ const generarPDFAbonos = async (req, res) => {
     const total_abonado = abonos.reduce((sum, a) => sum + parseFloat(a.abono), 0);
     const saldo = Math.max(parseFloat(pago.monto || 0) - total_abonado, 0);
 
+    // Leer el logo en base64
+    const logoPath = path.join(__dirname, '../../public/images/alvasa-logo-new.jpg');
+    let logo = null;
+    try {
+      const logoBuffer = fs.readFileSync(logoPath);
+      logo = `data:image/jpeg;base64,${logoBuffer.toString('base64')}`;
+    } catch (err) {
+      console.warn('⚠️ No se pudo cargar el logo:', err.message);
+    }
+
+    // Renderizar HTML con EJS
     const html = await ejs.renderFile(
       path.join(__dirname, '../../views/abonos-pdf.ejs'),
-      { numero_control, pago, abonos, total_abonado, saldo }
+      { numero_control, pago, abonos, total_abonado, saldo, logo }
     );
 
+    // Generar PDF
     const browser = await puppeteer.launch({ headless: 'new' });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
