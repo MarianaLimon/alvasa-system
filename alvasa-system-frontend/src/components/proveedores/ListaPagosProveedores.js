@@ -12,7 +12,6 @@ const ListaPagosProveedores = () => {
   const [busqueda, setBusqueda] = useState('');
   const [gruposAbiertos, setGruposAbiertos] = useState({});
   const [girosAbiertosPorGrupo, setGirosAbiertosPorGrupo] = useState({});
-  const [valoresExtras, setValoresExtras] = useState({});
   const [mostrarModalPago, setMostrarModalPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
   const navigate = useNavigate();
@@ -21,25 +20,9 @@ const ListaPagosProveedores = () => {
     try {
       setLoading(true);
       const res = await axios.get('http://localhost:5050/pagos-proveedores');
+      
       const pagos = res.data;
 
-      // Obtener los abonos por cada numero_control
-      const valoresConAbonos = {};
-
-      for (const pago of pagos) {
-        const numero = pago.numero_control;
-        const responseAbonos = await axios.get(`http://localhost:5050/pagos-proveedores/abonos/total/${numero}`);
-        const totalAbonado = responseAbonos.data?.total ?? 0;
-
-
-        valoresConAbonos[numero] = {
-          tipoMoneda: '',
-          tipoCambio: '',
-          abonado: totalAbonado
-        };
-      }
-
-      setValoresExtras(valoresConAbonos);
       setPagos(pagos);
     } catch (error) {
       console.error('Error al cargar la lista de pagos:', error);
@@ -137,7 +120,7 @@ const ListaPagosProveedores = () => {
           <div className="text-center py-4">
             <Spinner animation="border" />
           </div>
-        ) : (
+         ) : (
           <div>
             {Object.entries(pagosAgrupados).map(([grupo, pagosGrupo]) => {
               const abierto = gruposAbiertos[grupo] || false;
@@ -180,110 +163,146 @@ const ListaPagosProveedores = () => {
 
                       <tbody>
                         {Object.entries(
-                          pagosGrupo.reduce((acc, pago) => {
+                            pagosGrupo.reduce((acc, pago) => {
                             if (!acc[pago.giro]) acc[pago.giro] = [];
                             acc[pago.giro].push(pago);
                             return acc;
-                          }, {})
+                            }, {})
                         ).map(([giro, pagosPorGiro]) => {
-                          const clave = `${grupo}|${giro}`;
-                          const abiertoGiro = girosAbiertosPorGrupo[clave] || false;
+                            const clave = `${grupo}|${giro}`;
+                            const abiertoGiro = girosAbiertosPorGrupo[clave] || false;
 
-                          return (
+                            return (
                             <React.Fragment key={clave}>
-                              <tr onClick={() => toggleGiro(grupo, giro)}>
-                                <td
-                                  colSpan="10"
-                                  className="giro-header-cell"
-                                >
-                                  <strong>{giro}</strong>
-                                  <span style={{ float: 'right' }}>
+                                <tr onClick={() => toggleGiro(grupo, giro)}>
+                                <td colSpan="10" className="giro-header-cell">
+                                    <strong>{giro}</strong>
+                                    <span style={{ float: 'right' }}>
                                     {abiertoGiro ? <BsDashCircle color="#414180" /> : <BsPlusCircle color="#414180" />}
-                                  </span>
+                                    </span>
                                 </td>
-                              </tr>
-                              {abiertoGiro &&
+                                </tr>
+                                {abiertoGiro &&
                                 pagosPorGiro.map((pago, idx) => (
-                                   <tr key={`${pago.numero_control}-${idx}`}>
-                                      <td>{pago.numero_control}</td>
-                                      <td>{pago.giro}</td>
-                                      <td>{pago.proveedor}</td>
-                                      <td>{pago.concepto}</td>
-                                      <td>${parseFloat(pago.monto).toFixed(2)}</td>
+                                    <tr key={`${pago.numero_control}-${idx}`}>
+                                    <td>{pago.numero_control}</td>
+                                    <td>{pago.giro}</td>
+                                    <td>{pago.proveedor}</td>
+                                    <td>{pago.concepto}</td>
+                                    <td>${parseFloat(pago.monto).toFixed(2)}</td>
 
-                                      {(() => {
-                                        const clave = pago.numero_control;
-                                        const valores = valoresExtras[clave] || {
-                                          tipoMoneda: '',
-                                          tipoCambio: ''
-                                        };
-                                        const monto = parseFloat(pago.monto);
-                                        const tipoCambio = parseFloat(valores.tipoCambio);
-                                        const pesos = tipoCambio ? (monto * tipoCambio).toFixed(2) : monto.toFixed(2);
-                                        const pagosRealizados = parseFloat(valores.abonado) || 0;
-                                        const saldoActual = (pesos - pagosRealizados).toFixed(2);
-
-                                        const handleChange = (campo, valor) => {
-                                          setValoresExtras(prev => ({
-                                            ...prev,
-                                            [clave]: {
-                                              ...prev[clave],
-                                              [campo]: campo === 'tipoMoneda' ? valor.toUpperCase() : valor
+                                    <td>
+                                        <input
+                                        type="text"
+                                        className="form-control form-control-sm text-uppercase"
+                                        value={pago.tipo_moneda || ''}
+                                        onChange={(e) => {
+                                            const nuevoValor = e.target.value.toUpperCase();
+                                            setPagos((prevPagos) =>
+                                            prevPagos.map((p) =>
+                                                p.numero_control === pago.numero_control
+                                                ? { ...p, tipo_moneda: nuevoValor }
+                                                : p
+                                            )
+                                            );
+                                        }}
+                                        onBlur={async (e) => {
+                                            const nuevoValor = e.target.value.toUpperCase();
+                                            try {
+                                            await axios.put(`http://localhost:5050/pagos-proveedores/estado/${pago.numero_control}`, {
+                                                tipo_moneda: nuevoValor,
+                                                tipo_cambio: pago.tipo_cambio,
+                                            });
+                                            await fetchPagos(); // 🔄 Ya no se dispara mientras escribes, solo al salir del campo
+                                            } catch (error) {
+                                            console.error('Error al actualizar tipo de moneda:', error);
                                             }
-                                          }));
-                                        };
+                                        }}
+                                        />
+                                    </td>
 
-                                        return (
-                                          <>
-                                            <td>
-                                              <input
-                                                type="text"
-                                                className="form-control form-control-sm text-uppercase"
-                                                value={valores.tipoMoneda}
-                                                onChange={(e) => handleChange('tipoMoneda', e.target.value)}
-                                              />
-                                            </td>
-                                            <td>
-                                              <input
-                                                type="number"
-                                                className="form-control form-control-sm"
-                                                value={valores.tipoCambio}
-                                                onChange={(e) => handleChange('tipoCambio', e.target.value)}
-                                              />
-                                            </td>
-                                            <td>${pesos}</td>
-                                            <td>
-                                              ${saldoActual}{' '}
-                                              {saldoActual <= 0 ? (
-                                                <span className="badge bg-success ms-2">Saldado</span>
-                                              ) : (
-                                                <span className="badge bg-warning text-dark ms-2">Pendiente</span>
-                                              )}
-                                            </td>
+                                    <td>
+                                    <InputGroup size="sm">
+                                        <InputGroup.Text>$</InputGroup.Text>
+                                        <Form.Control
+                                        type="number"
+                                        className="form-control-sm"
+                                        value={
+                                            pago.tipo_cambio === null || pago.tipo_cambio === undefined || pago.tipo_cambio === 0
+                                            ? ''
+                                            : parseFloat(pago.tipo_cambio).toFixed(2)
+                                        }
+                                        placeholder="—"
+                                        step="1.00"
+                                        min="0"
+                                        onChange={(e) => {
+                                            const nuevoValor = e.target.value;
+                                            setPagos((prevPagos) =>
+                                            prevPagos.map((p) =>
+                                                p.numero_control === pago.numero_control
+                                                ? { ...p, tipo_cambio: nuevoValor }
+                                                : p
+                                            )
+                                            );
+                                        }}
+                                        onBlur={async (e) => {
+                                            const nuevoValor = parseFloat(e.target.value) || 0;
+                                            try {
+                                            await axios.put(`http://localhost:5050/pagos-proveedores/estado/${pago.numero_control}`, {
+                                                tipo_moneda: pago.tipo_moneda,
+                                                tipo_cambio: nuevoValor,
+                                            });
+                                            await fetchPagos();
+                                            } catch (error) {
+                                            console.error('Error al actualizar tipo de cambio:', error);
+                                            }
+                                        }}
+                                        />
+                                    </InputGroup>
+                                    </td>
 
-                                            <td>
-                                              <button
-                                                className="btn btn-sm btn-success me-1"
-                                                onClick={() => abrirModalPago(pago.numero_control, pesos)}
-                                              >
-                                                Pagar
-                                              </button>
-                                              <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={() => navigate(`/pagos-proveedores/${pago.numero_control}`)}
-                                              >
-                                                Pagos
-                                              </button>
-                                            </td>
-                                          </> 
-                                        );
-                                      })()}
+
+
+                                    <td>$
+                                    {!isNaN(Number(pago.pesos))
+                                        ? Number(pago.pesos).toFixed(2)
+                                        : '0.00'}
+                                    </td>
+
+                                    <td>
+                                        ${parseFloat(pago.saldo).toFixed(2)}{' '}
+                                        {pago.estatus === 'Saldado' ? (
+                                        <span className="badge bg-success ms-2">Saldado</span>
+                                        ) : (
+                                        <span className="badge bg-warning text-dark ms-2">Pendiente</span>
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        <button
+                                        className="btn btn-sm btn-success me-1"
+                                        onClick={() =>
+                                            abrirModalPago(pago.numero_control, parseFloat(pago.saldo))
+                                        }
+                                        >
+                                        Pagar
+                                        </button>
+                                        <button
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={() =>
+                                            navigate(`/pagos-proveedores/${pago.numero_control}`)
+                                        }
+                                        >
+                                        Pagos
+                                        </button>
+                                    </td>
                                     </tr>
                                 ))}
                             </React.Fragment>
-                          );
+                            );
                         })}
-                      </tbody>
+                        </tbody>
+
                     </Table>
                   </div>
                 </Card>

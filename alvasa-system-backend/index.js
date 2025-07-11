@@ -21,11 +21,14 @@ const custodiaRoutes = require('./routes/asignacion-costos/custodia');
 const paqueteriaRoutes = require('./routes/asignacion-costos/paqueteria');
 const aseguradoraRoutes = require('./routes/asignacion-costos/aseguradora');
 const despachoRoutes = require('./routes/asignacion-costos/despacho');
+const listaPagosProveedoresRoutes = require('./routes/proveedores/listaPagosProveedores');
+const abonosPagosRoutes = require('./routes/proveedores/abonosPagosRoutes');
+
 
 const app = express();
 const port = 5050;
 
-const pagosProveedoresRoutes = require('./routes/proveedores/pagosProveedores');
+
 
 //
 // ✅ CORS manual que funciona siempre
@@ -65,7 +68,8 @@ app.use('/asignacion-costos/custodia', custodiaRoutes);
 app.use('/asignacion-costos/paqueteria', paqueteriaRoutes);
 app.use('/asignacion-costos/aseguradora', aseguradoraRoutes);
 app.use('/asignacion-costos/despacho', despachoRoutes);
-app.use('/pagos-proveedores', pagosProveedoresRoutes);
+app.use('/pagos-proveedores', listaPagosProveedoresRoutes);
+app.use('/pagos-proveedores', abonosPagosRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

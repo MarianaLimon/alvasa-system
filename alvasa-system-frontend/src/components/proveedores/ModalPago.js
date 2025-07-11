@@ -18,8 +18,11 @@ const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
   const handleAbonoChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     setAbono(value);
-    setSaldoRestante((saldo - value).toFixed(2));
+
+    const nuevoSaldo = saldo - value;
+    setSaldoRestante(nuevoSaldo >= 0 ? nuevoSaldo.toFixed(2) : '0.00');
   };
+
 
   const handleGuardar = async () => {
     if (!abono || !fechaPago || !tipoTransaccion) return alert('Completa todos los campos');
@@ -93,7 +96,9 @@ const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onCerrar}>Cancelar</Button>
-        <Button variant="success" onClick={handleGuardar}>Guardar pago</Button>
+        <Button variant="success" onClick={handleGuardar} disabled={!abono || abono <= 0 || abono > saldo} >
+          Guardar pago
+        </Button>
       </Modal.Footer>
     </Modal>
   );
