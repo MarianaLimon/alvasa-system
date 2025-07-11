@@ -2,12 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Table, Button, Row, Col, Toast } from 'react-bootstrap';
+import ModalPago from './ModalPago';
+import { BsPrinter } from 'react-icons/bs';
 
 const ListaAbonos = () => {
   const { numero_control } = useParams();
   const [abonos, setAbonos] = useState([]);
   const [pago, setPago] = useState({});
   const [showToast, setShowToast] = useState(false);
+
+  const [mostrarModalPago, setMostrarModalPago] = useState(false);
+
+  const handleAbrirModalPago = () => {
+    setMostrarModalPago(true);
+  };
+
+  const handleCerrarModalPago = () => {
+    setMostrarModalPago(false);
+  };
+
+  const handleGuardarPago = async (nuevoPago) => {
+    try {
+      await axios.post('http://localhost:5050/pagos-proveedores/abonos', nuevoPago);
+      await fetchAbonos();
+      await fetchDatosPago();
+      setShowToast(true);
+      setMostrarModalPago(false);
+    } catch (error) {
+      console.error('Error al guardar el abono:', error);
+    }
+  };
+
 
   const fetchDatosPago = async () => {
     try {
@@ -41,6 +66,42 @@ const ListaAbonos = () => {
       console.error('Error al eliminar abono:', error);
     }
   };
+
+  const handleGenerarPDF = async () => {
+    try {
+      const pagoConFormato = {
+        numero_control: pago.numero_control,
+        cliente: pago.cliente,
+        contenedor: pago.contenedor,
+        giro: pago.giro,
+        proveedor: pago.proveedor,
+        concepto: pago.concepto,
+        tipo_moneda: pago.tipo_moneda?.toUpperCase() || 'MX',
+        tipo_cambio: parseFloat(pago.tipo_cambio) || null,
+        monto_original: parseFloat(pago.monto) || 0,
+        monto: parseFloat(pago.pesos) || parseFloat(pago.monto),
+        estatus: pago.estatus
+      };
+
+      const res = await axios.post(
+        'http://localhost:5050/pagos-proveedores/abonos/pdf',
+        {
+          numero_control,
+          pago: pagoConFormato,
+          abonos
+        },
+        { responseType: 'blob' }
+      );
+
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url);
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+    }
+  };
+
+
 
   useEffect(() => {
     const fetchTodo = async () => {
@@ -105,7 +166,20 @@ const ListaAbonos = () => {
       </Card>
 
       <Card>
-        <Card.Header><strong>Lista de Abonos</strong></Card.Header>
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Lista de Abonos</strong>
+          </div>
+          <div>
+            <Button variant="secondary" size="sm" onClick={handleGenerarPDF} className="me-2">
+              <BsPrinter className="me-2" /> Imprimir PDF
+            </Button>
+            <Button variant="success" size="sm" onClick={handleAbrirModalPago}>
+              + Agregar abono
+            </Button>
+          </div>
+        </Card.Header>
+
         <Card.Body>
           <Table striped bordered hover>
             <thead>
@@ -151,6 +225,14 @@ const ListaAbonos = () => {
         </Toast.Header>
         <Toast.Body className="text-white">El abono ha sido eliminado correctamente.</Toast.Body>
       </Toast>
+
+      <ModalPago
+        mostrar={mostrarModalPago}
+        onCerrar={handleCerrarModalPago}
+        numeroControl={numero_control}
+        saldo={saldo}
+        onGuardar={handleGuardarPago}
+      />
     </div>
   );
 };

@@ -118,9 +118,49 @@ const eliminarAbono = async (req, res) => {
   }
 };
 
+const path = require('path');
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
+
+const generarPDFAbonos = async (req, res) => {
+  const { numero_control, pago, abonos } = req.body;
+
+  try {
+    const total_abonado = abonos.reduce((sum, a) => sum + parseFloat(a.abono), 0);
+    const saldo = Math.max(parseFloat(pago.monto || 0) - total_abonado, 0);
+
+    const html = await ejs.renderFile(
+      path.join(__dirname, '../../views/abonos-pdf.ejs'),
+      { numero_control, pago, abonos, total_abonado, saldo }
+    );
+
+    const browser = await puppeteer.launch({ headless: 'new' });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '40px', bottom: '40px', left: '30px', right: '30px' },
+    });
+
+    await browser.close();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=abonos-${numero_control}.pdf`);
+    res.send(pdfBuffer);
+
+  } catch (error) {
+    console.error('❌ Error al generar PDF de abonos:', error);
+    res.status(500).json({ message: 'Error al generar el PDF' });
+  }
+};
+
+
 module.exports = {
   obtenerTotalAbonos,
   obtenerAbonosPorNumeroControl,
   registrarAbono,
-  eliminarAbono
+  eliminarAbono,
+  generarPDFAbonos 
 };

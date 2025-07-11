@@ -4,12 +4,14 @@ const {
   obtenerTotalAbonos,
   obtenerAbonosPorNumeroControl,
   registrarAbono,
-  eliminarAbono
+  eliminarAbono,
+  generarPDFAbonos
 } = require('../../controllers/proveedores/abonosPagosController');
 
 router.get('/abonos/total/:numero_control', obtenerTotalAbonos);
-router.get('/abonos/:numero_control', obtenerAbonosPorNumeroControl); // ✅ esta ruta es la que te faltaba
+router.get('/abonos/:numero_control', obtenerAbonosPorNumeroControl);
 router.post('/abonos', registrarAbono);
 router.delete('/abonos/:id', eliminarAbono);
+router.post('/abonos/pdf', generarPDFAbonos);
 
 module.exports = router;

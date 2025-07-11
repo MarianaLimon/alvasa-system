@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Abonos - <%= numero_control %> - <%= pago.cliente %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      margin-bottom: 25px;
+    }
+
+    .info p {
+      margin: 4px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #666;
+      padding: 6px;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    td:nth-child(3),
+    th:nth-child(3) {
+      text-align: right;
+    }
+
+    .total td {
+      font-weight: bold;
+      background-color: #f2f2f2;
+      border-top: 2px solid #333;
+    }
+  </style>
+</head>
+<body>
+
+  <% function formatMoney(n) { return n.toLocaleString('es-MX', { minimumFractionDigits: 2 }); } %>
+
+  <h1>Resumen de Abonos</h1>
+
+  <div class="info">
+    <p><strong>Número de Control:</strong> <%= numero_control %></p>
+    <p><strong>Cliente:</strong> <%= pago.cliente %></p>
+    <p><strong>Contenedor:</strong> <%= pago.contenedor %></p>
+    <p><strong>Giro:</strong> <%= pago.giro %></p>
+    <p><strong>Proveedor:</strong> <%= pago.proveedor %></p>
+    <p><strong>Concepto:</strong> <%= pago.concepto %></p>
+    <p><strong>Monto Original:</strong> <%= pago.tipo_moneda %> $<%= formatMoney(pago.monto_original) %></p>
+    <p><strong>En Pesos:</strong> $<%= formatMoney(pago.monto) %></p>
+    <p><strong>Tipo de Cambio:</strong> <%= pago.tipo_cambio || 'N/A' %></p>
+    <p><strong>Estatus:</strong> <%= pago.estatus %></p>
+  </div>
+
+  <h2>Abonos Realizados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha de Pago</th>
+        <th>Tipo de Transacción</th>
+        <th>Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% abonos.forEach(ab => { %>
+        <tr>
+          <td><%= new Date(ab.fecha_pago).toLocaleDateString('es-MX') %></td>
+          <td><%= ab.tipo_transaccion %></td>
+          <td>$<%= formatMoney(ab.abono) %></td>
+        </tr>
+      <% }) %>
+      <tr class="total">
+        <td colspan="2">Total Abonado</td>
+        <td>$<%= formatMoney(total_abonado) %></td>
+      </tr>
+      <tr class="total">
+        <td colspan="2">Saldo Restante</td>
+        <td>$<%= formatMoney(saldo) %></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>
