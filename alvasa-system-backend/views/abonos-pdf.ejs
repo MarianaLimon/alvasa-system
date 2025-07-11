@@ -56,46 +56,94 @@
 
   <h1>Resumen de Abonos</h1>
 
-  <div class="info">
-    <p><strong>Número de Control:</strong> <%= numero_control %></p>
-    <p><strong>Cliente:</strong> <%= pago.cliente %></p>
-    <p><strong>Contenedor:</strong> <%= pago.contenedor %></p>
-    <p><strong>Giro:</strong> <%= pago.giro %></p>
-    <p><strong>Proveedor:</strong> <%= pago.proveedor %></p>
-    <p><strong>Concepto:</strong> <%= pago.concepto %></p>
-    <p><strong>Monto Original:</strong> <%= pago.tipo_moneda %> $<%= formatMoney(pago.monto_original) %></p>
-    <p><strong>En Pesos:</strong> $<%= formatMoney(pago.monto) %></p>
-    <p><strong>Tipo de Cambio:</strong> <%= pago.tipo_cambio || 'N/A' %></p>
-    <p><strong>Estatus:</strong> <%= pago.estatus %></p>
-  </div>
-
-  <h2>Abonos Realizados</h2>
-  <table>
+  <!-- Información General -->
+  <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
     <thead>
       <tr>
-        <th>Fecha de Pago</th>
-        <th>Tipo de Transacción</th>
-        <th>Monto</th>
+        <th colspan="2" style="background-color: #f0f0f0; text-align: left; padding: 6px;">Información General</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 6px;"><strong>Número de Control:</strong> <%= numero_control %></td>
+        <td style="padding: 6px;"><strong>Contenedor:</strong> <%= pago.contenedor %></td>
+      </tr>
+      <tr>
+        <td style="padding: 6px;"><strong>Proveedor:</strong> <%= pago.proveedor %></td>
+        <td style="padding: 6px;"><strong>Giro:</strong> <%= pago.giro %></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding: 6px;"><strong>Concepto:</strong> <%= pago.concepto %></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Montos + Saldo en dos columnas -->
+  <div style="display: flex; justify-content: space-between; margin-bottom: 40px; gap: 20px;">
+    <!-- Tabla de montos -->
+    <table style="width: 55%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="background-color: #f0f0f0; padding: 6px;">Monto Original</th>
+          <th style="background-color: #f0f0f0; padding: 6px;">Equivalente en Pesos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 6px;"><%= pago.tipo_moneda %> $<%= formatMoney(pago.monto_original) %></td>
+          <td style="padding: 6px;">$<%= formatMoney(pago.monto) %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tabla de saldo, estatus y total -->
+    <table style="width: 40%; border-collapse: collapse;">
+      <tbody>
+        <tr style="background-color: #f9f9f9;">
+          <td style="padding: 6px;"><strong>Saldo:</strong></td>
+          <td style="padding: 6px; text-align: right;">$<%= formatMoney(saldo) %></td>
+        </tr>
+        <tr>
+          <td style="padding: 6px;"><strong>Estatus:</strong></td>
+          <td style="padding: 6px; text-align: right;"><%= pago.estatus %></td>
+        </tr>
+        <tr style="border-top: 2px solid #333; background-color: #f2f2f2;">
+          <td style="padding: 6px;"><strong>Total de Abonos:</strong></td>
+          <td style="padding: 6px; text-align: right;">$<%= formatMoney(total_abonado) %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tabla de abonos -->
+  <h2>Abonos Realizados</h2>
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th style="background-color: #f0f0f0; padding: 6px;">Fecha de Pago</th>
+        <th style="background-color: #f0f0f0; padding: 6px;">Tipo de Transacción</th>
+        <th style="background-color: #f0f0f0; padding: 6px;">Monto</th>
       </tr>
     </thead>
     <tbody>
       <% abonos.forEach(ab => { %>
         <tr>
-          <td><%= new Date(ab.fecha_pago).toLocaleDateString('es-MX') %></td>
-          <td><%= ab.tipo_transaccion %></td>
-          <td>$<%= formatMoney(ab.abono) %></td>
+          <td style="padding: 6px;"><%= new Date(ab.fecha_pago).toLocaleDateString('es-MX') %></td>
+          <td style="padding: 6px;"><%= ab.tipo_transaccion %></td>
+          <td style="padding: 6px; text-align: right;">$<%= formatMoney(ab.abono) %></td>
         </tr>
       <% }) %>
-      <tr class="total">
-        <td colspan="2">Total Abonado</td>
-        <td>$<%= formatMoney(total_abonado) %></td>
+      <tr style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #333;">
+        <td colspan="2" style="padding: 6px;">Total Abonado</td>
+        <td style="padding: 6px; text-align: right;">$<%= formatMoney(total_abonado) %></td>
       </tr>
-      <tr class="total">
-        <td colspan="2">Saldo Restante</td>
-        <td>$<%= formatMoney(saldo) %></td>
+      <tr style="background-color: #f2f2f2; font-weight: bold;">
+        <td colspan="2" style="padding: 6px;">Saldo Restante</td>
+        <td style="padding: 6px; text-align: right;">$<%= formatMoney(saldo) %></td>
       </tr>
     </tbody>
   </table>
 
 </body>
+
 </html>

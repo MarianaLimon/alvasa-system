@@ -144,25 +144,81 @@ const ListaAbonos = () => {
       <Card className="mb-4">
         <Card.Body>
           <Row>
+            {/* IZQUIERDA: Tablas */}
             <Col md={8}>
-              <p><strong>Número de control:</strong> {numero_control}</p>
-              <p><strong>Contenedor:</strong> {pago.contenedor}</p>
-              <p><strong>Giro:</strong> {pago.giro}</p>
-              <p><strong>Proveedor:</strong> {pago.proveedor}</p>
-              <p><strong>Concepto de pago:</strong> {pago.concepto}</p>
-              <p><strong>Monto original:</strong> {formatMoneda()}</p>
-              {formatPesos() && (
-                <p><strong>Equivalente en pesos:</strong> {formatPesos()}</p>
-              )}
-              <p><strong>Total de abonos:</strong> ${totalAbonado.toFixed(2)}</p>
+              {/* Tabla 1: Número de control y Contenedor */}
+              <Table bordered size="sm" className="mb-3">
+                <thead className="table-light">
+                  <tr>
+                    <th>Número de Control</th>
+                    <th>Contenedor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{numero_control}</td>
+                    <td>{pago.contenedor}</td>
+                  </tr>
+                </tbody>
+              </Table>
+
+              {/* Tabla 2: Proveedor, Giro y Concepto */}
+              <Table bordered size="sm" className="mb-3">
+                <thead className="table-light">
+                  <tr>
+                    <th>Proveedor</th>
+                    <th>Giro</th>
+                    <th>Concepto de Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{pago.proveedor}</td>
+                    <td>{pago.giro}</td>
+                    <td>{pago.concepto}</td>
+                  </tr>
+                </tbody>
+              </Table>
+
+              {/* Tabla 3: Monto original y en pesos */}
+              <Table bordered size="sm" className="mb-3 w-75">
+                <thead className="table-light">
+                  <tr>
+                    <th>Monto Original</th>
+                    <th>Equivalente en Pesos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{formatMoneda()}</td>
+                    <td>{formatPesos() || '-'}</td>
+                  </tr>
+                </tbody>
+              </Table>
             </Col>
-            <Col md={4} className="text-end">
-              <h3><strong>Saldo:</strong></h3>
-              <h1 className="text-primary">${saldo.toFixed(2)}</h1>
-              <p><strong>Estatus:</strong> {pago.estatus}</p>
+
+            {/* DERECHA: Saldo, Estatus y Total Abonos */}
+            <Col md={4}>
+              <div className="bg-light p-4 rounded shadow-sm text-center">
+                <h6 className="text-muted">Saldo</h6>
+                <h2 className="text-primary">${saldo.toFixed(2)}</h2>
+
+                <p className="mb-2">
+                  <strong>Estatus:</strong>{' '}
+                  <span className={pago.estatus === 'Saldado' ? 'text-success' : 'text-warning'}>
+                    {pago.estatus}
+                  </span>
+                </p>
+
+                <hr />
+
+                <h6 className="text-muted mt-3">Total de Abonos</h6>
+                <h5 className="fw-bold">${totalAbonado.toFixed(2)}</h5>
+              </div>
             </Col>
           </Row>
         </Card.Body>
+
       </Card>
 
       <Card>
