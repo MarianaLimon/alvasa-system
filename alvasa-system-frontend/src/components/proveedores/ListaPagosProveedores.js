@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
-import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
+import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle, BsCashStack, BsSearch, BsFilter } from 'react-icons/bs';
 import './ListaPagosProveedores.css';
 import ModalPago from './ModalPago';
 
@@ -14,16 +14,31 @@ const ListaPagosProveedores = () => {
   const [girosAbiertosPorGrupo, setGirosAbiertosPorGrupo] = useState({});
   const [mostrarModalPago, setMostrarModalPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
+  const [proveedoresUnicos, setProveedoresUnicos] = useState([]);
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState('');
+  const [filtroEstatus, setFiltroEstatus] = useState('');
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
+
+
   const navigate = useNavigate();
 
   const fetchPagos = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5050/pagos-proveedores');
-      
+      let url = 'http://localhost:5050/pagos-proveedores';
+
+      if (proveedorSeleccionado) {
+        url += `?proveedor=${encodeURIComponent(proveedorSeleccionado)}`;
+      }
+
+      const res = await axios.get(url);
       const pagos = res.data;
 
       setPagos(pagos);
+
+      const proveedores = [...new Set(pagos.map((p) => p.proveedor))].filter(Boolean);
+      setProveedoresUnicos(proveedores);
     } catch (error) {
       console.error('Error al cargar la lista de pagos:', error);
     } finally {
@@ -31,10 +46,10 @@ const ListaPagosProveedores = () => {
     }
   };
 
-
   useEffect(() => {
     fetchPagos();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proveedorSeleccionado]);
 
   const toggleGrupo = (grupo) => {
     setGruposAbiertos((prev) => ({
@@ -85,11 +100,33 @@ const ListaPagosProveedores = () => {
     }
   };
 
-  const pagosFiltrados = pagos.filter((p) =>
-    p.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    p.proveedor?.toLowerCase().includes(busqueda.toLowerCase()) ||
-    p.numero_control?.toString().includes(busqueda)
-  );
+  const pagosFiltrados = pagos
+    .filter((p) =>
+      p.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.proveedor?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      p.numero_control?.toString().includes(busqueda)
+    )
+    .filter((p) => !filtroEstatus || p.estatus === filtroEstatus)
+    .filter((p) => !proveedorSeleccionado || p.proveedor === proveedorSeleccionado)
+    .filter((p) => {
+      if (!fechaDesde && !fechaHasta) return true;
+
+      const fechaPago = new Date(p.fecha.replace(/(\d{2}) (\w+) (\d{4})/, (m, d, mes, y) => {
+        const meses = {
+          'Enero': '01', 'Febrero': '02', 'Marzo': '03', 'Abril': '04',
+          'Mayo': '05', 'Junio': '06', 'Julio': '07', 'Agosto': '08',
+          'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12'
+        };
+        return `${y}-${meses[mes]}-${d}`;
+      }));
+
+      const desde = fechaDesde ? new Date(fechaDesde) : null;
+      const hasta = fechaHasta ? new Date(fechaHasta) : null;
+
+      if (desde && fechaPago < desde) return false;
+      if (hasta && fechaPago > hasta) return false;
+      return true;
+    })
 
   const pagosAgrupados = pagosFiltrados.reduce((acc, pago) => {
     const [parte1, parte2] = pago.numero_control.split('-');
@@ -103,16 +140,73 @@ const ListaPagosProveedores = () => {
     <Card className="mt-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <strong>Lista de Pagos a Proveedores</strong>
-        <Form style={{ maxWidth: '300px' }}>
-          <InputGroup>
+        <div className="d-flex align-items-center gap-3">
+          <InputGroup style={{ width: '11rem' }}>
+            <InputGroup.Text><BsFilter /></InputGroup.Text>
+            <Form.Select
+              value={proveedorSeleccionado}
+              onChange={(e) => setProveedorSeleccionado(e.target.value)}
+            >
+              <option value="">Proveedor</option>
+              {proveedoresUnicos.map((prov, idx) => (
+                <option key={idx} value={prov}>{prov}</option>
+              ))}
+            </Form.Select>
+          </InputGroup>
+
+          <InputGroup style={{ width: '10rem' }}>
+            <InputGroup.Text><BsFilter /></InputGroup.Text>
+            <Form.Select
+              value={filtroEstatus}
+              onChange={(e) => setFiltroEstatus(e.target.value)}
+            >
+              <option value="">Estatus</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Saldado">Saldado</option>
+            </Form.Select>
+          </InputGroup>
+
+          <InputGroup style={{ width: '14rem' }}>
+`            <InputGroup.Text>Desde</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={fechaDesde}
+              onChange={(e) => setFechaDesde(e.target.value)}
+            />
+          </InputGroup>
+
+          <InputGroup style={{ width: '14rem' }}>
+            <InputGroup.Text>Hasta</InputGroup.Text>
+            <Form.Control
+              type="date"
+              value={fechaHasta}
+              onChange={(e) => setFechaHasta(e.target.value)}
+            />
+          </InputGroup>
+
+          <button
+            className="btn btn-outline-secondary ms-2"
+            onClick={() => {
+              setBusqueda('');
+              setFiltroEstatus('');
+              setProveedorSeleccionado('');
+              setFechaDesde('');
+              setFechaHasta('');
+            }}
+          >
+            Limpiar filtros
+          </button>
+
+          <InputGroup style={{ width: '13rem' }}>
+            <InputGroup.Text><BsSearch /></InputGroup.Text>
             <Form.Control
               type="text"
-              placeholder="Buscar por cliente o proveedor..."
+              placeholder="Buscar"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </InputGroup>
-        </Form>
+        </div>
       </Card.Header>
 
       <Card.Body className="p-0">
@@ -125,6 +219,9 @@ const ListaPagosProveedores = () => {
             {Object.entries(pagosAgrupados).map(([grupo, pagosGrupo]) => {
               const abierto = gruposAbiertos[grupo] || false;
               const { cliente, contenedor, fecha } = pagosGrupo[0];
+              const totalPesosGrupo = pagosGrupo.reduce((acc, p) => acc + (parseFloat(p.pesos) || 0), 0);
+              const saldoGrupo = pagosGrupo.reduce((acc, p) => acc + (parseFloat(p.saldo) || 0), 0);
+              const estatusGrupo = saldoGrupo === 0 ? 'Saldado' : 'Pendiente';
 
               return (
                 <Card key={grupo} className="m-3">
@@ -132,18 +229,38 @@ const ListaPagosProveedores = () => {
                     onClick={() => toggleGrupo(grupo)}
                     style={{ cursor: 'pointer', background: '#5751AB', color: '#fff'}}
                   >
-                     <strong>{grupo}</strong>
-                      <span className="mx-3">|</span>
-                      <BsBoxSeam className="me-3" />
-                      {contenedor}
-                      <span className="mx-3">|</span>
-                      <BsPerson className="me-3" />
-                      {cliente}
-                      <span className="mx-3">|</span>
-                      <BsCalendar className="me-3" />
-                      {fecha}
-                    <span style={{ float: 'right' }}>{abierto ? '▼' : '▶'}</span>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>{grupo}</strong>
+                        <span className="mx-3">|</span>
+                        <BsBoxSeam className="me-2" />
+                        {contenedor}
+                        <span className="mx-3">|</span>
+                        <BsPerson className="me-2" />
+                        {cliente}
+                        <span className="mx-3">|</span>
+                        <BsCalendar className="me-2" />
+                        {fecha}
+                        <span className="mx-3">|</span>
+                        <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
+                          <BsCashStack className="me-1" />
+                          ${totalPesosGrupo.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="d-flex align-items-center gap-3">
+                        Saldo total:
+                        <span className="fw-bold" style={{ fontSize: '1.2rem', color: '#ffc107' }}>
+                           ${saldoGrupo.toFixed(2)}
+                        </span>
+                        <span className={`badge ${estatusGrupo === 'Saldado' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                          {estatusGrupo}
+                        </span>
+                        <span>{abierto ? '▼' : '▶'}</span>
+                      </div>
+
+                    </div>
                   </Card.Header>
+
                   <div className={`collapse-wrapper ${abierto ? 'expanded' : 'collapsed'}`}>
                     <Table bordered responsive className="mb-0 custom-pagos-table">
                       <thead>
@@ -172,16 +289,40 @@ const ListaPagosProveedores = () => {
                             const clave = `${grupo}|${giro}`;
                             const abiertoGiro = girosAbiertosPorGrupo[clave] || false;
 
+                            const totalPesosGiro = pagosPorGiro.reduce((acc, p) => acc + (parseFloat(p.pesos) || 0), 0);
+                            const saldoGiro = pagosPorGiro.reduce((acc, p) => acc + (parseFloat(p.saldo) || 0), 0);
+                            const estatusGiro = saldoGiro === 0 ? 'Saldado' : 'Pendiente';
+
+
                             return (
                             <React.Fragment key={clave}>
+                                
                                 <tr onClick={() => toggleGiro(grupo, giro)}>
-                                <td colSpan="10" className="giro-header-cell">
-                                    <strong>{giro}</strong>
-                                    <span style={{ float: 'right' }}>
-                                    {abiertoGiro ? <BsDashCircle color="#414180" /> : <BsPlusCircle color="#414180" />}
-                                    </span>
-                                </td>
+                                  <td colSpan="10" className="giro-header-cell">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                      {/* Giro y total */}
+                                      <div className="d-flex align-items-center gap-3">
+                                        <strong className="text-dark">{giro}</strong> | 
+                                        <span className="fw-bold" style={{ fontSize: '1.2rem', color: '#5751AB' }}>
+                                          <BsCashStack className="me-1" />
+                                          ${totalPesosGiro.toFixed(2)}
+                                        </span>
+                                      </div>
+
+                                      {/* Saldo total + estatus + toggle */}
+                                      <div className="d-flex align-items-center gap-3">
+                                        Saldo total:<span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(108, 7, 255)' }}>
+                                           ${saldoGiro.toFixed(2)}
+                                        </span>
+                                        <span className={`badge ${estatusGiro === 'Saldado' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                                          {estatusGiro}
+                                        </span>
+                                        <span>{abiertoGiro ? <BsDashCircle color="#414180" /> : <BsPlusCircle color="#414180" />}</span>
+                                      </div>
+                                    </div>
+                                  </td>
                                 </tr>
+
                                 {abiertoGiro &&
                                 pagosPorGiro.map((pago, idx) => (
                                     <tr key={`${pago.numero_control}-${idx}`}>

@@ -33,6 +33,7 @@ async function insertarEstadoInicialPago(numero_control, monto) {
 // 🔄 Obtener lista dinámica de pagos desde asignación de costos
 exports.obtenerListaPagosProveedores = async (req, res) => {
   try {
+    const { proveedor } = req.query;
     const [procesos] = await db.promise().query(`
       SELECT 
         po.id,
@@ -70,6 +71,12 @@ exports.obtenerListaPagosProveedores = async (req, res) => {
 
       const agregarPago = (giro, proveedor, concepto, monto) => {
         if (concepto && monto && parseFloat(monto) > 0) {
+          // Si hay filtro y no coincide el proveedor, no se agrega
+          if (req.query.proveedor && req.query.proveedor.trim() !== '') {
+            const proveedorFiltro = req.query.proveedor.trim().toLowerCase();
+            if (proveedor.toLowerCase() !== proveedorFiltro) return;
+          }
+
           const numero_control = `${grupoControl}-${String.fromCharCode(letra++)}`;
           const pago = {
             numero_control,
@@ -81,6 +88,7 @@ exports.obtenerListaPagosProveedores = async (req, res) => {
             concepto,
             monto: parseFloat(monto)
           };
+
           listaPagos.push(pago);
         }
       };
