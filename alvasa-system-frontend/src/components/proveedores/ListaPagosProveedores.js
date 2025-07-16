@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
-import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle, BsCashStack, BsSearch, BsFilter } from 'react-icons/bs';
+import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle, BsCashStack, BsSearch } from 'react-icons/bs';
 import './ListaPagosProveedores.css';
 import ModalPago from './ModalPago';
+import FiltrosPagosProveedores from './FiltrosPagosProveedores';
+
 
 const ListaPagosProveedores = () => {
   const [pagos, setPagos] = useState([]);
@@ -16,10 +18,12 @@ const ListaPagosProveedores = () => {
   const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
   const [proveedoresUnicos, setProveedoresUnicos] = useState([]);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState('');
+  const [giroSeleccionado, setGiroSeleccionado] = useState('');
+  const [conceptoSeleccionado, setConceptoSeleccionado] = useState('');
   const [filtroEstatus, setFiltroEstatus] = useState('');
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
-
+  const [totalesGenerales, setTotalesGenerales] = useState([]);
 
   const navigate = useNavigate();
 
@@ -46,8 +50,18 @@ const ListaPagosProveedores = () => {
     }
   };
 
+  const fetchTotales = async () => {
+    try {
+      const res = await axios.get('http://localhost:5050/pagos-proveedores/totales');
+      setTotalesGenerales(res.data); // ← esto asume que ya recibes array de objetos con número_control_general, monto_total_en_pesos, etc.
+    } catch (error) {
+      console.error('Error al obtener totales generales:', error);
+    }
+  };
+
   useEffect(() => {
     fetchPagos();
+    fetchTotales();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proveedorSeleccionado]);
 
@@ -127,6 +141,9 @@ const ListaPagosProveedores = () => {
       if (hasta && fechaPago > hasta) return false;
       return true;
     })
+    .filter((p) => !giroSeleccionado || p.giro === giroSeleccionado)
+    .filter((p) => !conceptoSeleccionado || p.concepto === conceptoSeleccionado)
+
 
   const pagosAgrupados = pagosFiltrados.reduce((acc, pago) => {
     const [parte1, parte2] = pago.numero_control.split('-');
@@ -140,74 +157,51 @@ const ListaPagosProveedores = () => {
     <Card className="mt-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <strong>Lista de Pagos a Proveedores</strong>
-        <div className="d-flex align-items-center gap-3">
-          <InputGroup style={{ width: '11rem' }}>
-            <InputGroup.Text><BsFilter /></InputGroup.Text>
-            <Form.Select
-              value={proveedorSeleccionado}
-              onChange={(e) => setProveedorSeleccionado(e.target.value)}
-            >
-              <option value="">Proveedor</option>
-              {proveedoresUnicos.map((prov, idx) => (
-                <option key={idx} value={prov}>{prov}</option>
-              ))}
-            </Form.Select>
-          </InputGroup>
-
-          <InputGroup style={{ width: '10rem' }}>
-            <InputGroup.Text><BsFilter /></InputGroup.Text>
-            <Form.Select
-              value={filtroEstatus}
-              onChange={(e) => setFiltroEstatus(e.target.value)}
-            >
-              <option value="">Estatus</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="Saldado">Saldado</option>
-            </Form.Select>
-          </InputGroup>
-
-          <InputGroup style={{ width: '14rem' }}>
-`            <InputGroup.Text>Desde</InputGroup.Text>
-            <Form.Control
-              type="date"
-              value={fechaDesde}
-              onChange={(e) => setFechaDesde(e.target.value)}
-            />
-          </InputGroup>
-
-          <InputGroup style={{ width: '14rem' }}>
-            <InputGroup.Text>Hasta</InputGroup.Text>
-            <Form.Control
-              type="date"
-              value={fechaHasta}
-              onChange={(e) => setFechaHasta(e.target.value)}
-            />
-          </InputGroup>
-
-          <button
-            className="btn btn-outline-secondary ms-2"
-            onClick={() => {
-              setBusqueda('');
-              setFiltroEstatus('');
-              setProveedorSeleccionado('');
-              setFechaDesde('');
-              setFechaHasta('');
-            }}
-          >
-            Limpiar filtros
-          </button>
-
-          <InputGroup style={{ width: '13rem' }}>
-            <InputGroup.Text><BsSearch /></InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Buscar"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-          </InputGroup>
-        </div>
+        <InputGroup style={{ width: '13rem' }}>
+          <InputGroup.Text><BsSearch /></InputGroup.Text>
+          <Form.Control
+            type="text"
+            placeholder="Buscar"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+        </InputGroup>
       </Card.Header>
+
+      <FiltrosPagosProveedores
+        proveedorSeleccionado={proveedorSeleccionado}
+        setProveedorSeleccionado={setProveedorSeleccionado}
+        proveedoresUnicos={proveedoresUnicos}
+        filtroEstatus={filtroEstatus}
+        setFiltroEstatus={setFiltroEstatus}
+        fechaDesde={fechaDesde}
+        setFechaDesde={setFechaDesde}
+        fechaHasta={fechaHasta}
+        setFechaHasta={setFechaHasta}
+        giroSeleccionado={giroSeleccionado}
+        setGiroSeleccionado={setGiroSeleccionado}
+        conceptoSeleccionado={conceptoSeleccionado}
+        setConceptoSeleccionado={setConceptoSeleccionado}
+        conceptosPorGiro={Object.fromEntries(
+          Object.entries(pagos.reduce((acc, p) => {
+            if (!acc[p.giro]) acc[p.giro] = new Set();
+            acc[p.giro].add(p.concepto);
+            return acc;
+          }, {})).map(([g, conceptos]) => [g, [...conceptos]])
+        )}
+        girosUnicos={[...new Set(pagos.map(p => p.giro).filter(Boolean))]}
+        onLimpiarFiltros={() => {
+          setBusqueda('');
+          setFiltroEstatus('');
+          setProveedorSeleccionado('');
+          setFechaDesde('');
+          setFechaHasta('');
+          setGiroSeleccionado('');
+          setConceptoSeleccionado('');
+        }}
+        onGenerarPDF={() => alert('Generar PDF con filtros (pendiente)')}
+      />
+
 
       <Card.Body className="p-0">
         {loading ? (
@@ -219,9 +213,13 @@ const ListaPagosProveedores = () => {
             {Object.entries(pagosAgrupados).map(([grupo, pagosGrupo]) => {
               const abierto = gruposAbiertos[grupo] || false;
               const { cliente, contenedor, fecha } = pagosGrupo[0];
-              const totalPesosGrupo = pagosGrupo.reduce((acc, p) => acc + (parseFloat(p.pesos) || 0), 0);
-              const saldoGrupo = pagosGrupo.reduce((acc, p) => acc + (parseFloat(p.saldo) || 0), 0);
-              const estatusGrupo = saldoGrupo === 0 ? 'Saldado' : 'Pendiente';
+              
+              const totalesGrupo = totalesGenerales.find(t => t.numero_control_general === grupo);
+
+              const totalPesosGrupo = parseFloat(totalesGrupo?.monto_total_en_pesos) || 0;
+              const saldoGrupo = parseFloat(totalesGrupo?.saldo_total) || 0;
+
+              const estatusGrupo = totalesGrupo?.estatus_general || 'Pendiente';
 
               return (
                 <Card key={grupo} className="m-3">

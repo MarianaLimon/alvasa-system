@@ -30,6 +30,49 @@ async function insertarEstadoInicialPago(numero_control, monto) {
   }
 }
 
+async function actualizarTotalesPorGrupo(listaPagos) {
+  const grupos = {};
+
+  for (const pago of listaPagos) {
+    const grupo = pago.numero_control.split('-').slice(0, 2).join('-');
+
+    if (!grupos[grupo]) {
+      grupos[grupo] = {
+        monto_total_en_pesos: 0,
+        total_abonado: 0,
+        saldo_total: 0,
+        estatus_general: 'Pendiente'
+      };
+    }
+
+    const pesos = parseFloat(pago.pesos) || 0;
+    const saldo = parseFloat(pago.saldo) || 0;
+    const abonado = pesos - saldo;
+
+    grupos[grupo].monto_total_en_pesos += pesos;
+    grupos[grupo].total_abonado += abonado;
+    grupos[grupo].saldo_total += saldo;
+  }
+
+  for (const grupo in grupos) {
+    const g = grupos[grupo];
+    g.estatus_general = g.saldo_total <= 0 ? 'Saldado' : 'Pendiente';
+
+    await db.promise().query(`
+      INSERT INTO proveedores_pagos_totales 
+        (numero_control_general, monto_total_en_pesos, total_abonado, saldo_total, estatus_general, fecha_actualizacion)
+      VALUES (?, ?, ?, ?, ?, NOW())
+      ON DUPLICATE KEY UPDATE 
+        monto_total_en_pesos = VALUES(monto_total_en_pesos),
+        total_abonado = VALUES(total_abonado),
+        saldo_total = VALUES(saldo_total),
+        estatus_general = VALUES(estatus_general),
+        fecha_actualizacion = NOW()
+    `, [grupo, g.monto_total_en_pesos, g.total_abonado, g.saldo_total, g.estatus_general]);
+  }
+}
+
+
 // 🔄 Obtener lista dinámica de pagos desde asignación de costos
 exports.obtenerListaPagosProveedores = async (req, res) => {
   try {
@@ -265,8 +308,7 @@ exports.obtenerListaPagosProveedores = async (req, res) => {
       pago.estatus = 'Pendiente';
     }
   }
-
-
+    await actualizarTotalesPorGrupo(listaPagos);
     res.json(listaPagos);
 
   } catch (error) {
@@ -330,5 +372,18 @@ exports.actualizarEstadoPago = async (req, res) => {
   } catch (error) {
     console.error('❌ Error al actualizar estado de pago:', error);
     res.status(500).json({ message: 'Error al actualizar estado de pago' });
+  }
+};
+
+// ✅ Obtener totales por grupo desde la tabla proveedores_pagos_totales
+exports.obtenerTotalesGenerales = async (req, res) => {
+  try {
+    const [filas] = await db.promise().query(`
+      SELECT * FROM proveedores_pagos_totales ORDER BY id DESC
+    `);
+    res.json(filas);
+  } catch (error) {
+    console.error('❌ Error al obtener totales generales:', error);
+    res.status(500).json({ error: 'Error al obtener totales generales' });
   }
 };
