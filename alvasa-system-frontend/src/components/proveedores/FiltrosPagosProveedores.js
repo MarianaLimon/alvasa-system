@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, InputGroup, Button } from 'react-bootstrap';
-import { BsFilter, BsFilePdf } from 'react-icons/bs';
+import { BsFilter} from 'react-icons/bs';
 
 const FiltrosPagosProveedores = ({
   proveedorSeleccionado, setProveedorSeleccionado,
@@ -12,8 +12,7 @@ const FiltrosPagosProveedores = ({
   girosUnicos,
   conceptoSeleccionado, setConceptoSeleccionado,
   conceptosPorGiro,
-  onLimpiarFiltros,
-  onGenerarPDF
+  onLimpiarFiltros
 }) => {
   return (
     <div className="d-flex flex-wrap gap-3 px-3 pb-3 mt-2">
@@ -94,10 +93,7 @@ const FiltrosPagosProveedores = ({
   <Button variant="outline-secondary" onClick={onLimpiarFiltros}>
     Limpiar filtros
   </Button>
-  <Button variant="danger" onClick={onGenerarPDF}>
-    <BsFilePdf className="me-1" />
-    Generar PDF
-  </Button>
+  
 </div>
 
     </div>

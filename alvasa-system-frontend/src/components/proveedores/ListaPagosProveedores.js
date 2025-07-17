@@ -115,6 +115,7 @@ const ListaPagosProveedores = () => {
   };
 
   const pagosFiltrados = pagos
+  
     .filter((p) =>
       p.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
       p.proveedor?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -144,6 +145,14 @@ const ListaPagosProveedores = () => {
     .filter((p) => !giroSeleccionado || p.giro === giroSeleccionado)
     .filter((p) => !conceptoSeleccionado || p.concepto === conceptoSeleccionado)
 
+  const totalFiltradoPesos = pagosFiltrados.reduce((acc, p) => acc + (parseFloat(p.pesos) || 0), 0);
+  const totalFiltradoAbonado = pagosFiltrados.reduce((acc, p) => {
+    const abono = parseFloat(p.pesos) || 0;
+    const saldo = parseFloat(p.saldo) || 0;
+    return acc + (abono - saldo);
+  }, 0);
+  const totalFiltradoSaldo = pagosFiltrados.reduce((acc, p) => acc + (parseFloat(p.saldo) || 0), 0);
+
 
   const pagosAgrupados = pagosFiltrados.reduce((acc, pago) => {
     const [parte1, parte2] = pago.numero_control.split('-');
@@ -155,17 +164,19 @@ const ListaPagosProveedores = () => {
 
   return (
     <Card className="mt-4">
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <strong>Lista de Pagos a Proveedores</strong>
-        <InputGroup style={{ width: '13rem' }}>
-          <InputGroup.Text><BsSearch /></InputGroup.Text>
-          <Form.Control
-            type="text"
-            placeholder="Buscar"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-        </InputGroup>
+      <Card.Header>
+        <div className="d-flex justify-content-between align-items-center flex-wrap">
+          <h5 className="mb-2 mb-md-0">Lista de proveedores</h5>
+          <InputGroup style={{ maxWidth: '250px' }}>
+            <InputGroup.Text><BsSearch /></InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Buscar"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </InputGroup>
+        </div>
       </Card.Header>
 
       <FiltrosPagosProveedores
@@ -202,6 +213,20 @@ const ListaPagosProveedores = () => {
         onGenerarPDF={() => alert('Generar PDF con filtros (pendiente)')}
       />
 
+      {/* Totales generales después de aplicar filtros */}
+      <div className="totales-pagos-container">
+        <div className="totales-pagos-box">
+          <div className="totales-pagos-item">
+            Total en pesos: <span className="text-primary total-filter">${totalFiltradoPesos.toFixed(2)}</span>
+          </div>
+          <div className="totales-pagos-item">
+            Saldo total: <span className="text-danger total-filter">${totalFiltradoSaldo.toFixed(2)}</span>
+          </div>
+          <div className="totales-pagos-item">
+            Total abonado: <span className="text-success total-filter">${totalFiltradoAbonado.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
 
       <Card.Body className="p-0">
         {loading ? (
