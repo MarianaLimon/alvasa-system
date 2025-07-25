@@ -425,8 +425,6 @@ const ListaPagosProveedores = () => {
                                     </InputGroup>
                                     </td>
 
-
-
                                     <td>$
                                     {!isNaN(Number(pago.pesos))
                                         ? Number(pago.pesos).toFixed(2)

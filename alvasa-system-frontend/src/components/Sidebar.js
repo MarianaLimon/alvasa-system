@@ -37,6 +37,9 @@ const Sidebar = () => {
         <NavLink to="/pagos-proveedores" className={linkClass} end>
           <BsClipboard className="icon" /> Proveedores
         </NavLink>
+        <NavLink to="/estado-cuenta-clientes" className={linkClass} end>
+          <BsClipboard className="icon" /> Edo Cta Clientes
+        </NavLink>
       </Nav>
     </div>
   );

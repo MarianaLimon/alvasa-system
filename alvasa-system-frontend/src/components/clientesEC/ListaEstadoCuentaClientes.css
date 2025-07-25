@@ -1,0 +1,104 @@
+/* Encabezado de la tabla */
+thead tr.listaec-titles th {
+  background-color: #414180 !important;
+  color: white !important;
+}
+
+/* Fila de encabezado por tipo de giro */
+tr.table-giros-ec {
+  background-color: #F0F0FF !important;
+}
+
+/* Encabezado de cada giro */
+.giro-header-cell-ec {
+  background-color: #b4b4f3 !important;
+  transition: background-color 0.3s;
+  color: #2e2e2e !important;
+  cursor: pointer;
+}
+
+.giro-header-cell-ec:hover {
+  background-color: #9191e2 !important;
+}
+
+/* Fila individual */
+td.fila-ec {
+  background-color: #dfeafc !important;
+  color: #1a1a1a !important;
+  transition: background-color 0.3s ease;
+  border: solid #fff 1.5px;
+}
+
+td.fila-ec:hover {
+  background-color: rgb(188, 200, 228) !important;
+}
+
+tr:hover td.fila-ec {
+  background-color: rgb(188, 200, 228) !important;
+}
+
+/* Columnas pequeñas */
+.col-moneda-ec,
+.col-cambio-ec {
+  width: 9rem;
+  min-width: 70px;
+  max-width: 120px;
+  text-align: center;
+}
+
+/* Contenedor de totales generales */
+.totales-ec-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.totales-ec-box {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 1rem 10rem;
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Tamaño de texto para totales */
+.total-ec-filter {
+  font-size: 1.5rem;
+}
+
+.totales-ec-item {
+  white-space: nowrap;
+}
+
+
+.btn-generar-pdf {
+  border: 1px solid #5751AB !important;
+  color: #5751AB;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-generar-pdf:hover {
+  background-color: #5751AB;
+  color: white;
+}
+
+.btn-limpiar-filtros, .btn-verpagos {
+  border: 1px solid #17A2B8 !important;
+  color: #17A2B8;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-limpiar-filtros:hover, .btn-verpagos:hover {
+  background-color: #17A2B8;
+  color: white;
+}
+
+

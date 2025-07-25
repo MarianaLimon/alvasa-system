@@ -19,6 +19,7 @@ import FormularioAsignacionCostos from './components/asignacionCostos/Formulario
 import VerAsignacionCostos from './components/asignacionCostos/VerAsignacionCostos';
 import ListaPagosProveedores from './components/proveedores/ListaPagosProveedores';
 import ListaAbonos from './components/proveedores/ListaAbonos';
+import ListaEstadoCuentaClientes from './components/clientesEC/ListaEstadoCuentaClientes';
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
             <Route path="/asignacion-costos/ver/:folio" element={<VerAsignacionCostos />} />
             <Route path="/pagos-proveedores" element={<ListaPagosProveedores />} />
             <Route path="/pagos-proveedores/:numero_control" element={<ListaAbonos />} />
+            <Route path="/estado-cuenta-clientes" element={<ListaEstadoCuentaClientes />} />
           </Routes>
         </div>
       </div>
