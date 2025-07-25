@@ -1,4 +1,5 @@
 const db = require('../../config/db');
+const { insertarServiciosPorAsignacion } = require('./serviciosEstadoCuentaController');
 
 // 🔢 Generador de ID tipo EC-0001
 async function generarIdEstadoCuenta() {
@@ -6,7 +7,6 @@ async function generarIdEstadoCuenta() {
     SELECT id_estado_cuenta FROM estado_cuenta_clientes ORDER BY id DESC LIMIT 1
   `);
   if (rows.length === 0) return 'EC-0001';
-
   const numero = parseInt(rows[0].id_estado_cuenta.split('-')[1]) + 1;
   return `EC-${numero.toString().padStart(4, '0')}`;
 }
@@ -14,6 +14,8 @@ async function generarIdEstadoCuenta() {
 // ✅ Inserta o actualiza automáticamente la fila del estado de cuenta
 exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
   try {
+    console.log(`🧩 Procesando asignación ${idAsignacion} / proceso ${idProceso}`);
+
     // 1. Datos base
     const [[datos]] = await db.promise().query(`
       SELECT 
@@ -33,48 +35,31 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
       WHERE po.id = ? AND ac.id = ?
     `, [idProceso, idAsignacion]);
 
-    if (!datos) return;
+    if (!datos) return console.log(`⚠️ Datos no encontrados para asignación ${idAsignacion}`);
 
-    // 2. Calcular total (ventas reales de todos los subformularios)
+    // 2. Calcular total
     const [[{ total }]] = await db.promise().query(`
       SELECT SUM(venta) AS total FROM (
         SELECT flete_internacional_venta AS venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT cargos_locales_venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT demoras_venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT venta_servicio_extra FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT flete_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT estadia_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT burreo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT sobrepeso_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT apoyo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT pernocta_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_pernocta_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_falso_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_cancelacion_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_dias_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT custodia_venta_almacenaje FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT venta FROM paqueteria_costos WHERE asignacion_id = ?
-        UNION ALL
-        SELECT venta FROM aseguradora_costos WHERE asignacion_id = ?
+        UNION ALL SELECT cargos_locales_venta FROM forwarder_costos WHERE asignacion_id = ?
+        UNION ALL SELECT demoras_venta FROM forwarder_costos WHERE asignacion_id = ?
+        UNION ALL SELECT venta_servicio_extra FROM forwarder_costos WHERE asignacion_id = ?
+        UNION ALL SELECT flete_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT estadia_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT burreo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT sobrepeso_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT apoyo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT pernocta_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_venta FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_pernocta_venta FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_falso_venta FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_cancelacion_venta FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_dias_venta FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT custodia_venta_almacenaje FROM custodia_costos WHERE asignacion_id = ?
+        UNION ALL SELECT venta FROM paqueteria_costos WHERE asignacion_id = ?
+        UNION ALL SELECT venta FROM aseguradora_costos WHERE asignacion_id = ?
       ) AS subformularios
-    `, Array(18).fill(idAsignacion)); // Mismo ID para todos
+    `, Array(18).fill(idAsignacion));
 
     const abonado = 0;
     const saldo = total || 0;
@@ -92,9 +77,9 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
           total = ?, abonado = ?, saldo = ?, estatus = ?, actualizado_en = NOW()
         WHERE asignacion_id = ?
       `, [saldo, abonado, saldo, estatus, idAsignacion]);
+      console.log(`🔁 Actualizado estado de cuenta para asignación ${idAsignacion}`);
     } else {
       const nuevoId = await generarIdEstadoCuenta();
-
       await db.promise().query(`
         INSERT INTO estado_cuenta_clientes (
           id_estado_cuenta, id_proceso_operativo, cliente_id, asignacion_id,
@@ -117,13 +102,18 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
         saldo,
         estatus
       ]);
+      console.log(`🆕 Insertado nuevo estado de cuenta: ${nuevoId}`);
     }
+
+    // 4. Servicios
+    await insertarServiciosPorAsignacion(idAsignacion);
+    console.log(`✅ Servicios agregados para asignación ${idAsignacion}`);
   } catch (error) {
     console.error('❌ Error en estado de cuenta:', error);
   }
 };
 
-// 🔍 Obtener todos los estados de cuenta generados
+// 🔍 Obtener todos los estados de cuenta
 exports.obtenerEstadosCuentaClientes = async (req, res) => {
   try {
     const [registros] = await db.promise().query(`
@@ -138,7 +128,7 @@ exports.obtenerEstadosCuentaClientes = async (req, res) => {
   }
 };
 
-// 🔄 Genera todos los estados de cuenta automáticamente al iniciar
+// 🔄 Ejecutar automáticamente al iniciar
 async function generarTodosLosEstadosDeCuenta() {
   try {
     const [asignaciones] = await db.promise().query(`
@@ -157,7 +147,7 @@ async function generarTodosLosEstadosDeCuenta() {
   }
 }
 
-// Ejecutar si la tabla está vacía
+// ▶️ Lanzar al iniciar si está vacío
 (async () => {
   const [rows] = await db.promise().query(`SELECT COUNT(*) AS total FROM estado_cuenta_clientes`);
   if (rows[0].total === 0) {

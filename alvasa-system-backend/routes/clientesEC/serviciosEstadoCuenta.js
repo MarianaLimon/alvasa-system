@@ -1,8 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { controladorDummy } = require('../../controllers/clientesEC/serviciosEstadoCuentaController');
+const { insertarServiciosPorAsignacion } = require('../../controllers/clientesEC/serviciosEstadoCuentaController');
 
-// Ruta dummy para que no truene
-router.get('/', controladorDummy);
+// Ruta para probar manualmente desde Postman si hace falta
+router.post('/:asignacion_id', async (req, res) => {
+  try {
+    const { asignacion_id } = req.params;
+    await insertarServiciosPorAsignacion(asignacion_id);
+    res.json({ message: 'Servicios insertados correctamente.' });
+  } catch (error) {
+    console.error('Error en la ruta servicios estado cuenta:', error);
+    res.status(500).json({ error: 'Error al insertar servicios.' });
+  }
+});
 
 module.exports = router;
