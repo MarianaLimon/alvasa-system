@@ -43,7 +43,7 @@ exports.insertarServiciosPorAsignacion = async (asignacion_id) => {
     const servicios = [
       { servicio: 'Importación', importe: datos.importacion_venta },
       { servicio: 'Almacenajes', importe: datos.almacenajes_venta },
-      { servicio: 'Servicio', importe: datos.servicio_venta },
+      { servicio: 'Serv. Prg. Mo Ejec.', importe: datos.servicio_venta },
       { servicio: datos.tipo_servicio1, importe: datos.venta_servicio1 },
       { servicio: datos.tipo_servicio2, importe: datos.venta_servicio2 },
     ];

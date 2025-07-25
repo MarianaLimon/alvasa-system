@@ -58,8 +58,13 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
         UNION ALL SELECT custodia_venta_almacenaje FROM custodia_costos WHERE asignacion_id = ?
         UNION ALL SELECT venta FROM paqueteria_costos WHERE asignacion_id = ?
         UNION ALL SELECT venta FROM aseguradora_costos WHERE asignacion_id = ?
+        UNION ALL SELECT importacion_venta FROM aa_despacho_costos WHERE asignacion_id = ?
+        UNION ALL SELECT almacenajes_venta FROM aa_despacho_costos WHERE asignacion_id = ?
+        UNION ALL SELECT servicio_venta FROM aa_despacho_costos WHERE asignacion_id = ?
+        UNION ALL SELECT venta_servicio1 FROM aa_despacho_costos WHERE asignacion_id = ?
+        UNION ALL SELECT venta_servicio2 FROM aa_despacho_costos WHERE asignacion_id = ?
       ) AS subformularios
-    `, Array(18).fill(idAsignacion));
+    `, Array(23).fill(idAsignacion));
 
     const abonado = 0;
     const saldo = total || 0;
@@ -71,15 +76,23 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
       [idAsignacion]
     );
 
+    let idEstadoCuenta;
+
     if (existe) {
+      idEstadoCuenta = existe.id;
       await db.promise().query(`
         UPDATE estado_cuenta_clientes SET
           total = ?, abonado = ?, saldo = ?, estatus = ?, actualizado_en = NOW()
         WHERE asignacion_id = ?
       `, [saldo, abonado, saldo, estatus, idAsignacion]);
       console.log(`🔁 Actualizado estado de cuenta para asignación ${idAsignacion}`);
+
+      // 🧽 Borrar servicios previos para ese estado
+      await db.promise().query(`DELETE FROM servicios_estado_cuenta WHERE id_estado_cuenta = ?`, [idEstadoCuenta]);
     } else {
       const nuevoId = await generarIdEstadoCuenta();
+      idEstadoCuenta = nuevoId;
+
       await db.promise().query(`
         INSERT INTO estado_cuenta_clientes (
           id_estado_cuenta, id_proceso_operativo, cliente_id, asignacion_id,
@@ -105,9 +118,9 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
       console.log(`🆕 Insertado nuevo estado de cuenta: ${nuevoId}`);
     }
 
-    // 4. Servicios
+    // 4. Reinsertar todos los servicios actualizados
     await insertarServiciosPorAsignacion(idAsignacion);
-    console.log(`✅ Servicios agregados para asignación ${idAsignacion}`);
+    console.log(`✅ Servicios insertados para asignación ${idAsignacion}`);
   } catch (error) {
     console.error('❌ Error en estado de cuenta:', error);
   }
@@ -116,17 +129,27 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
 // 🔍 Obtener todos los estados de cuenta
 exports.obtenerEstadosCuentaClientes = async (req, res) => {
   try {
-    const [registros] = await db.promise().query(`
-      SELECT *
-      FROM estado_cuenta_clientes
-      ORDER BY creado_en DESC
+    const [estados] = await db.promise().query(`
+      SELECT * FROM estado_cuenta_clientes ORDER BY creado_en DESC
     `);
-    res.json(registros);
+
+    for (const estado of estados) {
+      const [servicios] = await db.promise().query(
+        `SELECT giro, servicio, importe
+         FROM servicios_estado_cuenta
+         WHERE id_estado_cuenta = ?`,
+        [estado.id]
+      );
+      estado.servicios = servicios;
+    }
+
+    res.json(estados);
   } catch (error) {
     console.error('❌ Error al obtener estados de cuenta:', error);
     res.status(500).json({ error: 'Error al obtener estados de cuenta' });
   }
 };
+
 
 // 🔄 Ejecutar automáticamente al iniciar
 async function generarTodosLosEstadosDeCuenta() {

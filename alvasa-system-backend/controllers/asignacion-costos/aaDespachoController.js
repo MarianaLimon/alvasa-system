@@ -1,4 +1,5 @@
 const db = require('../../config/db');
+const { insertarOCrearEstadoCuenta } = require('../../controllers/clientesEC/estadoCuentaClientesController');
 
 // Guardar o actualizar datos de AA Despacho
 const guardarAADespacho = (req, res) => {
@@ -65,11 +66,29 @@ const guardarAADespacho = (req, res) => {
     parseFloat(ventaServicio2) || 0
   ];
 
-  db.query(sql, valores, (err, result) => {
+  db.query(sql, valores, async (err, result) => {
     if (err) {
       console.error('❌ Error al guardar AA Despacho:', err);
       return res.status(500).json({ error: 'Error al guardar los datos de AA Despacho' });
     }
+
+    // ✅ Intentar actualizar Estado de Cuenta después de guardar
+    try {
+      const [[proceso]] = await db.promise().query(
+        'SELECT proceso_operativo_id FROM asignacion_costos WHERE id = ?',
+        [asignacionId]
+      );
+
+      if (proceso?.proceso_operativo_id) {
+        await insertarOCrearEstadoCuenta(asignacionId, proceso.proceso_operativo_id);
+        console.log('✅ Estado de cuenta cliente actualizado automáticamente desde AA Despacho');
+      } else {
+        console.warn('⚠️ No se encontró proceso operativo para esta asignación');
+      }
+    } catch (syncError) {
+      console.error('❌ Error al actualizar estado de cuenta desde AA Despacho:', syncError);
+    }
+
     res.status(200).json({ message: 'Datos de AA Despacho guardados correctamente' });
   });
 };
