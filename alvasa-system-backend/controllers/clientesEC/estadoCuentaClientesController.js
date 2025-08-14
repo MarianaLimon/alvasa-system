@@ -37,40 +37,7 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
 
     if (!datos) return console.log(`⚠️ Datos no encontrados para asignación ${idAsignacion}`);
 
-    // 2. Calcular total
-    const [[{ total }]] = await db.promise().query(`
-      SELECT SUM(venta) AS total FROM (
-        SELECT flete_internacional_venta AS venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL SELECT cargos_locales_venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL SELECT demoras_venta FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL SELECT venta_servicio_extra FROM forwarder_costos WHERE asignacion_id = ?
-        UNION ALL SELECT flete_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT estadia_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT burreo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT sobrepeso_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT apoyo_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT pernocta_venta FROM flete_terrestre_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_pernocta_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_falso_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_cancelacion_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_dias_venta FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT custodia_venta_almacenaje FROM custodia_costos WHERE asignacion_id = ?
-        UNION ALL SELECT venta FROM paqueteria_costos WHERE asignacion_id = ?
-        UNION ALL SELECT venta FROM aseguradora_costos WHERE asignacion_id = ?
-        UNION ALL SELECT importacion_venta FROM aa_despacho_costos WHERE asignacion_id = ?
-        UNION ALL SELECT almacenajes_venta FROM aa_despacho_costos WHERE asignacion_id = ?
-        UNION ALL SELECT servicio_venta FROM aa_despacho_costos WHERE asignacion_id = ?
-        UNION ALL SELECT venta_servicio1 FROM aa_despacho_costos WHERE asignacion_id = ?
-        UNION ALL SELECT venta_servicio2 FROM aa_despacho_costos WHERE asignacion_id = ?
-      ) AS subformularios
-    `, Array(23).fill(idAsignacion));
-
-    const abonado = 0;
-    const saldo = total || 0;
-    const estatus = saldo === 0 ? 'Pagado' : 'Pendiente';
-
-    // 3. Verificar existencia
+    // 2. Verificar existencia
     const [[existe]] = await db.promise().query(
       'SELECT id FROM estado_cuenta_clientes WHERE asignacion_id = ?',
       [idAsignacion]
@@ -80,12 +47,6 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
 
     if (existe) {
       idEstadoCuenta = existe.id;
-      await db.promise().query(`
-        UPDATE estado_cuenta_clientes SET
-          total = ?, abonado = ?, saldo = ?, estatus = ?, actualizado_en = NOW()
-        WHERE asignacion_id = ?
-      `, [saldo, abonado, saldo, estatus, idAsignacion]);
-      console.log(`🔁 Actualizado estado de cuenta para asignación ${idAsignacion}`);
 
       // 🧽 Borrar servicios previos para ese estado
       await db.promise().query(`DELETE FROM servicios_estado_cuenta WHERE id_estado_cuenta = ?`, [idEstadoCuenta]);
@@ -98,7 +59,7 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
           id_estado_cuenta, id_proceso_operativo, cliente_id, asignacion_id,
           folio_proceso, cliente, contenedor, fecha_entrega, tipo_carga, mercancia,
           total, abonado, saldo, estatus, creado_en, actualizado_en
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 'Pendiente', NOW(), NOW())
       `, [
         nuevoId,
         datos.id_proceso_operativo,
@@ -109,28 +70,45 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
         datos.contenedor,
         datos.fecha_entrega || null,
         datos.tipo_carga,
-        datos.mercancia,
-        saldo,
-        abonado,
-        saldo,
-        estatus
+        datos.mercancia
       ]);
       console.log(`🆕 Insertado nuevo estado de cuenta: ${nuevoId}`);
     }
 
-    // 4. Reinsertar todos los servicios actualizados
-    await sincronizarServiciosEstadoCuenta(idAsignacion, idProceso);
+    // 3. Reinsertar todos los servicios actualizados
+    await sincronizarServiciosEstadoCuenta(idAsignacion, idProceso, idEstadoCuenta);
     console.log(`✅ Servicios insertados para asignación ${idAsignacion}`);
+
+    // 4. Calcular total desde servicios
+    const [[{ totalServicios }]] = await db.promise().query(`
+      SELECT SUM(importe) AS totalServicios
+      FROM servicios_estado_cuenta
+      WHERE id_estado_cuenta = ?
+    `, [idEstadoCuenta]);
+
+    const total = totalServicios || 0;
+    const abonado = 0;
+    const saldo = total;
+    const estatus = saldo === 0 ? 'Pagado' : 'Pendiente';
+
+    // 5. Actualizar el total final
+    await db.promise().query(`
+      UPDATE estado_cuenta_clientes SET
+        total = ?, abonado = ?, saldo = ?, estatus = ?, actualizado_en = NOW()
+      WHERE id = ?
+    `, [total, abonado, saldo, estatus, idEstadoCuenta]);
+
   } catch (error) {
     console.error('❌ Error en estado de cuenta:', error);
   }
 };
 
+
 // 🔍 Obtener todos los estados de cuenta
 exports.obtenerEstadosCuentaClientes = async (req, res) => {
   try {
     const [estados] = await db.promise().query(`
-      SELECT * FROM estado_cuenta_clientes ORDER BY creado_en DESC
+      SELECT * FROM estado_cuenta_clientes ORDER BY id_estado_cuenta DESC
     `);
 
     for (const estado of estados) {

@@ -12,7 +12,21 @@ import './ListaEstadoCuentaClientes.css';
 const CardEstadoCuentaCliente = ({ data }) => {
   const [open, setOpen] = useState(false);
 
-  // Adaptar nombres del backend a los que se usaban en el diseño
+  // 🔢 Función para formato consistente de dinero
+  const formatoPesos = (valor) => {
+    return parseFloat(valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  // 📆 Formateo bonito de fecha
+  const formatearFecha = (fechaISO) => {
+    if (!fechaISO) return '—';
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = fecha.toLocaleString('es-MX', { month: 'long' });
+    const anio = fecha.getFullYear();
+    return `${dia} ${mes} ${anio}`;
+  };
+
   const {
     id_estado_cuenta: idEstadoCuenta,
     cliente,
@@ -27,7 +41,12 @@ const CardEstadoCuentaCliente = ({ data }) => {
     estatus
   } = data;
 
-  const colorEstatus = estatus === 'Pagado' ? 'success' : estatus === 'Parcial' ? 'warning text-dark' : 'warning text-dark';
+  const colorEstatus =
+    estatus === 'Pagado'
+      ? 'success'
+      : estatus === 'Parcial'
+      ? 'warning text-dark'
+      : 'warning text-dark';
 
   return (
     <Card className="m-3">
@@ -46,17 +65,17 @@ const CardEstadoCuentaCliente = ({ data }) => {
             {cliente}
             <span className="mx-3">|</span>
             <BsCalendar className="me-2" />
-            {fechaEntrega}
+            {formatearFecha(fechaEntrega)}
             <span className="mx-3">|</span>
             <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
               <BsCashStack className="me-1" />
-              ${total.toLocaleString()}
+              ${formatoPesos(total)}
             </span>
           </div>
           <div className="d-flex align-items-center gap-3">
             Saldo:
             <span className="fw-bold" style={{ fontSize: '1.2rem', color: '#ffc107' }}>
-              ${saldo.toLocaleString()}
+              ${formatoPesos(saldo)}
             </span>
             <span className={`badge bg-${colorEstatus}`}>{estatus}</span>
             <span>{open ? '▼' : '▶'}</span>
@@ -86,12 +105,12 @@ const CardEstadoCuentaCliente = ({ data }) => {
                     <tr key={i}>
                       <td className="fila-ec">{item.giro}</td>
                       <td className="fila-ec">{item.servicio}</td>
-                      <td className="fila-ec">${parseFloat(item.importe).toLocaleString()}</td>
+                      <td className="fila-ec">${formatoPesos(item.importe)}</td>
                     </tr>
                   ))}
                   <tr className="fw-bold">
                     <td colSpan={2} className="fila-ec">Total</td>
-                    <td className="fila-ec">${total.toLocaleString()}</td>
+                    <td className="fila-ec">${formatoPesos(total)}</td>
                   </tr>
                 </tbody>
               </Table>
@@ -100,13 +119,13 @@ const CardEstadoCuentaCliente = ({ data }) => {
             {/* Columna 2: Totales */}
             <Col md={3}>
               <Card className="p-3 text-center shadow-sm">
-                <p><strong>Total del Contenedor:</strong><br /> ${total.toLocaleString()}</p>
-                <p><strong>Total Abonado:</strong><br /> ${abonado.toLocaleString()}</p>
-                <p><strong>Saldo Pendiente:</strong><br /> ${saldo.toLocaleString()}</p>
+                <p><strong>Total del Contenedor:</strong><br /> ${formatoPesos(total)}</p>
+                <p><strong>Total Abonado:</strong><br /> ${formatoPesos(abonado)}</p>
+                <p><strong>Saldo Pendiente:</strong><br /> ${formatoPesos(saldo)}</p>
               </Card>
             </Col>
 
-            {/* Columna 3: Botones uno debajo del otro */}
+            {/* Columna 3: Botones */}
             <Col md={3}>
               <div className="d-flex flex-column gap-2 mt-3 mt-5">
                 <Button variant="success" size="sm">Pagar</Button>

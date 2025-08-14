@@ -44,9 +44,9 @@ useEffect(() => {
     return coincideCliente && coincideEstatus && coincideFechaDesde && coincideFechaHasta;
   });
 
-  const totalVentas = filtrados.reduce((acc, c) => acc + c.total, 0);
-  const totalAbonado = filtrados.reduce((acc, c) => acc + c.abonado, 0);
-  const totalSaldo = filtrados.reduce((acc, c) => acc + c.saldo, 0);
+  const totalVentas = filtrados.reduce((acc, c) => acc + Number(c.total || 0), 0);
+  const totalAbonado = filtrados.reduce((acc, c) => acc + Number(c.abonado || 0), 0);
+  const totalSaldo = filtrados.reduce((acc, c) => acc + Number(c.saldo || 0), 0);
 
   const limpiarFiltros = () => {
     setClienteSeleccionado('');
