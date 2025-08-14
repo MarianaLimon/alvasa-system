@@ -1,5 +1,9 @@
 const db = require('../../config/db');
 
+const { insertarOCrearEstadoCuenta } = require('../clientesEC/estadoCuentaClientesController');
+const { sincronizarServiciosEstadoCuenta } = require('../../utils/sincronizarServiciosEstadoCuenta');
+
+
 const crearAsignacionCostos = (req, res) => {
   console.log('📩 Entró a crearAsignacionCostos');
   console.log('➡️  Body recibido:', req.body);
@@ -44,13 +48,35 @@ const crearAsignacionCostos = (req, res) => {
       salidaAduana
     ];
 
-    db.query(consultaInsertar, valores, (err, resultado) => {
+    db.query(consultaInsertar, valores, async (err, resultado) => {
       if (err) {
-        console.error('❌ Error en la consulta INSERT:', err);
-        return res.status(500).json({ mensaje: 'Error al crear la asignación de costos' });
+        console.error('❌ Error al insertar asignación:', err);
+        return res.status(500).json({ mensaje: 'Error interno del servidor' });
       }
-      res.status(201).json({ mensaje: 'Asignación creada correctamente', id: resultado.insertId });
+
+      try {
+        const asignacionId = resultado.insertId;
+
+        // ✅ Crea/actualiza el Estado de Cuenta inmediatamente
+        await insertarOCrearEstadoCuenta(asignacionId, procesoOperativoId);
+
+        // ✅ Sincroniza servicios en ECC (quedarán en 0 si aún no hay ventas)
+        await sincronizarServiciosEstadoCuenta(asignacionId, procesoOperativoId);
+
+        return res.status(201).json({
+          mensaje: 'Asignación creada correctamente',
+          id: asignacionId
+        });
+      } catch (syncErr) {
+        console.error('❌ Error al sincronizar ECC justo después de crear la asignación:', syncErr);
+        // Aun así responde 201 para no romper el flujo del frontend, pero avisa:
+        return res.status(201).json({
+          mensaje: 'Asignación creada; hubo un problema sincronizando el ECC',
+          id: resultado.insertId
+        });
+      }
     });
+
   });
 };
 

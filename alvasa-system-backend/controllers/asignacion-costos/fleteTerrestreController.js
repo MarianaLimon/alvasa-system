@@ -1,15 +1,13 @@
 const db = require('../../config/db');
+const { insertarOCrearEstadoCuenta } = require('../clientesEC/estadoCuentaClientesController');
+const { sincronizarServiciosEstadoCuenta } = require('../../utils/sincronizarServiciosEstadoCuenta');
 
-// Función segura para convertir valores vacíos o inválidos a 0
 const parseDecimal = (val) => {
   const num = parseFloat(val);
   return isNaN(num) ? 0 : num;
 };
 
-// Guardar o actualizar Flete Terrestre
 const guardarFleteTerrestre = async (req, res) => {
-  console.log('📦 Datos recibidos para guardar flete terrestre:', req.body);
-
   const asignacionId = req.params.id;
   const {
     proveedor,
@@ -38,11 +36,61 @@ const guardarFleteTerrestre = async (req, res) => {
     parseDecimal(pernoctaVenta)
   ];
 
-  console.log('🧮 Valores convertidos antes del insert:', datos);
-
   try {
     db.query('SELECT id FROM flete_terrestre_costos WHERE asignacion_id = ?', [asignacionId], (err, resultados) => {
       if (err) return res.status(500).json({ error: 'Error al buscar Flete Terrestre' });
+
+      const callbackFinal = async (idFlete) => {
+        try {
+          // Guardar los extras PRIMERO
+          await new Promise((resolve, reject) => {
+            db.query('DELETE FROM extras_flete_terrestre WHERE flete_terrestre_id = ?', [idFlete], (err) => {
+              if (err) return reject(err);
+
+              const valores = extras
+                .filter(extra => extra.concepto?.trim() !== '' && Number(extra.costo) > 0 && Number(extra.venta) > 0)
+                .map(extra => [
+                  idFlete,
+                  extra.concepto.trim(),
+                  parseFloat(extra.costo),
+                  parseFloat(extra.venta)
+                ]);
+
+              if (valores.length === 0) return resolve();
+
+              db.query(
+                'INSERT INTO extras_flete_terrestre (flete_terrestre_id, concepto, costo, venta) VALUES ?',
+                [valores],
+                (err) => {
+                  if (err) return reject(err);
+                  resolve();
+                }
+              );
+            });
+          });
+
+          // 🔄 Ahora sí, después de guardar todo, actualiza el estado de cuenta
+          const [[proceso]] = await db.promise().query(
+            'SELECT proceso_operativo_id FROM asignacion_costos WHERE id = ?',
+            [asignacionId]
+          );
+
+          if (proceso?.proceso_operativo_id) {
+            const procesoId = proceso.proceso_operativo_id;
+            await insertarOCrearEstadoCuenta(asignacionId, procesoId);
+            await sincronizarServiciosEstadoCuenta(asignacionId, procesoId);
+            console.log('✅ Estado de cuenta actualizado y servicios sincronizados desde Flete Terrestre');
+          } else {
+            console.warn('⚠️ No se encontró proceso operativo para esta asignación');
+          }
+
+          return res.json({ mensaje: 'Flete terrestre y extras guardados correctamente' });
+
+        } catch (error) {
+          console.error('❌ Error al guardar extras o sincronizar estado de cuenta:', error);
+          return res.status(500).json({ error: 'Error al guardar flete terrestre' });
+        }
+      };
 
       if (resultados.length > 0) {
         const idFlete = resultados[0].id;
@@ -57,15 +105,11 @@ const guardarFleteTerrestre = async (req, res) => {
            WHERE asignacion_id = ?`,
           [...datos, asignacionId],
           (err) => {
-            if (err) {
-              console.error('❌ Error al actualizar Flete Terrestre:', err);
-              return res.status(500).json({ error: 'Error al actualizar Flete Terrestre' });
-            }
-            actualizarExtras(idFlete, extras, res);
+            if (err) return res.status(500).json({ error: 'Error al actualizar Flete Terrestre' });
+            callbackFinal(idFlete);
           }
         );
       } else {
-        console.log('🧪 Insertando flete terrestre con:', [asignacionId, ...datos]);
         db.query(
           `INSERT INTO flete_terrestre_costos 
            (asignacion_id, proveedor, flete, flete_venta, estadia, estadia_venta, burreo, burreo_venta, 
@@ -73,14 +117,9 @@ const guardarFleteTerrestre = async (req, res) => {
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [asignacionId, ...datos],
           (err, result) => {
-            if (err) {
-              console.error('❌ Error al insertar Flete Terrestre:', err);
-              return res.status(500).json({ error: 'Error al guardar Flete Terrestre' });
-            }
-
+            if (err) return res.status(500).json({ error: 'Error al guardar Flete Terrestre' });
             const nuevoId = result.insertId;
-            console.log('Extras a guardar:', extras);
-            actualizarExtras(nuevoId, extras, res);
+            callbackFinal(nuevoId);
           }
         );
       }
@@ -91,29 +130,26 @@ const guardarFleteTerrestre = async (req, res) => {
   }
 };
 
-// Función auxiliar para actualizar los extras
 const actualizarExtras = (fleteId, extras, res) => {
-
-    console.log('🧩 ID de flete recibido para extras:', fleteId);
-    
   db.query('DELETE FROM extras_flete_terrestre WHERE flete_terrestre_id = ?', [fleteId], (err) => {
     if (err) {
-      console.error('Error al eliminar extras:', err);
       return res.status(500).json({ error: 'Error al eliminar extras anteriores' });
     }
 
-    if (!extras || extras.length === 0) {
-      return res.json({ mensaje: 'Flete terrestre actualizado sin extras' });
-    }
-
     const valores = extras
-      .filter(extra => extra.concepto || extra.costo || extra.venta) // solo si tienen contenido
-      .map(extra => [fleteId, extra.concepto, parseDecimal(extra.costo), parseDecimal(extra.venta)]);
-
-    console.log('Insertando estos extras:', valores);
+      .filter(extra => {
+        // Solo pasa si tiene concepto no vacío y valores mayores a 0
+        return extra.concepto?.trim() !== '' && Number(extra.costo) > 0 && Number(extra.venta) > 0;
+      })
+      .map(extra => [
+        fleteId,
+        extra.concepto.trim(),
+        parseFloat(extra.costo),
+        parseFloat(extra.venta)
+      ]);
 
     if (valores.length === 0) {
-      return res.json({ mensaje: 'Flete terrestre actualizado, sin extras válidos' });
+      return res.json({ mensaje: 'Flete terrestre actualizado sin extras válidos' });
     }
 
     db.query(
@@ -121,7 +157,6 @@ const actualizarExtras = (fleteId, extras, res) => {
       [valores],
       (err) => {
         if (err) {
-          console.error('Error al insertar extras:', err);
           return res.status(500).json({ error: 'Error al guardar extras' });
         }
         return res.json({ mensaje: 'Flete terrestre y extras guardados correctamente' });
@@ -130,7 +165,6 @@ const actualizarExtras = (fleteId, extras, res) => {
   });
 };
 
-// Obtener Flete Terrestre por asignación
 const obtenerFleteTerrestre = (req, res) => {
   const asignacionId = req.params.id;
   db.query(

@@ -1,4 +1,6 @@
 const db = require('../../config/db');
+const { insertarOCrearEstadoCuenta } = require('../clientesEC/estadoCuentaClientesController');
+const { sincronizarServiciosEstadoCuenta } = require('../../utils/sincronizarServiciosEstadoCuenta');
 
 exports.guardarForwarder = (req, res) => {
   const asignacionId = req.params.asignacionId;
@@ -12,7 +14,6 @@ exports.guardarForwarder = (req, res) => {
     abonado, fechaAbon, rembolsado, fechaRemb
   } = req.body;
 
-  // Limpieza de valores opcionales
   const tipoServicioExtraLimpio = tipoServicioExtra?.trim() || null;
   const costoServicioExtraLimpio = parseFloat(costoServicioExtra) || 0;
   const ventaServicioExtraLimpio = parseFloat(ventaServicioExtra) || 0;
@@ -43,8 +44,33 @@ exports.guardarForwarder = (req, res) => {
   db.query(sqlVerificar, [asignacionId], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Error al verificar forwarder' });
 
+    const callbackFinal = async () => {
+      try {
+        // Obtener proceso operativo relacionado
+        const [[proceso]] = await db.promise().query(
+          'SELECT proceso_operativo_id FROM asignacion_costos WHERE id = ?',
+          [asignacionId]
+        );
+
+        if (!proceso?.proceso_operativo_id) {
+          console.warn('⚠️ No se encontró proceso operativo para esta asignación');
+          return;
+        }
+
+        const procesoId = proceso.proceso_operativo_id;
+
+        // Crear o actualizar estado de cuenta
+        await insertarOCrearEstadoCuenta(asignacionId, procesoId);
+
+        // Ejecutar sincronización global
+        await sincronizarServiciosEstadoCuenta(asignacionId, procesoId);
+      } catch (e) {
+        console.error('❌ Error al sincronizar servicios desde Forwarder:', e);
+      }
+    };
+
+    // INSERT o UPDATE
     if (rows.length > 0) {
-      console.log('🔄 Actualizando forwarder con:', valores);
       const sqlUpdate = `
         UPDATE forwarder_costos SET
           forwarder = ?, asignado_por = ?, consignatario = ?, naviera = ?,
@@ -55,12 +81,12 @@ exports.guardarForwarder = (req, res) => {
           abonado = ?, fecha_abon = ?, rembolsado = ?, fecha_remb = ?
         WHERE asignacion_id = ?
       `;
-      db.query(sqlUpdate, valores, (err) => {
+      db.query(sqlUpdate, valores, async (err) => {
         if (err) return res.status(500).json({ error: 'Error al actualizar forwarder' });
+        await callbackFinal();
         res.json({ message: 'Forwarder actualizado correctamente' });
       });
     } else {
-      console.log('🆕 Insertando forwarder con:', valores);
       const sqlInsert = `
         INSERT INTO forwarder_costos (
           forwarder, asignado_por, consignatario, naviera,
@@ -72,8 +98,9 @@ exports.guardarForwarder = (req, res) => {
           asignacion_id
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      db.query(sqlInsert, valores, (err) => {
+      db.query(sqlInsert, valores, async (err) => {
         if (err) return res.status(500).json({ error: 'Error al guardar forwarder' });
+        await callbackFinal();
         res.json({ message: 'Forwarder guardado correctamente' });
       });
     }

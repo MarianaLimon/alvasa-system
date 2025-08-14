@@ -1,5 +1,5 @@
 const db = require('../../config/db');
-const { insertarServiciosPorAsignacion } = require('./serviciosEstadoCuentaController');
+const { sincronizarServiciosEstadoCuenta } = require('../../utils/sincronizarServiciosEstadoCuenta');
 
 // 🔢 Generador de ID tipo EC-0001
 async function generarIdEstadoCuenta() {
@@ -119,7 +119,7 @@ exports.insertarOCrearEstadoCuenta = async (idAsignacion, idProceso) => {
     }
 
     // 4. Reinsertar todos los servicios actualizados
-    await insertarServiciosPorAsignacion(idAsignacion);
+    await sincronizarServiciosEstadoCuenta(idAsignacion, idProceso);
     console.log(`✅ Servicios insertados para asignación ${idAsignacion}`);
   } catch (error) {
     console.error('❌ Error en estado de cuenta:', error);

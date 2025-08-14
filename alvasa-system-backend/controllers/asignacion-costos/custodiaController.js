@@ -1,4 +1,6 @@
 const db = require('../../config/db');
+const { insertarOCrearEstadoCuenta } = require('../clientesEC/estadoCuentaClientesController');
+const { sincronizarServiciosEstadoCuenta } = require('../../utils/sincronizarServiciosEstadoCuenta');
 
 // Función para convertir vacío o inválido a 0
 const parseDecimal = (val) => {
@@ -69,6 +71,18 @@ const guardarCustodia = async (req, res) => {
         parseDecimal(custodiaDiasCosto), parseDecimal(custodiaDiasVenta),
         parseDecimal(custodiaCostoAlmacenaje), parseDecimal(custodiaVentaAlmacenaje)
       ]);
+    }
+
+    // 🔄 Actualizar estado de cuenta e insertar giro Custodia
+    const [[proceso]] = await db.promise().query(
+      'SELECT proceso_operativo_id FROM asignacion_costos WHERE id = ?',
+      [asignacionId]
+    );
+
+    if (proceso?.proceso_operativo_id) {
+      const procesoId = proceso.proceso_operativo_id;
+      await insertarOCrearEstadoCuenta(asignacionId, procesoId);
+      await sincronizarServiciosEstadoCuenta(asignacionId, procesoId);
     }
 
     res.json({ mensaje: 'Custodia guardada correctamente' });
