@@ -7,17 +7,25 @@ import {
   BsCashStack,
   BsPrinter
 } from 'react-icons/bs';
+import axios from 'axios';
 import './ListaEstadoCuentaClientes.css';
+import ModalAbonoEstadoCuenta from './ModalAbonoEstadoCuenta';
 
 const CardEstadoCuentaCliente = ({ data }) => {
   const [open, setOpen] = useState(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
-  // 🔢 Función para formato consistente de dinero
-  const formatoPesos = (valor) => {
-    return parseFloat(valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  // ✅ copia local que SÍ re-renderiza
+  const [estado, setEstado] = useState(data);
 
-  // 📆 Formateo bonito de fecha
+  // 🔢 Formato de dinero
+  const formatoPesos = (valor) =>
+    parseFloat(valor).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+  // 📆 Fecha legible
   const formatearFecha = (fechaISO) => {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO);
@@ -27,6 +35,37 @@ const CardEstadoCuentaCliente = ({ data }) => {
     return `${dia} ${mes} ${anio}`;
   };
 
+  // 🔁 Traer datos actualizados tras un abono
+  const actualizarDatos = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5050/estado-cuenta/abonos/detalle/${estado.id_estado_cuenta}`
+      );
+      if (res.data) setEstado(res.data); // ✅ ahora sí re-renderiza
+    } catch (error) {
+      console.error('❌ Error al actualizar estado de cuenta:', error);
+    }
+  };
+
+  // 💰 POST: enviar abono al backend
+  const guardarAbono = async (nuevoAbono) => {
+    try {
+      const res = await axios.post(
+        'http://localhost:5050/estado-cuenta/abonos',
+        nuevoAbono
+      );
+      console.log('✅ Abono registrado:', res.data);
+
+      await actualizarDatos();  // 🔄 refresca datos en la tarjeta
+      setMostrarModal(false);   // ✅ cierra modal
+
+    } catch (error) {
+      console.error('❌ Error al guardar abono:', error);
+      throw error;
+    }
+  };
+
+  // 👇 ahora leemos TODO desde "estado", no desde "data"
   const {
     id_estado_cuenta: idEstadoCuenta,
     cliente,
@@ -39,7 +78,7 @@ const CardEstadoCuentaCliente = ({ data }) => {
     abonado,
     saldo,
     estatus
-  } = data;
+  } = estado;
 
   const colorEstatus =
     estatus === 'Pagado'
@@ -67,7 +106,10 @@ const CardEstadoCuentaCliente = ({ data }) => {
             <BsCalendar className="me-2" />
             {formatearFecha(fechaEntrega)}
             <span className="mx-3">|</span>
-            <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
+            <span
+              className="fw-bold"
+              style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}
+            >
               <BsCashStack className="me-1" />
               ${formatoPesos(total)}
             </span>
@@ -128,7 +170,18 @@ const CardEstadoCuentaCliente = ({ data }) => {
             {/* Columna 3: Botones */}
             <Col md={3}>
               <div className="d-flex flex-column gap-2 mt-3 mt-5">
-                <Button variant="success" size="sm">Pagar</Button>
+                <Button variant="success" size="sm" onClick={() => setMostrarModal(true)}>
+                  Pagar
+                </Button>
+
+                <ModalAbonoEstadoCuenta
+                  show={mostrarModal}
+                  handleClose={() => setMostrarModal(false)}
+                  idEstadoCuenta={idEstadoCuenta}
+                  saldoActual={saldo}
+                  onAbonoExitoso={guardarAbono}
+                />
+
                 <Button className="btn-verpagos" size="sm">Ver Pagos</Button>
                 <Button variant="outline-secondary" size="sm">
                   <BsPrinter className="me-1" /> Imprimir

@@ -24,6 +24,7 @@ const despachoRoutes = require('./routes/asignacion-costos/despacho');
 const listaPagosProveedoresRoutes = require('./routes/proveedores/listaPagosProveedores');
 const abonosPagosRoutes = require('./routes/proveedores/abonosPagosRoutes');
 const listaEstadoCuentaCliente = require('./routes/clientesEC/estadoCuentaClientes');
+const abonosEstadoCuentaRoutes = require('./routes/clientesEC/abonosEstadoCuenta');
 
 
 const app = express();
@@ -70,6 +71,7 @@ app.use('/asignacion-costos/despacho', despachoRoutes);
 app.use('/pagos-proveedores', listaPagosProveedoresRoutes);
 app.use('/pagos-proveedores', abonosPagosRoutes);
 app.use('/estado-cuenta-clientes',listaEstadoCuentaCliente);
+app.use('/estado-cuenta/abonos', abonosEstadoCuentaRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {
