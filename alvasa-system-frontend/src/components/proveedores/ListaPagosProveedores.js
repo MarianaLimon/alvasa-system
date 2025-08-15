@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Table, Spinner, Card, Form, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { BsBoxSeam, BsCalendar, BsPerson, BsPlusCircle, BsDashCircle, BsCashStack, BsSearch } from 'react-icons/bs';
-import './ListaPagosProveedores.css';
+import './styles/ListaPagosProveedores.css';
 import ModalPago from './ModalPago';
 import FiltrosPagosProveedores from './FiltrosPagosProveedores';
 

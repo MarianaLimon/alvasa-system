@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Card } from 'react-bootstrap';
 import CardEstadoCuentaCliente from './CardEstadoCuentaCliente';
 import FiltrosEstadoCuentaClientes from './FiltrosEstadoCuentaClientes';
-import './ListaEstadoCuentaClientes.css';
+import './styles/ListaEstadoCuentaClientes.css';
 
 const API = 'http://localhost:5050';
 

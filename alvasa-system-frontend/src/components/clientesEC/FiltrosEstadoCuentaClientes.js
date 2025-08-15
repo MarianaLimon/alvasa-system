@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, InputGroup, Button } from 'react-bootstrap';
 import { BsFilter, BsPrinter } from 'react-icons/bs';
-import './ListaEstadoCuentaClientes.css';
+import './styles/ListaEstadoCuentaClientes.css';
 
 const FiltrosEstadoCuentaClientes = ({
   clienteSeleccionado, setClienteSeleccionado,

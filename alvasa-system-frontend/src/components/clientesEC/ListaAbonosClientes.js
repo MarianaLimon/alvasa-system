@@ -1,4 +1,3 @@
-// src/components/estadoCuenta/ListaAbonosClientes.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -9,7 +8,7 @@ import { BsPrinter } from 'react-icons/bs';
 const API = 'http://localhost:5050';
 
 const ListaAbonosClientes = () => {
-  // Tu ruta: /estado-cuenta/abonos/:numeroEstado  (ej: EC-0006)
+  
   const { numeroEstado } = useParams();
 
   const [abonos, setAbonos] = useState([]);
@@ -31,22 +30,35 @@ const ListaAbonosClientes = () => {
   };
 
   // ========== Fetchers ==========
-  // ⬇️ Datos del estado de cuenta (detalle con cliente, contenedor, total, etc.)
+  // Datos del estado de cuenta (detalle con cliente, contenedor, total, etc.)
   const obtenerEstadoCuenta = async () => {
     const { data } = await axios.get(`${API}/estado-cuenta/abonos/detalle/${numeroEstado}`);
     setEstado(data || {});
   };
 
-  // ⬇️ Lista de abonos (arreglo)
+  // Lista de abonos
   const obtenerAbonos = async () => {
     const { data } = await axios.get(`${API}/estado-cuenta/abonos/${numeroEstado}`);
-    setAbonos(Array.isArray(data) ? data : []);
+
+    const normTime = (f) => {
+      if (!f) return 0;
+      const s = String(f);
+      // si viene solo 'YYYY-MM-DD', le agregamos hora para evitar TZ
+      const d = new Date(s.length <= 10 ? `${s}T23:59:59` : s);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+
+    const lista = Array.isArray(data) ? data : [];
+    lista.sort((a, b) =>
+      (normTime(b.fecha_pago) - normTime(a.fecha_pago)) || ((b.id ?? 0) - (a.id ?? 0))
+    );
+
+    setAbonos(lista);
   };
 
   // ========== Acciones ==========
   const guardarAbono = async (nuevoAbono) => {
     try {
-      // nuevoAbono debe contener: { id_estado_cuenta, abono, fecha_pago?, tipo_transaccion? }
       await axios.post(`${API}/estado-cuenta/abonos`, nuevoAbono);
       await Promise.all([obtenerEstadoCuenta(), obtenerAbonos()]);
       setShowToast(true);
@@ -99,31 +111,49 @@ const ListaAbonosClientes = () => {
           <Row>
             <Col md={8}>
               <Table bordered size="sm" className="mb-3">
-                <tbody>
-                  <tr>
-                    <th style={{ width: 240 }}>Número de Estado de Cuenta</th>
-                    <td>{estado.id_estado_cuenta || numeroEstado}</td>
-                    <th style={{ width: 140 }}>Contenedor</th>
-                    <td>{estado.contenedor || '—'}</td>
-                  </tr>
-                  <tr>
-                    <th>Cliente</th>
-                    <td>{estado.cliente || '—'}</td>
-                    <th>Fecha</th>
-                    <td>{fechaMX(estado.fecha_entrega)}</td>
-                  </tr>
-                  <tr>
-                    <th>Tipo de Carga</th>
-                    <td>{estado.tipo_carga || '—'}</td>
-                    <th>Mercancía</th>
-                    <td>{estado.mercancia || '—'}</td>
-                  </tr>
-                  <tr>
-                    <th colSpan={3}>Total de Servicios</th>
-                    <td>{formato(totalServicios)}</td>
-                  </tr>
-                </tbody>
-              </Table>
+                  <thead className="table-light">
+                    <tr>
+                      <th>Número de Estado de Cuenta</th>
+                      <th>Contenedor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{estado.id_estado_cuenta || numeroEstado}</td>
+                      <td>{estado.contenedor || '—'}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+                <Table bordered size="sm" className="mb-3">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Mercancía</th>
+                      <th>Tipo de Carga</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{estado.cliente || '—'}</td>
+                      <td>{estado.mercancia || '—'}</td>
+                      <td>{estado.tipo_carga || '—'}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+                <Table bordered size="sm" className="mb-3 w-75">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Total de Servicios</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{fechaMX(estado.fecha_entrega)}</td>
+                      <td>{formato(totalServicios)}</td>
+                    </tr>
+                  </tbody>
+                </Table>
             </Col>
 
             <Col md={4}>
@@ -213,7 +243,7 @@ const ListaAbonosClientes = () => {
       <ModalAbonoEstadoCuenta
         show={mostrarModalAbonoEstadoCuenta}
         handleClose={cerrarModalAbonoEstadoCuenta}
-        idEstadoCuenta={numeroEstado}     // importante: el código (EC-0006)
+        idEstadoCuenta={numeroEstado}    
         saldoActual={saldo}
         onAbonoExitoso={guardarAbono}
       />

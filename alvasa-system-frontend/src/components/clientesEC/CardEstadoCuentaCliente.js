@@ -3,7 +3,7 @@ import { Row, Col, Card, Button, Table, Collapse } from 'react-bootstrap';
 import { BsBoxSeam, BsPerson, BsCalendar, BsCashStack, BsPrinter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './ListaEstadoCuentaClientes.css';
+import './styles/ListaEstadoCuentaClientes.css';
 import ModalAbonoEstadoCuenta from './ModalAbonoEstadoCuenta';
 
 const API = 'http://localhost:5050';
@@ -99,7 +99,7 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
             <BsCalendar className="me-2" />
             {formatearFecha(fechaEntrega)}
             <span className="mx-3">|</span>
-            <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
+            <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(244, 100, 140)' }}>
               <BsCashStack className="me-1" />
               ${formatoPesos(total)}
             </span>
