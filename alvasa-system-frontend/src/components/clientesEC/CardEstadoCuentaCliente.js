@@ -85,10 +85,7 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
 
   return (
     <Card className="m-3">
-      <Card.Header
-        onClick={() => setOpen(!open)}
-        style={{ cursor: 'pointer', background: '#5751AB', color: '#fff' }}
-      >
+      <Card.Header className='card-header-ecc' onClick={() => setOpen(!open)} >
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <strong>{idEstadoCuenta}</strong>
@@ -122,7 +119,7 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
         <div className="p-5 bg-light">
           <Row className="mt-3">
 
-            {/* Columna 1: Tabla */}
+            {/* Columna 1 */}
             <Col md={3}>
               <Card className="p-3 text-center shadow-sm">
                 <p><strong>Total del Contenedor:</strong><br /> ${formatoPesos(total)}</p>
@@ -131,7 +128,7 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
               </Card>
             </Col>
         
-            {/* Columna 2: Totales */}
+            {/* Columna 2 */}
             <Col md={2}>
               <div style={{ marginBottom: '2rem' }}>
                 <p className="mb-0"><strong>Tipo de carga:</strong> {tipoCarga}</p>
@@ -159,31 +156,41 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
               </div>
             </Col>
             
-            {/* Columna 3: Botones */}
+            {/* Columna 3 */}
             <Col md={7}>
-              <Table bordered responsive size="sm" className="bg-white">
-                <thead>
-                  <tr className="listaec-titles">
-                    <th>Giro</th>
-                    <th>Servicio</th>
-                    <th>Importe</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(servicios || []).map((item, i) => (
-                    <tr key={i}>
-                      <td className="fila-ec">{item.giro}</td>
-                      <td className="fila-ec">{item.servicio}</td>
-                      <td className="fila-ec">${formatoPesos(item.importe)}</td>
-                    </tr>
-                  ))}
-                  <tr className="fw-bold">
-                    <td colSpan={2} className="fila-ec">Total</td>
-                    <td className="fila-ec">${formatoPesos(total)}</td>
-                  </tr>
-                </tbody>
-              </Table>
+              <div className="tabla-servicios-card">
+                <div className="tabla-servicios-wrapper">
+                  <Table bordered size="sm" className="bg-white mb-0">
+                    <thead>
+                      <tr className="listaec-titles">
+                        <th>Giro</th>
+                        <th>Servicio</th>
+                        <th>Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(servicios || []).map((item, i) => (
+                        <tr key={i}>
+                          <td className="fila-ec">{item.giro}</td>
+                          <td className="fila-ec">{item.servicio}</td>
+                          <td className="fila-ec">${formatoPesos(item.importe)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+
+                  {/* Indicador sutil de “hay más” */}
+                  <div className="tabla-servicios-fade" />
+                </div>
+
+                {/* Total siempre visible */}
+                <div className="tabla-servicios-total">
+                  <span className="fw-bold">Total</span>
+                  <span className="fw-bold">${formatoPesos(total)}</span>
+                </div>
+              </div>
             </Col>
+
           </Row>
         </div>
       </Collapse>

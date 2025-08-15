@@ -1,7 +1,14 @@
+.card-header-ecc{
+  cursor: pointer;
+  background-color: #5751AB;
+  color: #fff;
+}
+
 /* Encabezado de la tabla */
 thead tr.listaec-titles th {
-  background-color: #414180 !important;
+  background-color: #5c5cbd  !important;
   color: white !important;
+  padding-left: 1.5rem;
 }
 
 /* Fila de encabezado por tipo de giro */
@@ -27,6 +34,7 @@ td.fila-ec {
   color: #1a1a1a !important;
   transition: background-color 0.3s ease;
   border: solid #fff 1.5px;
+  padding-left: 1.5rem;
 }
 
 td.fila-ec:hover {
@@ -102,3 +110,66 @@ tr:hover td.fila-ec {
 }
 
 
+/* Contenedor de la tabla + total */
+.tabla-servicios-card {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: .375rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+/* El área scrolleable */
+.tabla-servicios-wrapper {
+  position: relative;
+  max-height: 280px;   /* ajusta para ~7 filas */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tabla-servicios-wrapper table {
+  width: 100%;
+  table-layout: fixed;      
+  margin-bottom: 0 !important;
+  border-collapse: separate;  
+  border-spacing: 0;
+}
+
+/* Encabezado fijo */
+.tabla-servicios-wrapper thead {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+
+.tabla-servicios-wrapper thead th {
+  background-color: #5751AB !important;
+  color: #fff !important;
+  height: 2.3rem !important;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.4);
+}
+
+/* El “fade” inferior para insinuar scroll */
+.tabla-servicios-fade {
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  z-index: 5;
+}
+
+/* Total fijo */
+.tabla-servicios-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem .75rem;
+  border-top: 1px solid #dee2e6;
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.tabla-servicios-wrapper .table-responsive {
+  overflow: visible !important;
+}
