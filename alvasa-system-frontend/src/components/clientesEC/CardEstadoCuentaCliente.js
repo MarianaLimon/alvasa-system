@@ -119,14 +119,48 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
       </Card.Header>
 
       <Collapse in={open}>
-        <div className="p-3 bg-light">
+        <div className="p-5 bg-light">
           <Row className="mt-3">
+
             {/* Columna 1: Tabla */}
-            <Col md={6}>
-              <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
+            <Col md={3}>
+              <Card className="p-3 text-center shadow-sm">
+                <p><strong>Total del Contenedor:</strong><br /> ${formatoPesos(total)}</p>
+                <p><strong>Total Abonado:</strong><br /> ${formatoPesos(abonado)}</p>
+                <p><strong>Saldo Pendiente:</strong><br /> ${formatoPesos(saldo)}</p>
+              </Card>
+            </Col>
+        
+            {/* Columna 2: Totales */}
+            <Col md={2}>
+              <div style={{ marginBottom: '2rem' }}>
                 <p className="mb-0"><strong>Tipo de carga:</strong> {tipoCarga}</p>
                 <p className="mb-0"><strong>Mercancía:</strong> {mercancia}</p>
               </div>
+              <div className="d-flex flex-column gap-2 mt-3 mt-5">
+                <Button variant="success" size="sm" onClick={() => setMostrarModal(true)}>
+                  Pagar
+                </Button>
+
+                <ModalAbonoEstadoCuenta
+                  show={mostrarModal}
+                  handleClose={() => setMostrarModal(false)}
+                  idEstadoCuenta={idEstadoCuenta}
+                  saldoActual={saldo}
+                  onAbonoExitoso={guardarAbono}
+                />
+
+                <Button className="btn-verpagos" size="sm" onClick={irAVerPagos}>
+                  Ver Pagos
+                </Button>
+                <Button variant="outline-secondary" size="sm">
+                  <BsPrinter className="me-1" /> Imprimir
+                </Button>
+              </div>
+            </Col>
+            
+            {/* Columna 3: Botones */}
+            <Col md={7}>
               <Table bordered responsive size="sm" className="bg-white">
                 <thead>
                   <tr className="listaec-titles">
@@ -149,39 +183,6 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
                   </tr>
                 </tbody>
               </Table>
-            </Col>
-
-            {/* Columna 2: Totales */}
-            <Col md={3}>
-              <Card className="p-3 text-center shadow-sm">
-                <p><strong>Total del Contenedor:</strong><br /> ${formatoPesos(total)}</p>
-                <p><strong>Total Abonado:</strong><br /> ${formatoPesos(abonado)}</p>
-                <p><strong>Saldo Pendiente:</strong><br /> ${formatoPesos(saldo)}</p>
-              </Card>
-            </Col>
-
-            {/* Columna 3: Botones */}
-            <Col md={3}>
-              <div className="d-flex flex-column gap-2 mt-3 mt-5">
-                <Button variant="success" size="sm" onClick={() => setMostrarModal(true)}>
-                  Pagar
-                </Button>
-
-                <ModalAbonoEstadoCuenta
-                  show={mostrarModal}
-                  handleClose={() => setMostrarModal(false)}
-                  idEstadoCuenta={idEstadoCuenta}
-                  saldoActual={saldo}
-                  onAbonoExitoso={guardarAbono}
-                />
-
-                <Button className="btn-verpagos" size="sm" onClick={irAVerPagos}>
-                  Ver Pagos
-                </Button>
-                <Button variant="outline-secondary" size="sm">
-                  <BsPrinter className="me-1" /> Imprimir
-                </Button>
-              </div>
             </Col>
           </Row>
         </div>
