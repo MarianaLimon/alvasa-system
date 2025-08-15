@@ -1,31 +1,37 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, Button, Table, Collapse } from 'react-bootstrap';
-import {
-  BsBoxSeam,
-  BsPerson,
-  BsCalendar,
-  BsCashStack,
-  BsPrinter
-} from 'react-icons/bs';
+import { BsBoxSeam, BsPerson, BsCalendar, BsCashStack, BsPrinter } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ListaEstadoCuentaClientes.css';
 import ModalAbonoEstadoCuenta from './ModalAbonoEstadoCuenta';
 
-const CardEstadoCuentaCliente = ({ data }) => {
+const API = 'http://localhost:5050';
+
+const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
   const [open, setOpen] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [estado, setEstado] = useState(data); // copia local
+  const navigate = useNavigate();
 
-  // ✅ copia local que SÍ re-renderiza
-  const [estado, setEstado] = useState(data);
+  // Desestructura desde el estado local
+  const {
+    id_estado_cuenta: idEstadoCuenta,
+    cliente,
+    contenedor,
+    fecha_entrega: fechaEntrega,
+    tipo_carga: tipoCarga,
+    mercancia,
+    servicios = [],
+    total = 0,
+    abonado = 0,
+    saldo = 0,
+    estatus = 'Pendiente',
+  } = estado;
 
-  // 🔢 Formato de dinero
   const formatoPesos = (valor) =>
-    parseFloat(valor).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    parseFloat(valor ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // 📆 Fecha legible
   const formatearFecha = (fechaISO) => {
     if (!fechaISO) return '—';
     const fecha = new Date(fechaISO);
@@ -35,57 +41,47 @@ const CardEstadoCuentaCliente = ({ data }) => {
     return `${dia} ${mes} ${anio}`;
   };
 
-  // 🔁 Traer datos actualizados tras un abono
+  // Trae datos actualizados del backend
   const actualizarDatos = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5050/estado-cuenta/abonos/detalle/${estado.id_estado_cuenta}`
-      );
-      if (res.data) setEstado(res.data); // ✅ ahora sí re-renderiza
-    } catch (error) {
-      console.error('❌ Error al actualizar estado de cuenta:', error);
-    }
+    const { data } = await axios.get(`${API}/estado-cuenta/abonos/detalle/${idEstadoCuenta}`);
+    if (data) setEstado(data);
   };
 
-  // 💰 POST: enviar abono al backend
+  // POST: enviar abono y notificar al padre
   const guardarAbono = async (nuevoAbono) => {
     try {
-      const res = await axios.post(
-        'http://localhost:5050/estado-cuenta/abonos',
-        nuevoAbono
-      );
-      console.log('✅ Abono registrado:', res.data);
+      const { data: resp } = await axios.post(`${API}/estado-cuenta/abonos`, nuevoAbono);
+      await actualizarDatos();        // refresca solo esta tarjeta
+      setMostrarModal(false);
 
-      await actualizarDatos();  // 🔄 refresca datos en la tarjeta
-      setMostrarModal(false);   // ✅ cierra modal
-
+      // avisa al padre para actualizar la banda superior
+      onCambioAbonos?.({
+        idEstado: idEstadoCuenta,
+        deltaAbono: Number(nuevoAbono.abono || 0),
+        totalesFila: resp?.totales || null, // { abonado, saldo, estatus }
+      });
     } catch (error) {
       console.error('❌ Error al guardar abono:', error);
       throw error;
     }
   };
 
-  // 👇 ahora leemos TODO desde "estado", no desde "data"
-  const {
-    id_estado_cuenta: idEstadoCuenta,
-    cliente,
-    contenedor,
-    fecha_entrega: fechaEntrega,
-    tipo_carga: tipoCarga,
-    mercancia,
-    servicios = [],
-    total,
-    abonado,
-    saldo,
-    estatus
-  } = estado;
+  // Navegar al detalle de pagos
+  const irAVerPagos = () => {
+    const resumen = {
+      numeroEstado: idEstadoCuenta,
+      cliente,
+      contenedor,
+      fecha: formatearFecha(fechaEntrega),
+      total,
+      abonado,
+      saldo,
+    };
+    navigate(`/estado-cuenta/abonos/${idEstadoCuenta}`, { state: { resumen } });
+  };
 
   const colorEstatus =
-    estatus === 'Pagado'
-      ? 'success'
-      : estatus === 'Parcial'
-      ? 'warning text-dark'
-      : 'warning text-dark';
+    estatus === 'Pagado' ? 'success' : 'warning text-dark';
 
   return (
     <Card className="m-3">
@@ -106,10 +102,7 @@ const CardEstadoCuentaCliente = ({ data }) => {
             <BsCalendar className="me-2" />
             {formatearFecha(fechaEntrega)}
             <span className="mx-3">|</span>
-            <span
-              className="fw-bold"
-              style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}
-            >
+            <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
               <BsCashStack className="me-1" />
               ${formatoPesos(total)}
             </span>
@@ -143,7 +136,7 @@ const CardEstadoCuentaCliente = ({ data }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {servicios.map((item, i) => (
+                  {(servicios || []).map((item, i) => (
                     <tr key={i}>
                       <td className="fila-ec">{item.giro}</td>
                       <td className="fila-ec">{item.servicio}</td>
@@ -182,7 +175,9 @@ const CardEstadoCuentaCliente = ({ data }) => {
                   onAbonoExitoso={guardarAbono}
                 />
 
-                <Button className="btn-verpagos" size="sm">Ver Pagos</Button>
+                <Button className="btn-verpagos" size="sm" onClick={irAVerPagos}>
+                  Ver Pagos
+                </Button>
                 <Button variant="outline-secondary" size="sm">
                   <BsPrinter className="me-1" /> Imprimir
                 </Button>

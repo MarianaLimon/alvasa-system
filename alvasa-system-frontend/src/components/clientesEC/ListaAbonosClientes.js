@@ -1,3 +1,4 @@
+// src/components/estadoCuenta/ListaAbonosClientes.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -5,8 +6,12 @@ import { Card, Table, Button, Row, Col, Toast } from 'react-bootstrap';
 import ModalAbonoEstadoCuenta from './ModalAbonoEstadoCuenta';
 import { BsPrinter } from 'react-icons/bs';
 
+const API = 'http://localhost:5050';
+
 const ListaAbonosClientes = () => {
-  const { id_estado_cuenta } = useParams();
+  // Tu ruta: /estado-cuenta/abonos/:numeroEstado  (ej: EC-0006)
+  const { numeroEstado } = useParams();
+
   const [abonos, setAbonos] = useState([]);
   const [estado, setEstado] = useState({});
   const [showToast, setShowToast] = useState(false);
@@ -15,33 +20,40 @@ const ListaAbonosClientes = () => {
   const abrirModalAbonoEstadoCuenta = () => setMostrarModalAbonoEstadoCuenta(true);
   const cerrarModalAbonoEstadoCuenta = () => setMostrarModalAbonoEstadoCuenta(false);
 
-  const obtenerAbonos = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5050/abonos-estado-cuenta/${id_estado_cuenta}`);
-      setAbonos(res.data);
-    } catch (error) {
-      console.error('Error al obtener abonos:', error);
-    }
+  const formato = (n) =>
+    (Number(n || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+
+  const fechaMX = (f) => {
+    if (!f) return '—';
+    const s = String(f);
+    const d = new Date(s.length <= 10 ? `${s}T00:00:00` : s);
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('es-MX');
   };
 
+  // ========== Fetchers ==========
+  // ⬇️ Datos del estado de cuenta (detalle con cliente, contenedor, total, etc.)
   const obtenerEstadoCuenta = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5050/estado-cuenta-clientes/${id_estado_cuenta}`);
-      setEstado(res.data);
-    } catch (error) {
-      console.error('Error al obtener estado de cuenta:', error);
-    }
+    const { data } = await axios.get(`${API}/estado-cuenta/abonos/detalle/${numeroEstado}`);
+    setEstado(data || {});
   };
 
+  // ⬇️ Lista de abonos (arreglo)
+  const obtenerAbonos = async () => {
+    const { data } = await axios.get(`${API}/estado-cuenta/abonos/${numeroEstado}`);
+    setAbonos(Array.isArray(data) ? data : []);
+  };
+
+  // ========== Acciones ==========
   const guardarAbono = async (nuevoAbono) => {
     try {
-      await axios.post('http://localhost:5050/abonos-estado-cuenta', nuevoAbono);
-      await obtenerAbonos();
-      await obtenerEstadoCuenta();
+      // nuevoAbono debe contener: { id_estado_cuenta, abono, fecha_pago?, tipo_transaccion? }
+      await axios.post(`${API}/estado-cuenta/abonos`, nuevoAbono);
+      await Promise.all([obtenerEstadoCuenta(), obtenerAbonos()]);
       setShowToast(true);
       cerrarModalAbonoEstadoCuenta();
     } catch (error) {
       console.error('Error al guardar abono:', error);
+      alert('No se pudo guardar el abono.');
     }
   };
 
@@ -49,28 +61,39 @@ const ListaAbonosClientes = () => {
     const confirmar = window.confirm('¿Eliminar este abono?');
     if (!confirmar) return;
     try {
-      await axios.delete(`http://localhost:5050/abonos-estado-cuenta/${id}`);
-      await obtenerAbonos();
-      await obtenerEstadoCuenta();
+      await axios.delete(`${API}/estado-cuenta/abonos/${id}`);
+      await Promise.all([obtenerEstadoCuenta(), obtenerAbonos()]);
       setShowToast(true);
     } catch (error) {
       console.error('Error al eliminar abono:', error);
+      alert('No se pudo eliminar el abono.');
     }
   };
 
+  // ========== Efecto inicial ==========
   useEffect(() => {
-    obtenerEstadoCuenta();
-    obtenerAbonos();
+    if (!numeroEstado) return;
+    (async () => {
+      try {
+        await Promise.all([obtenerEstadoCuenta(), obtenerAbonos()]);
+      } catch (e) {
+        console.error('Error cargando estado de cuenta:', e);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id_estado_cuenta]);
+  }, [numeroEstado]);
 
-  const totalAbonado = abonos.reduce((sum, a) => sum + parseFloat(a.abono), 0);
-  const saldo = Math.max(parseFloat(estado.saldo || 0), 0);
-  const total = parseFloat(estado.total || 0);
-  const formato = (n) => `$${parseFloat(n || 0).toFixed(2)}`;
+  // ========== Cálculos ==========
+  const totalAbonado = abonos.reduce(
+    (sum, a) => sum + Number(a.pesos ?? a.abono ?? 0),
+    0
+  );
+  const totalServicios = Number(estado.total || 0);
+  const saldo = Math.max(totalServicios - totalAbonado, 0);
 
   return (
     <div className="container mt-4">
+      {/* Encabezado */}
       <Card className="mb-4">
         <Card.Body>
           <Row>
@@ -78,26 +101,26 @@ const ListaAbonosClientes = () => {
               <Table bordered size="sm" className="mb-3">
                 <tbody>
                   <tr>
-                    <th>Número de Estado de Cuenta</th>
-                    <td>{estado.id_estado_cuenta}</td>
-                    <th>Contenedor</th>
-                    <td>{estado.contenedor}</td>
+                    <th style={{ width: 240 }}>Número de Estado de Cuenta</th>
+                    <td>{estado.id_estado_cuenta || numeroEstado}</td>
+                    <th style={{ width: 140 }}>Contenedor</th>
+                    <td>{estado.contenedor || '—'}</td>
                   </tr>
                   <tr>
                     <th>Cliente</th>
-                    <td>{estado.cliente}</td>
+                    <td>{estado.cliente || '—'}</td>
                     <th>Fecha</th>
-                    <td>{new Date(estado.fecha_entrega).toLocaleDateString('es-MX')}</td>
+                    <td>{fechaMX(estado.fecha_entrega)}</td>
                   </tr>
                   <tr>
                     <th>Tipo de Carga</th>
-                    <td>{estado.tipo_carga}</td>
+                    <td>{estado.tipo_carga || '—'}</td>
                     <th>Mercancía</th>
-                    <td>{estado.mercancia}</td>
+                    <td>{estado.mercancia || '—'}</td>
                   </tr>
                   <tr>
                     <th colSpan={3}>Total de Servicios</th>
-                    <td>{formato(total)}</td>
+                    <td>{formato(totalServicios)}</td>
                   </tr>
                 </tbody>
               </Table>
@@ -109,8 +132,8 @@ const ListaAbonosClientes = () => {
                 <h2 className="text-primary">{formato(saldo)}</h2>
                 <p className="mb-2">
                   <strong>Estatus:</strong>{' '}
-                  <span className={estado.estatus === 'Pagado' ? 'text-success' : 'text-warning'}>
-                    {estado.estatus}
+                  <span className={saldo <= 0 ? 'text-success' : 'text-warning'}>
+                    {saldo <= 0 ? 'Pagado' : 'Pendiente'}
                   </span>
                 </p>
                 <hr />
@@ -122,14 +145,17 @@ const ListaAbonosClientes = () => {
         </Card.Body>
       </Card>
 
+      {/* Lista de abonos */}
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <strong>Lista de Abonos</strong>
           <div>
-            <Button variant="secondary" size="sm" className="me-2">
+            <Button variant="secondary" size="sm" className="me-2" onClick={() => window.print()}>
               <BsPrinter className="me-2" /> Imprimir PDF
             </Button>
-            <Button variant="success" size="sm" onClick={abrirModalAbonoEstadoCuenta}>+ Agregar abono</Button>
+            <Button variant="success" size="sm" onClick={abrirModalAbonoEstadoCuenta}>
+              + Agregar abono
+            </Button>
           </div>
         </Card.Header>
         <Card.Body>
@@ -139,18 +165,22 @@ const ListaAbonosClientes = () => {
                 <th>Monto</th>
                 <th>Fecha de Pago</th>
                 <th>Tipo de Transacción</th>
-                <th>Acciones</th>
+                <th style={{ width: 120 }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {abonos.length === 0 ? (
-                <tr><td colSpan="4">No hay abonos registrados.</td></tr>
+                <tr>
+                  <td colSpan="4" className="text-center text-muted">
+                    No hay abonos registrados.
+                  </td>
+                </tr>
               ) : (
                 abonos.map((a) => (
                   <tr key={a.id}>
-                    <td>{formato(a.abono)}</td>
-                    <td>{new Date(a.fecha_pago).toLocaleDateString('es-MX')}</td>
-                    <td>{a.tipo_transaccion}</td>
+                    <td>{formato(a.pesos ?? a.abono)}</td>
+                    <td>{fechaMX(a.fecha_pago)}</td>
+                    <td>{a.tipo_transaccion || '—'}</td>
                     <td>
                       <Button variant="danger" size="sm" onClick={() => eliminarAbono(a.id)}>
                         Eliminar
@@ -164,28 +194,29 @@ const ListaAbonosClientes = () => {
         </Card.Body>
       </Card>
 
+      {/* Toast de éxito */}
       <Toast
         show={showToast}
         onClose={() => setShowToast(false)}
-        delay={3000}
+        delay={2500}
         autohide
         bg="success"
         className="position-fixed bottom-0 end-0 m-4"
       >
         <Toast.Header closeButton={false}>
-          <strong className="me-auto">Abono actualizado</strong>
+          <strong className="me-auto">Abonos</strong>
         </Toast.Header>
-        <Toast.Body className="text-white">El abono se procesó correctamente.</Toast.Body>
+        <Toast.Body className="text-white">Cambios guardados correctamente.</Toast.Body>
       </Toast>
 
+      {/* Modal para nuevo abono */}
       <ModalAbonoEstadoCuenta
         show={mostrarModalAbonoEstadoCuenta}
         handleClose={cerrarModalAbonoEstadoCuenta}
-        idEstadoCuenta={id_estado_cuenta}
+        idEstadoCuenta={numeroEstado}     // importante: el código (EC-0006)
         saldoActual={saldo}
         onAbonoExitoso={guardarAbono}
       />
-
     </div>
   );
 };

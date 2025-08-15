@@ -72,6 +72,7 @@ app.use('/pagos-proveedores', listaPagosProveedoresRoutes);
 app.use('/pagos-proveedores', abonosPagosRoutes);
 app.use('/estado-cuenta-clientes',listaEstadoCuentaCliente);
 app.use('/estado-cuenta/abonos', abonosEstadoCuentaRoutes);
+app.use('/abonos-estado-cuenta', abonosEstadoCuentaRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

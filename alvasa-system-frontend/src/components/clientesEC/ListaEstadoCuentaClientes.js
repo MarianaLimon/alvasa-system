@@ -1,9 +1,12 @@
+// src/components/estadoCuenta/ListaEstadoCuentaClientes.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card } from 'react-bootstrap';
 import CardEstadoCuentaCliente from './CardEstadoCuentaCliente';
 import FiltrosEstadoCuentaClientes from './FiltrosEstadoCuentaClientes';
 import './ListaEstadoCuentaClientes.css';
+
+const API = 'http://localhost:5050';
 
 const ListaEstadoCuentaClientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -12,41 +15,38 @@ const ListaEstadoCuentaClientes = () => {
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // ❌ Ya no llamamos a la generación automática por POST
-
-      // ✅ Solo obtenemos estados de cuenta ya existentes
-      const { data } = await axios.get('http://localhost:5050/estado-cuenta-clientes');
-      const clientesConSaldo = data.map(c => ({
-        ...c,
-        saldo: c.total - c.abonado // calcular saldo si es necesario
-      }));
-      setClientes(clientesConSaldo);
-    } catch (error) {
-      console.error('Error al cargar estados de cuenta:', error);
-    }
+  // ---- fetch inicial / recarga reutilizable
+  const cargarLista = async () => {
+    const { data } = await axios.get(`${API}/estado-cuenta-clientes`);
+    const clientesConSaldo = data.map((c) => ({
+      ...c,
+      // asegura saldo por si viene null
+      saldo: Number(c.saldo ?? (Number(c.total || 0) - Number(c.abonado || 0))),
+    }));
+    setClientes(clientesConSaldo);
   };
 
-  fetchData();
-}, []);
+  useEffect(() => {
+    cargarLista().catch((e) =>
+      console.error('Error al cargar estados de cuenta:', e)
+    );
+  }, []);
 
+  // ---- filtros
+  const clientesUnicos = [...new Set(clientes.map((c) => c.cliente))];
 
-
-  const clientesUnicos = [...new Set(clientes.map(c => c.cliente))];
-
-  const filtrados = clientes.filter(c => {
-    const coincideCliente = clienteSeleccionado === '' || c.cliente === clienteSeleccionado;
-    const coincideEstatus = filtroEstatus === '' || c.estatus === filtroEstatus;
-    const coincideFechaDesde = fechaDesde === '' || new Date(c.fecha_entrega) >= new Date(fechaDesde);
-    const coincideFechaHasta = fechaHasta === '' || new Date(c.fecha_entrega) <= new Date(fechaHasta);
+  const filtrados = clientes.filter((c) => {
+    const coincideCliente = !clienteSeleccionado || c.cliente === clienteSeleccionado;
+    const coincideEstatus = !filtroEstatus || c.estatus === filtroEstatus;
+    const coincideFechaDesde = !fechaDesde || new Date(c.fecha_entrega) >= new Date(fechaDesde);
+    const coincideFechaHasta = !fechaHasta || new Date(c.fecha_entrega) <= new Date(fechaHasta);
     return coincideCliente && coincideEstatus && coincideFechaDesde && coincideFechaHasta;
   });
 
-  const totalVentas = filtrados.reduce((acc, c) => acc + Number(c.total || 0), 0);
+  // ---- totales de la banda superior (se recalculan a partir de "filtrados")
+  const totalVentas  = filtrados.reduce((acc, c) => acc + Number(c.total || 0), 0);
   const totalAbonado = filtrados.reduce((acc, c) => acc + Number(c.abonado || 0), 0);
-  const totalSaldo = filtrados.reduce((acc, c) => acc + Number(c.saldo || 0), 0);
+  const totalSaldo   = filtrados.reduce((acc, c) => acc + Number(c.saldo || 0), 0);
 
   const limpiarFiltros = () => {
     setClienteSeleccionado('');
@@ -57,6 +57,29 @@ useEffect(() => {
 
   const handleImprimir = () => {
     console.log('Imprimir cards filtrados:', filtrados);
+  };
+
+  // ---- 🔔 handler llamado por cada card cuando cambia un abono
+  const onCambioAbonos = ({ idEstado, deltaAbono, totalesFila } = {}) => {
+    setClientes((prev) =>
+      prev.map((c) => {
+        if (c.id_estado_cuenta !== idEstado) return c;
+
+        // si el backend devolvió los totales de la fila, úsalo (más preciso)
+        if (totalesFila) {
+          const abonado = Number(totalesFila.abonado || 0);
+          const saldo   = Number(totalesFila.saldo   || Math.max(Number(c.total || 0) - abonado, 0));
+          const estatus = totalesFila.estatus || c.estatus;
+          return { ...c, abonado, saldo, estatus };
+        }
+
+        // fallback: ajusta localmente con el delta
+        const abonado = Number(c.abonado || 0) + Number(deltaAbono || 0);
+        const saldo   = Math.max(Number(c.total || 0) - abonado, 0);
+        const estatus = saldo <= 0 ? 'Pagado' : 'Pendiente';
+        return { ...c, abonado, saldo, estatus };
+      })
+    );
   };
 
   return (
@@ -95,8 +118,12 @@ useEffect(() => {
 
       <Card.Body className="p-0">
         {filtrados.length > 0 ? (
-          filtrados.map((cliente, idx) => (
-            <CardEstadoCuentaCliente key={idx} data={cliente} />
+          filtrados.map((cliente) => (
+            <CardEstadoCuentaCliente
+              key={cliente.id_estado_cuenta}   // clave estable
+              data={cliente}
+              onCambioAbonos={onCambioAbonos}  // 👈 pasa el callback al card
+            />
           ))
         ) : (
           <p className="text-center py-4">No se encontraron resultados.</p>

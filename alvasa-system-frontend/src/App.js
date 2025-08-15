@@ -20,7 +20,7 @@ import VerAsignacionCostos from './components/asignacionCostos/VerAsignacionCost
 import ListaPagosProveedores from './components/proveedores/ListaPagosProveedores';
 import ListaAbonos from './components/proveedores/ListaAbonos';
 import ListaEstadoCuentaClientes from './components/clientesEC/ListaEstadoCuentaClientes';
-
+import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes'; // ⬅️ NUEVO
 
 function App() {
   return (
@@ -28,24 +28,34 @@ function App() {
       <div className="d-flex">
         <Sidebar />
         <div className="flex-grow-1" style={{ marginLeft: '250px', padding: '20px' }}>
-          {/*<h1 className="titulo-principal mb-4">ALVASA SYSTEM</h1>*/}
           <Routes>
             <Route path="/" element={<Home />} />                                   
             <Route path="/clientes" element={<Clientes />} />
+
+            {/* Cotizaciones */}
             <Route path="/cotizaciones" element={<ListaCotizaciones />} />
             <Route path="/nuevacotizacion" element={<FormularioCotizacion />} />
             <Route path="/cotizaciones/:id" element={<VerCotizacion />} />
             <Route path="/cotizaciones/editar/:id" element={<FormularioCotizacion modo="editar" />} />
+
+            {/* Procesos operativos */}
             <Route path="/procesos-operativos/nuevo" element={<FormularioProcesoOperativo />} />
             <Route path="/procesos-operativos" element={<ListaProcesosOperativos />} />
             <Route path="/procesos-operativos/:id" element={<VerProcesoOperativo />} />
             <Route path="/procesos-operativos/editar/:id" element={<FormularioProcesoOperativo modo="editar" />} />
+
+            {/* Asignación de costos */}
             <Route path="/asignacion-costos/nuevo" element={<FormularioAsignacionCostos modo="crear" />} />
             <Route path="/asignacion-costos/editar/:folio" element={<FormularioAsignacionCostos modo="editar" />} />
             <Route path="/asignacion-costos/ver/:folio" element={<VerAsignacionCostos />} />
+
+            {/* Pagos proveedores */}
             <Route path="/pagos-proveedores" element={<ListaPagosProveedores />} />
             <Route path="/pagos-proveedores/:numero_control" element={<ListaAbonos />} />
+
+            {/* Estado de cuenta clientes */}
             <Route path="/estado-cuenta-clientes" element={<ListaEstadoCuentaClientes />} />
+            <Route path="/estado-cuenta/abonos/:numeroEstado" element={<ListaAbonosClientes />} /> {/* ⬅️ NUEVO */}
           </Routes>
         </div>
       </div>
