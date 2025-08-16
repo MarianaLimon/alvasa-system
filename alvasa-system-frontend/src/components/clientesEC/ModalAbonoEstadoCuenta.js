@@ -14,7 +14,7 @@ const toMoney = (v) => (Number(v || 0)).toFixed(2);
 const ModalAbonoEstadoCuenta = ({ show, handleClose, idEstadoCuenta, saldoActual = 0, onAbonoExitoso }) => {
   const [abono, setAbono] = useState('');            // string controlado del input
   const [fechaPago, setFechaPago] = useState('');    // YYYY-MM-DD
-  const [tipoTransaccion, setTipoTransaccion] = useState('Efectivo');
+  const [tipoTransaccion, setTipoTransaccion] = useState('Transferencia');
   const [saving, setSaving] = useState(false);
 
   // Normaliza saldo a número
@@ -26,7 +26,7 @@ const ModalAbonoEstadoCuenta = ({ show, handleClose, idEstadoCuenta, saldoActual
     if (show) {
       setAbono('');
       setFechaPago(hoyISO()); // default hoy
-      setTipoTransaccion('Efectivo');
+      setTipoTransaccion('Transferencia');
       setSaving(false);
     }
   }, [show, idEstadoCuenta]);
@@ -132,8 +132,8 @@ const ModalAbonoEstadoCuenta = ({ show, handleClose, idEstadoCuenta, saldoActual
               value={tipoTransaccion}
               onChange={(e) => setTipoTransaccion(e.target.value)}
             >
-              <option value="Efectivo">Efectivo</option>
               <option value="Transferencia">Transferencia</option>
+              <option value="Efectivo">Efectivo</option>
               <option value="Cheque">Cheque</option>
             </Form.Select>
           </Form.Group>

@@ -1,4 +1,5 @@
 const db = require('../../config/db');
+const { recalcularTotalesECC } = require('../../utils/recalcularTotalesECC');
 
 // Registrar un nuevo abono
 exports.registrarAbonoEstadoCuenta = async (req, res) => {
@@ -78,10 +79,20 @@ exports.registrarAbonoEstadoCuenta = async (req, res) => {
     );
 
     await conn.commit();
+
+    // 🔁 Recalcula con la fuente de la verdad (servicios + abonos)
+    const resumen = await recalcularTotalesECC({ idEstadoCuenta: id_estado_cuenta });
+
     return res.status(201).json({
       mensaje: 'Abono registrado correctamente.',
-      totales: { abonado: nuevoAbonado, saldo: nuevoSaldo, estatus: nuevoEstatus }
+      totales: { 
+        abonado: resumen.totalAbonos, 
+        saldo: resumen.saldo, 
+        estatus: resumen.saldo <= 0 ? 'Pagado' : 'Pendiente' 
+      },
+      resumen
     });
+
   } catch (error) {
     try { await conn.rollback(); } catch {}
     console.error('❌ Error en registrarAbonoEstadoCuenta:', error);
@@ -126,11 +137,12 @@ exports.obtenerTotalAbonosEstadoCuenta = async (req, res) => {
 
 exports.eliminarAbonoEstadoCuenta = async (req, res) => {
   const { id } = req.params;
-
   const conn = db.promise();
+
   try {
     await conn.beginTransaction();
 
+    // 1) Traer abono (para conocer el folio del ECC)
     const [[abono]] = await conn.query(
       `SELECT id, id_estado_cuenta, abono
          FROM abonos_estado_cuenta
@@ -142,8 +154,9 @@ exports.eliminarAbonoEstadoCuenta = async (req, res) => {
       return res.status(404).json({ mensaje: 'Abono no encontrado.' });
     }
 
-    const idEstadoCuenta = abono.id_estado_cuenta;
+    const idEstadoCuenta = abono.id_estado_cuenta; // folio tipo 'EC-0006'
 
+    // 2) Lock del ECC por folio
     const [rowsEstado] = await conn.query(
       `SELECT id, total
          FROM estado_cuenta_clientes
@@ -156,8 +169,10 @@ exports.eliminarAbonoEstadoCuenta = async (req, res) => {
       return res.status(404).json({ mensaje: 'Estado de cuenta no encontrado.' });
     }
 
+    // 3) Borrar el abono
     await conn.query(`DELETE FROM abonos_estado_cuenta WHERE id = ?`, [id]);
 
+    // 4) Recalcular totales internos (tu lógica actual, por si quieres mantener respuesta inmediata)
     const [[{ totalAbonos }]] = await conn.query(
       `SELECT COALESCE(SUM(abono),0) AS totalAbonos
          FROM abonos_estado_cuenta
@@ -178,10 +193,20 @@ exports.eliminarAbonoEstadoCuenta = async (req, res) => {
     );
 
     await conn.commit();
+
+    // 5) 🔁 Recalcular con la FUENTE DE LA VERDAD (servicios + abonos)
+    const resumen = await recalcularTotalesECC({ idEstadoCuenta });
+
     return res.json({
       mensaje: 'Abono eliminado y totales actualizados.',
-      totales: { abonado: nuevoAbonado, saldo: nuevoSaldo, estatus: nuevoEstatus }
+      totales: {
+        abonado: resumen.totalAbonos,
+        saldo: resumen.saldo,
+        estatus: resumen.estatus
+      },
+      resumen
     });
+
   } catch (error) {
     try { await conn.rollback(); } catch {}
     console.error('❌ Error en eliminarAbonoEstadoCuenta:', error);
@@ -189,7 +214,55 @@ exports.eliminarAbonoEstadoCuenta = async (req, res) => {
   }
 };
 
-// ✅ Obtener un estado de cuenta específico (con servicios y totales calculados)
+// GET /abonos-estado-cuenta/detalle/:id_estado_cuenta
+exports.obtenerDetalleEstadoCuenta = async (req, res) => {
+  const { id_estado_cuenta } = req.params; // folio: 'EC-0006'
+  try {
+    const conn = db.promise();
+
+    // ECC base
+    const [[ecc]] = await conn.query(
+      `SELECT id, id_estado_cuenta, total, abonado, (total - abonado) AS saldo
+         FROM estado_cuenta_clientes
+        WHERE id_estado_cuenta = ?
+        LIMIT 1`,
+      [id_estado_cuenta]
+    );
+    if (!ecc) return res.status(404).json({ mensaje: 'Estado de cuenta no encontrado.' });
+
+    // Servicios (por ID numérico)
+    const [servicios] = await conn.query(
+      `SELECT giro, servicio, importe
+         FROM servicios_estado_cuenta
+        WHERE id_estado_cuenta = ?`,
+      [ecc.id]
+    );
+
+    // Abonos (por folio) — últimos arriba
+    const [abonos] = await conn.query(
+      `SELECT id, abono, fecha_pago, tipo_transaccion, creado_en
+         FROM abonos_estado_cuenta
+        WHERE id_estado_cuenta = ?
+        ORDER BY (fecha_pago IS NULL), fecha_pago DESC, creado_en DESC`,
+      [id_estado_cuenta]
+    );
+
+    return res.json({
+      folio: ecc.id_estado_cuenta,
+      ecc_id: ecc.id,
+      total: Number(ecc.total || 0),
+      abonado: Number(ecc.abonado || 0),
+      saldo: Number(ecc.saldo || 0),
+      servicios,
+      abonos,
+    });
+  } catch (err) {
+    console.error('Error obtenerDetalleEstadoCuenta:', err);
+    return res.status(500).json({ mensaje: 'Error interno al obtener detalle.' });
+  }
+};
+
+// Obtener un estado de cuenta específico (con servicios y totales calculados)
 exports.obtenerEstadoCuentaPorId = async (req, res) => {
   const { id_estado_cuenta } = req.params; // p.ej. "EC-0006"
 

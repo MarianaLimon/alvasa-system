@@ -4,12 +4,12 @@ import { Modal, Button, Form, InputGroup } from 'react-bootstrap';
 const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
   const [abono, setAbono] = useState('');
   const [fechaPago, setFechaPago] = useState('');
-  const [tipoTransaccion, setTipoTransaccion] = useState('Efectivo');
+  const [tipoTransaccion, setTipoTransaccion] = useState('Transferencia');
 
   useEffect(() => {
     setAbono('');
     setFechaPago('');
-    setTipoTransaccion('Efectivo');
+    setTipoTransaccion('Transferencia');
   }, [mostrar, numeroControl]);
 
   const handleGuardar = async () => {
@@ -71,8 +71,8 @@ const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
               value={tipoTransaccion}
               onChange={(e) => setTipoTransaccion(e.target.value)}
             >
-              <option value="Efectivo">Efectivo</option>
               <option value="Transferencia">Transferencia</option>
+              <option value="Efectivo">Efectivo</option>
               <option value="Cheque">Cheque</option>
             </Form.Select>
           </Form.Group>

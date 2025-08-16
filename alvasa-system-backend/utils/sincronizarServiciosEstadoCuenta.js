@@ -4,6 +4,7 @@ const { insertarServiciosPorAsignacion: insertarServiciosFleteTerrestre } = requ
 const { insertarServiciosPorAsignacion: insertarServiciosCustodia } = require('../controllers/serviciosEstadoCuenta/custodia');
 const { insertarServiciosPorAsignacion: insertarServiciosPaqueteria } = require('../controllers/serviciosEstadoCuenta/paqueteria');
 const { insertarServiciosPorAsignacion: insertarServiciosAseguradora } = require('../controllers/serviciosEstadoCuenta/aseguradora');
+const { recalcularTotalesECC } = require('./recalcularTotalesECC');
 
 async function sincronizarServiciosEstadoCuenta(asignacionId, procesoId) {
   try {
@@ -15,6 +16,9 @@ async function sincronizarServiciosEstadoCuenta(asignacionId, procesoId) {
     await insertarServiciosCustodia(asignacionId, procesoId);
     await insertarServiciosPaqueteria(asignacionId, procesoId);
     await insertarServiciosAseguradora(asignacionId, procesoId);
+
+    // recalcular total y abonado sin pisar abonos existentes
+    await recalcularTotalesECC({ procesoId });
 
     console.log('✅ Todos los servicios fueron sincronizados correctamente en el estado de cuenta');
   } catch (error) {

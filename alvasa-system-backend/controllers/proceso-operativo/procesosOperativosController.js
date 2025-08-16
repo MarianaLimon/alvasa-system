@@ -6,6 +6,8 @@ const fs = require('fs');
 
 const { sincronizarAADespacho, sincronizarForwarder } = require('../../utils/sincronizarAsignacion');
 
+const { sincronizarECCDesdeProceso } = require('../../utils/sincronizarECCDatos');
+
 // Formatear fecha estilo MX
 function formatoFecha(date) {
   const f = new Date(date);
@@ -384,13 +386,18 @@ exports.actualizarProcesoOperativo = (req, res) => {
               console.log('✅ Sincronización AA Despacho:', resultadoSync);
               console.log('✅ Sincronización Forwarder:', resultadoForwarder);
 
-              return res.status(200).json({
-                message: 'Proceso operativo y asignación actualizados correctamente. ' + resultadoSync + '. ' + resultadoForwarder
+              // sincroniza datos generales del ECC
+              const resultadoECC = await sincronizarECCDesdeProceso(id);
+              console.log('✅ Sincronización ECC (datos generales):', resultadoECC);
+
+               return res.status(200).json({
+                message: 'Proceso operativo y asignación actualizados correctamente. ' + resultadoSync + '. ' + 
+                resultadoForwarder + '. ECC:' + resultadoECC
               });
             } catch (syncError) {
               console.error('❌ Error al sincronizar subformularios:', syncError);
               return res.status(200).json({
-                message: 'Proceso operativo actualizado. Falló sincronización de subformularios.',
+                message: 'Proceso operativo actualizado. Falló sincronización de subformularios/ECC.',
                 error: syncError
               });
             }
