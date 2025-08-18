@@ -1,22 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, InputGroup } from 'react-bootstrap';
 
+const hoyLocalYYYYMMDD = () => {
+  const d = new Date();
+  // Ajuste a hora local para evitar desface por UTC
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().split('T')[0];
+};
+
 const ModalPago = ({ mostrar, onCerrar, numeroControl, saldo, onGuardar }) => {
   const [abono, setAbono] = useState('');
   const [fechaPago, setFechaPago] = useState('');
   const [tipoTransaccion, setTipoTransaccion] = useState('Transferencia');
 
   useEffect(() => {
-    setAbono('');
-    setFechaPago('');
-    setTipoTransaccion('Transferencia');
+    if (mostrar) {
+      setAbono('');
+      setFechaPago(hoyLocalYYYYMMDD());           // ← fecha de hoy por defecto
+      setTipoTransaccion('Transferencia');
+    }
   }, [mostrar, numeroControl]);
 
   const handleGuardar = async () => {
     if (!abono || !fechaPago || !tipoTransaccion) {
       return alert('Completa todos los campos');
     }
-
     if (parseFloat(abono) > parseFloat(saldo)) {
       return alert('El abono no puede ser mayor al saldo actual');
     }
