@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Reporte de Estados de Cuenta (Filtrado)</title>
+<style>
+  *{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif;margin:24px;font-size:12px}
+  h1,h2,h3{margin:0}
+  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .brand{font-weight:700;font-size:18px}
+  .muted{color:#666}
+  .chip{display:inline-block;border:1px solid #ddd;border-radius:999px;padding:2px 8px;margin-right:6px;font-size:10px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+  th{background:#f7f7f7}
+  .right{text-align:right}
+  .totales{margin-top:8px;display:flex;justify-content:flex-end;gap:24px}
+  .tot-card{border:1px solid #ddd;border-radius:8px;padding:10px 12px;min-width:160px}
+  .res{font-weight:700}
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">ALVASA SYSTEM</div>
+    <div class="muted">Reporte de Estados de Cuenta (Filtrado)</div>
+  </div>
+
+  <div>
+    <% const f = filtros || {}; %>
+    <span class="chip">Cliente: <%= f.cliente || 'Todos' %></span>
+    <span class="chip">Desde: <%= f.desde || '—' %></span>
+    <span class="chip">Hasta: <%= f.hasta || '—' %></span>
+    <span class="chip">Contenedor: <%= f.contenedor || 'Todos' %></span>
+    <span class="chip">Tipo de carga: <%= f.tipo_carga || 'Todos' %></span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:16%">Folio</th>
+        <th style="width:22%">Cliente</th>
+        <th style="width:14%">Fecha</th>
+        <th style="width:16%">Contenedor</th>
+        <th>Mercancía</th>
+        <th class="right" style="width:13%">Servicios</th>
+        <th class="right" style="width:13%">Abonos</th>
+        <th class="right" style="width:13%">Saldo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (lista.length) { %>
+        <% lista.forEach(it => { %>
+          <tr>
+            <td><%= it.folio %></td>
+            <td><%= it.cliente || '—' %></td>
+            <td><%= $fechaCorta(it.fecha_entrega) %></td>
+            <td><%= it.no_contenedor || '—' %></td>
+            <td><%= it.mercancia || '—' %></td>
+            <td class="right"><%= $money(it.totalServicios || 0) %></td>
+            <td class="right"><%= $money(it.totalAbonos || 0) %></td>
+            <td class="right"><%= $money(it.saldo || 0) %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="8" class="muted">No hay estados de cuenta que coincidan con los filtros.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <div class="totales">
+    <div class="tot-card">
+      <div>Total Servicios</div>
+      <div class="res"><%= $money(global.totalServicios || 0) %></div>
+    </div>
+    <div class="tot-card">
+      <div>Total Abonos</div>
+      <div class="res"><%= $money(global.totalAbonos || 0) %></div>
+    </div>
+    <div class="tot-card">
+      <div>Saldo Global</div>
+      <div class="res"><%= $money(global.saldo || 0) %></div>
+    </div>
+  </div>
+</body>
+</html>

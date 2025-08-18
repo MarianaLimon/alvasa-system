@@ -103,6 +103,14 @@ const ListaAbonosClientes = () => {
   const totalServicios = Number(estado.total || 0);
   const saldo = Math.max(totalServicios - totalAbonado, 0);
 
+  const imprimirECC = () => {
+    if (!numeroEstado) return;
+    window.open(
+      `${API}/estado-cuenta/pdf/sencillo/${encodeURIComponent(numeroEstado)}`,
+      '_blank'
+    );
+  };
+
   return (
     <div className="container mt-4">
       {/* Encabezado */}
@@ -180,8 +188,10 @@ const ListaAbonosClientes = () => {
         <Card.Header className="d-flex justify-content-between align-items-center">
           <strong>Lista de Abonos</strong>
           <div>
-            <Button variant="secondary" size="sm" className="me-2" onClick={() => window.print()}>
-              <BsPrinter className="me-2" /> Imprimir PDF
+            <Button variant="secondary" size="sm" className="me-2" onClick={imprimirECC}
+              disabled={!numeroEstado} title={!numeroEstado ? 'Sin folio' : 'Abrir PDF'}
+            >
+              <BsPrinter className="me-2" /> PDF del Estado
             </Button>
             <Button variant="success" size="sm" onClick={abrirModalAbonoEstadoCuenta}>
               + Agregar abono

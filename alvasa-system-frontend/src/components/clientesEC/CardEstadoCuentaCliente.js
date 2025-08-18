@@ -80,6 +80,11 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
     navigate(`/estado-cuenta/abonos/${idEstadoCuenta}`, { state: { resumen } });
   };
 
+  const imprimirPDF = () => {
+    if (!idEstadoCuenta) return;
+    window.open(`${API}/estado-cuenta/pdf/sencillo/${encodeURIComponent(idEstadoCuenta)}`, '_blank');
+  };
+
   const colorEstatus =
     estatus === 'Pagado' ? 'success' : 'warning text-dark';
 
@@ -150,7 +155,7 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
                 <Button className="btn-verpagos" size="sm" onClick={irAVerPagos}>
                   Ver Pagos
                 </Button>
-                <Button variant="outline-secondary" size="sm">
+                <Button variant="outline-secondary" size="sm" onClick={imprimirPDF}>
                   <BsPrinter className="me-1" /> Imprimir
                 </Button>
               </div>

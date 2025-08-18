@@ -25,7 +25,7 @@ const listaPagosProveedoresRoutes = require('./routes/proveedores/listaPagosProv
 const abonosPagosRoutes = require('./routes/proveedores/abonosPagosRoutes');
 const listaEstadoCuentaCliente = require('./routes/clientesEC/estadoCuentaClientes');
 const abonosEstadoCuentaRoutes = require('./routes/clientesEC/abonosEstadoCuenta');
-
+const eccPdfRoutes = require('./routes/clientesEC/eccPdf');
 
 const app = express();
 const port = 5050;
@@ -70,9 +70,10 @@ app.use('/asignacion-costos/aseguradora', aseguradoraRoutes);
 app.use('/asignacion-costos/despacho', despachoRoutes);
 app.use('/pagos-proveedores', listaPagosProveedoresRoutes);
 app.use('/pagos-proveedores', abonosPagosRoutes);
-app.use('/estado-cuenta-clientes',listaEstadoCuentaCliente);
+app.use('/estado-cuenta-clientes', listaEstadoCuentaCliente);
 app.use('/estado-cuenta/abonos', abonosEstadoCuentaRoutes);
 app.use('/abonos-estado-cuenta', abonosEstadoCuentaRoutes);
+app.use('/', eccPdfRoutes);
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {

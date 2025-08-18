@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Estado de Cuenta - <%= enc.folio %></title>
+  <style>
+    @page { size: A4; margin: 12mm 20mm; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .header img { height: 60px; }
+    .header .ctrl { font-size: 12px; font-weight: 600; }
+
+    /* Títulos */
+    .title { text-align: center; font-size: 20px; font-weight: 700; margin: 16px 0 12px; }
+
+    /* Tablas base */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #888; padding: 6px 8px; text-align: left; }
+    th { background: #eee; }
+
+    /* Bloques superiores (Generales) */
+    .block { margin-top: 10px; }
+    .w50 { width: 49%; }
+    .row { display: flex; gap: 2%; }
+    .muted { color: #666; }
+    .right { text-align: right; }
+
+    /* Dos columnas (Servicios|Abonos) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+
+    /* Totales globales */
+    .totales { display: flex; gap: 16px; justify-content: flex-end; margin-top: 14px; }
+    .tot-card { border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; min-width: 160px; }
+    .tot-card .val { font-weight: 700; font-size: 13px; }
+
+    .footer { margin-top: 12px; font-size: 10px; color: #666; }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado con logo + Número de Control -->
+  <div class="header">
+    <% if (logo) { %><img src="<%= logo %>" alt="ALVASA"><% } %>
+    <div class="ctrl">Número de Control: <%= enc.folio %></div>
+  </div>
+
+  <div class="title">Estado de Cuenta</div>
+
+  <!-- Información General (estilo proveedores) -->
+  <div class="block">
+    <table>
+      <thead>
+        <tr><th colspan="4">Información General</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="width:25%;"><strong>Contenedor:</strong></td>
+          <td style="width:25%;"><%= enc.no_contenedor || '—' %></td>
+          <td style="width:25%;"><strong>Cliente:</strong></td>
+          <td style="width:25%;"><%= enc.cliente || '—' %></td>
+        </tr>
+        <tr>
+          <td><strong>Giro / Tipo de carga:</strong></td>
+          <td><%= enc.tipo_carga || '—' %></td>
+          <td><strong>Concepto / Mercancía:</strong></td>
+          <td><%= enc.mercancia || '—' %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cajas estilo proveedores: izq totales base, der resumen -->
+  <div class="row block">
+    <!-- Izquierda -->
+    <table class="w50">
+      <thead>
+        <tr>
+          <th style="width:50%;">Total Servicios</th>
+          <th style="width:50%;">Total Abonos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center;"><%= $money(totalServicios) %></td>
+          <td style="text-align: center;"><%= $money(totalAbonos) %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Derecha -->
+    <table class="w50">
+      <tbody>
+        <tr>
+          <th style="width:45%;">Saldo:</th>
+          <td class="right"><%= $money(saldo) %></td>
+        </tr>
+        <tr>
+          <th>Estatus:</th>
+          <td style="text-align: right;"><%= estatus %></td>
+        </tr>
+        <tr>
+          <th>Total de Abonos:</th>
+          <td class="right"><%= $money(totalAbonos) %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Fechas (mismo estilo) -->
+  <div class="block">
+    <table>
+      <tbody>
+        <tr>
+          <th style="width:25%;">Fecha de Entrega:</th>
+          <td style="width:75%;"><%= $fechaLarga(enc.fecha_entrega) %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Dos columnas: Servicios | Abonos -->
+  <div class="cols">
+    <!-- Servicios -->
+    <div>
+      <h3>Servicios</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32%;">Giro</th>
+            <th>Servicio</th>
+            <th class="right" style="width:22%;">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (servicios && servicios.length) { %>
+            <% servicios.forEach(s => { %>
+              <tr>
+                <td><%= s.giro || '—' %></td>
+                <td><%= s.servicio || '—' %></td>
+                <td class="right"><%= $money(s.importe) %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="3" class="muted">Sin servicios registrados.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Abonos -->
+    <div>
+      <h3>Abonos Realizados</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32%;">Fecha de Pago</th>
+            <th style="width:28%;">Tipo de Transacción</th>
+            <th class="right" style="width:22%;">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (abonos && abonos.length) { %>
+            <% abonos.forEach(a => { %>
+              <tr>
+                <td><%= $fechaCorta(a.fecha_pago) %></td>
+                <td><%= a.tipo_transaccion || '—' %></td>
+                <td class="right"><%= $money(a.abono) %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="3" class="muted">No hay abonos registrados.</td></tr>
+          <% } %>
+          <tr>
+            <th>Total Abonado</th>
+            <th></th>
+            <th class="right"><%= $money(totalAbonos) %></th>
+          </tr>
+          <tr>
+            <th>Saldo Restante</th>
+            <th></th>
+            <th class="right"><%= $money(saldo) %></th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  
+</body>
+</html>
