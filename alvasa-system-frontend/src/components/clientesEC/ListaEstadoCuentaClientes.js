@@ -56,7 +56,14 @@ const ListaEstadoCuentaClientes = () => {
   };
 
   const handleImprimir = () => {
-    console.log('Imprimir cards filtrados:', filtrados);
+    const params = new URLSearchParams();
+    if (clienteSeleccionado) params.append('cliente', clienteSeleccionado);
+    if (filtroEstatus)       params.append('estatus', filtroEstatus);
+    if (fechaDesde)          params.append('desde',  fechaDesde);
+    if (fechaHasta)          params.append('hasta',  fechaHasta);
+
+    // Usa la ruta existente en tu back:
+    window.open(`${API}/estado-cuenta/pdf/filtrado?${params.toString()}`, '_blank');
   };
 
   // ---- 🔔 handler llamado por cada card cuando cambia un abono

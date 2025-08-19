@@ -142,6 +142,11 @@
                 <td class="right"><%= $money(s.importe) %></td>
               </tr>
             <% }) %>
+            <!-- total de servicios -->
+            <tr>
+              <th colspan="2" class="left">Total Servicios</th>
+              <th class="right"><%= $money(totalServicios) %></th>
+            </tr>
           <% } else { %>
             <tr><td colspan="3" class="muted">Sin servicios registrados.</td></tr>
           <% } %>

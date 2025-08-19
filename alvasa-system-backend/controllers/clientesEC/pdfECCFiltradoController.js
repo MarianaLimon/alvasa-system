@@ -1,118 +1,166 @@
 const path = require('path');
+const fs = require('fs');
 const db = require('../../config/db');
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
 
-const $money = (n) => (Number(n || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-const $fechaCorta = (iso) => {
-  if (!iso) return '—';
-  const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+// ===== Helpers (idénticos al sencillo) =====
+const $money = (n) =>
+  (Number(n || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+
+const toDateSafe = (v) => {
+  if (!v) return null;
+  if (v instanceof Date && !isNaN(v)) return v;
+  if (typeof v === 'string') {
+    const s = v.trim();
+    const m = s.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+    if (m) {
+      const [_, y, mo, d] = m.map(Number);
+      return new Date(Date.UTC(y, mo - 1, d));
+    }
+    const tryD = new Date(s);
+    if (!isNaN(tryD)) return tryD;
+  }
+  try {
+    const s = String(v);
+    const tryD = new Date(s);
+    if (!isNaN(tryD)) return tryD;
+  } catch (_) {}
+  return null;
 };
 
-// Para totales por ECC
-async function getServiciosPorFolio(folio) {
-  const [rows] = await db.promise().query(`
-    SELECT importe FROM servicios_estado_cuenta WHERE id_estado_cuenta = ?
-  `, [folio]);
-  return rows.reduce((a, r) => a + Number(r.importe || 0), 0);
-}
-async function getAbonosPorFolio(folio) {
-  const [rows] = await db.promise().query(`
-    SELECT abono FROM abonos_estado_cuenta WHERE numero_estado_cuenta = ?
-  `, [folio]);
-  return rows.reduce((a, r) => a + Number(r.abono || 0), 0);
-}
+const $fechaLarga = (v) => {
+  const d = toDateSafe(v);
+  if (!d) return '—';
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+};
+
+const $fechaCorta = (v) => {
+  const d = toDateSafe(v);
+  if (!d) return '—';
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+};
+
+const $sum = (arr, k) => arr.reduce((a, it) => a + Number(it?.[k] || 0), 0);
+
+// ===== Logo (igual que sencillo) =====
+const logoPath = path.join(__dirname, '../../public/images/alvasa-logo-new.jpg');
+const logo = (() => {
+  try {
+    const buf = fs.readFileSync(logoPath);
+    return 'data:image/jpeg;base64,' + buf.toString('base64');
+  } catch (err) {
+    console.warn('⚠️ No se pudo cargar el logo:', err.message);
+    return null;
+  }
+})();
 
 exports.generarPDFECCFiltrado = async (req, res) => {
   try {
-    // Filtros esperados (ajusta nombres según tu frontend):
-    const { cliente, desde, hasta, contenedor, tipo_carga } = req.query;
+    const { cliente, estatus, desde, hasta } = req.query;
 
-    // Base query
+    // ---- Filtros sobre ECC (campos reales)
     const where = [];
     const params = [];
-
-    // Filtro por cliente (nombre contiene)
-    if (cliente) {
-      where.push('c.nombre LIKE ?');
-      params.push(`%${cliente}%`);
-    }
-    // Fecha (usamos src.entrega como fecha de referencia del ECC)
-    if (desde) {
-      where.push('src.entrega >= ?');
-      params.push(desde);
-    }
-    if (hasta) {
-      where.push('src.entrega <= ?');
-      params.push(hasta);
-    }
-    // Contenedor exacto (si lo usas)
-    if (contenedor) {
-      where.push('po.no_contenedor = ?');
-      params.push(contenedor);
-    }
-    // Tipo de carga (exacto)
-    if (tipo_carga) {
-      where.push('po.tipo_carga = ?');
-      params.push(tipo_carga);
-    }
+    if (cliente) { where.push('ecc.cliente = ?');        params.push(cliente); }
+    if (estatus) { where.push('ecc.estatus = ?');        params.push(estatus); }
+    if (desde)   { where.push('ecc.fecha_entrega >= ?'); params.push(desde); }
+    if (hasta)   { where.push('ecc.fecha_entrega <= ?'); params.push(hasta); }
 
     const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    // Traemos la lista de ECC que cumplen el filtro
-    const [lista] = await db.promise().query(`
+    // ---- Traer lista base (con ID interno y FOLIO)
+    const [listaBase] = await db.promise().query(`
       SELECT
-        ecc.id_estado_cuenta  AS folio,
-        c.nombre              AS cliente,
-        po.no_contenedor      AS no_contenedor,
-        po.tipo_carga         AS tipo_carga,
-        po.mercancia          AS mercancia,
-        src.entrega           AS fecha_entrega
+        ecc.id                  AS ecc_id,           -- interno numérico
+        ecc.id_estado_cuenta    AS folio,            -- folio string
+        ecc.cliente             AS cliente,
+        ecc.estatus             AS estatus,
+        ecc.contenedor          AS contenedor,
+        ecc.tipo_carga          AS tipo_carga,
+        ecc.mercancia           AS mercancia,
+        ecc.fecha_entrega       AS fecha_entrega
       FROM estado_cuenta_clientes ecc
-      LEFT JOIN clientes c ON c.id = ecc.cliente_id
-      LEFT JOIN procesos_operativos po ON po.id = ecc.id_proceso_operativo
-      LEFT JOIN salida_retorno_contenedor src ON src.proceso_operativo_id = po.id
       ${whereSQL}
-      ORDER BY src.entrega DESC, ecc.id DESC
+      ORDER BY ecc.fecha_entrega DESC, ecc.id DESC
     `, params);
 
-    // Calculamos totales por cada ECC
-    for (const it of lista) {
-      const totalServicios = await getServiciosPorFolio(it.folio);
-      const totalAbonos = await getAbonosPorFolio(it.folio);
-      it.totalServicios = totalServicios;
-      it.totalAbonos = totalAbonos;
-      it.saldo = totalServicios - totalAbonos;
+    if (!listaBase || listaBase.length === 0) {
+      // Render vacío
+      const templatePath = path.join(__dirname, '../../views/ecc-filtrado.ejs');
+      const html = await ejs.renderFile(templatePath, {
+        filtros: { cliente, estatus, desde, hasta },
+        lista: [],
+        global: { totalServicios: 0, totalAbonos: 0, saldo: 0 },
+        $money, $fechaLarga, $fechaCorta, logo
+      }, { async: true });
+
+      const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox','--disable-setuid-sandbox'] });
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
+      const pdf = await page.pdf({ printBackground: true, format: 'A4', margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });
+      await browser.close();
+      res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="ECC-filtrado.pdf"`, 'Content-Length': pdf.length });
+      return res.send(pdf);
     }
 
-    // Acumulados globales
-    const sum = (arr, k) => arr.reduce((a, it) => a + Number(it[k] || 0), 0);
+    // ---- Totales agrupados
+    const ids    = listaBase.map(r => r.ecc_id);  // para servicios (numérico)
+    const folios = listaBase.map(r => r.folio);   // para abonos (string)
+
+    // Servicios: referencia por ID INTERNO (numérico)
+    const [serviciosAgg] = await db.promise().query(`
+      SELECT id_estado_cuenta AS ecc_id, COALESCE(SUM(importe),0) AS totalServicios
+      FROM servicios_estado_cuenta
+      WHERE id_estado_cuenta IN (?)
+      GROUP BY id_estado_cuenta
+    `, [ids]);
+
+    // Abonos: referencia por FOLIO (string)
+    const [abonosAgg] = await db.promise().query(`
+      SELECT id_estado_cuenta AS folio, COALESCE(SUM(abono),0) AS totalAbonos
+      FROM abonos_estado_cuenta
+      WHERE id_estado_cuenta IN (?)
+      GROUP BY id_estado_cuenta
+    `, [folios]);
+
+    const servMap = new Map(serviciosAgg.map(r => [Number(r.ecc_id), Number(r.totalServicios || 0)]));
+    const abonMap = new Map(abonosAgg.map(r => [String(r.folio), Number(r.totalAbonos || 0)]));
+
+    const lista = listaBase.map(r => {
+      const totalServicios = servMap.get(Number(r.ecc_id)) || 0;
+      const totalAbonos    = abonMap.get(String(r.folio))   || 0;
+      const saldo          = totalServicios - totalAbonos;
+      // puedes usar el estatus de ECC o derivarlo del saldo; dejo el de ECC si existe, si no derivado:
+      const estatusFinal   = r.estatus || (saldo <= 0 ? 'Pagado' : 'Pendiente');
+      return { ...r, totalServicios, totalAbonos, saldo, estatus: estatusFinal };
+    });
+
+    // ---- Totales globales
     const global = {
-      totalServicios: sum(lista, 'totalServicios'),
-      totalAbonos: sum(lista, 'totalAbonos'),
-      saldo: sum(lista, 'saldo')
+      totalServicios: $sum(lista, 'totalServicios'),
+      totalAbonos:    $sum(lista, 'totalAbonos'),
+      saldo:          $sum(lista, 'saldo'),
     };
 
-    // Render EJS
+    // ---- Render
     const templatePath = path.join(__dirname, '../../views/ecc-filtrado.ejs');
     const html = await ejs.renderFile(templatePath, {
-      filtros: { cliente, desde, hasta, contenedor, tipo_carga },
+      filtros: { cliente, estatus, desde, hasta },
       lista,
       global,
-      $money, $fechaCorta
+      $money, $fechaLarga, $fechaCorta, logo
     }, { async: true });
 
-    // PDF
+    // ---- PDF
     const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox','--disable-setuid-sandbox'] });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
-
     const pdf = await page.pdf({
-      printBackground: true, format: 'A4',
-      margin: { top: '12mm', right: '10mm', bottom: '12mm', left: '10mm' }
+      printBackground: true,
+      format: 'A4',
+      margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
     });
-
     await browser.close();
 
     res.set({

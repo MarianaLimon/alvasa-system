@@ -1,85 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="utf-8" />
-<title>Reporte de Estados de Cuenta (Filtrado)</title>
-<style>
-  *{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif;margin:24px;font-size:12px}
-  h1,h2,h3{margin:0}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .brand{font-weight:700;font-size:18px}
-  .muted{color:#666}
-  .chip{display:inline-block;border:1px solid #ddd;border-radius:999px;padding:2px 8px;margin-right:6px;font-size:10px}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
-  th{background:#f7f7f7}
-  .right{text-align:right}
-  .totales{margin-top:8px;display:flex;justify-content:flex-end;gap:24px}
-  .tot-card{border:1px solid #ddd;border-radius:8px;padding:10px 12px;min-width:160px}
-  .res{font-weight:700}
-</style>
+  <meta charset="UTF-8" />
+  <title>Estado de Cuenta - Reporte Filtrado</title>
+  <style>
+    @page { size: A4; margin: 12mm 20mm; }
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .header img { height: 60px; }
+    .header .date { font-size: 12px; color: #666; }
+
+    /* Título */
+    .title { text-align: center; font-size: 20px; font-weight: 700; margin: 16px 0 12px; }
+
+    /* Filtros */
+    .filters { font-size: 10px; color: #666; margin-bottom: 8px; }
+    .filters span { margin-right: 10px; }
+
+    /* Tablas base */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #888; padding: 6px 8px; text-align: left; }
+    th { background: #eee; }
+
+    /* Bloques y filas */
+    .block { margin-top: 10px; }
+    .row { display: flex; gap: 2%; }
+    .w50 { width: 49%; }
+    .right { text-align: right; }
+    .muted { color: #666; }
+
+    /* Tarjetas de cada ECC */
+    .card { border: 1px solid #bbb; border-radius: 6px; padding: 10px 10px 8px; margin: 10px 0 12px; }
+    .card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; }
+    .folio { font-weight: 700; font-size: 14px; }
+    .estatus { border: 1px solid #aaa; border-radius: 999px; padding: 2px 10px; font-size: 10px; }
+
+    /* Totales globales */
+    .totales { display: flex; gap: 16px; justify-content: flex-end; margin-top: 12px; }
+    .tot-card { border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; min-width: 160px; }
+    .tot-card .val { font-weight: 700; font-size: 13px; }
+
+    /* Evitar cortes feos entre páginas */
+    .card, .block, table { break-inside: avoid; page-break-inside: avoid; }
+
+    /* Pequeñas secciones */
+    .subtle { font-size: 10px; color: #555; margin-top: 4px; }
+  </style>
 </head>
 <body>
+
+  <!-- Encabezado -->
   <div class="header">
-    <div class="brand">ALVASA SYSTEM</div>
-    <div class="muted">Reporte de Estados de Cuenta (Filtrado)</div>
+    <% if (logo) { %><img src="<%= logo %>" alt="ALVASA"><% } %>
+    <div class="date"><%= new Date().toLocaleDateString('es-MX') %></div>
   </div>
 
-  <div>
-    <% const f = filtros || {}; %>
-    <span class="chip">Cliente: <%= f.cliente || 'Todos' %></span>
-    <span class="chip">Desde: <%= f.desde || '—' %></span>
-    <span class="chip">Hasta: <%= f.hasta || '—' %></span>
-    <span class="chip">Contenedor: <%= f.contenedor || 'Todos' %></span>
-    <span class="chip">Tipo de carga: <%= f.tipo_carga || 'Todos' %></span>
+  <div class="title">Estado de Cuenta — Reporte Filtrado</div>
+
+  <!-- Filtros aplicados -->
+  <div class="filters">
+    <% if (filtros) { %>
+      <% if (filtros.cliente)    { %><span><strong>Cliente:</strong> <%= filtros.cliente %></span><% } %>
+      <% if (filtros.estatus)    { %><span><strong>Estatus:</strong> <%= filtros.estatus %></span><% } %>
+      <% if (filtros.desde)      { %><span><strong>Desde:</strong> <%= filtros.desde %></span><% } %>
+      <% if (filtros.hasta)      { %><span><strong>Hasta:</strong> <%= filtros.hasta %></span><% } %>
+      <% if (filtros.contenedor) { %><span><strong>Contenedor:</strong> <%= filtros.contenedor %></span><% } %>
+      <% if (filtros.tipo_carga) { %><span><strong>Tipo de carga:</strong> <%= filtros.tipo_carga %></span><% } %>
+    <% } %>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th style="width:16%">Folio</th>
-        <th style="width:22%">Cliente</th>
-        <th style="width:14%">Fecha</th>
-        <th style="width:16%">Contenedor</th>
-        <th>Mercancía</th>
-        <th class="right" style="width:13%">Servicios</th>
-        <th class="right" style="width:13%">Abonos</th>
-        <th class="right" style="width:13%">Saldo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if (lista.length) { %>
-        <% lista.forEach(it => { %>
-          <tr>
-            <td><%= it.folio %></td>
-            <td><%= it.cliente || '—' %></td>
-            <td><%= $fechaCorta(it.fecha_entrega) %></td>
-            <td><%= it.no_contenedor || '—' %></td>
-            <td><%= it.mercancia || '—' %></td>
-            <td class="right"><%= $money(it.totalServicios || 0) %></td>
-            <td class="right"><%= $money(it.totalAbonos || 0) %></td>
-            <td class="right"><%= $money(it.saldo || 0) %></td>
-          </tr>
-        <% }) %>
-      <% } else { %>
-        <tr><td colspan="8" class="muted">No hay estados de cuenta que coincidan con los filtros.</td></tr>
-      <% } %>
-    </tbody>
-  </table>
-
+  <!-- Totales globales -->
   <div class="totales">
     <div class="tot-card">
       <div>Total Servicios</div>
-      <div class="res"><%= $money(global.totalServicios || 0) %></div>
+      <div class="val"><%= $money(global.totalServicios || 0) %></div>
     </div>
     <div class="tot-card">
       <div>Total Abonos</div>
-      <div class="res"><%= $money(global.totalAbonos || 0) %></div>
+      <div class="val"><%= $money(global.totalAbonos || 0) %></div>
     </div>
     <div class="tot-card">
-      <div>Saldo Global</div>
-      <div class="res"><%= $money(global.saldo || 0) %></div>
+      <div>Saldo Total</div>
+      <div class="val"><%= $money(global.saldo || 0) %></div>
     </div>
   </div>
+
+  <!-- Lista de ECC (formato similar al “sencillo”, pero resumido) -->
+  <% if (!lista || lista.length === 0) { %>
+    <p class="muted">No hay resultados con los filtros seleccionados.</p>
+  <% } %>
+
+  <% (lista || []).forEach(enc => { %>
+    <div class="card">
+      <div class="card-head">
+        <div class="folio">Número de Control: <%= enc.folio %></div>
+        <div class="estatus"><%= enc.estatus || 'Pendiente' %></div>
+      </div>
+
+      <!-- Información General -->
+      <div class="block">
+        <table>
+          <thead>
+            <tr><th colspan="4">Información General</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width:25%;"><strong>Contenedor:</strong></td>
+              <td style="width:25%;"><%= enc.contenedor || '—' %></td>
+              <td style="width:25%;"><strong>Cliente:</strong></td>
+              <td style="width:25%;"><%= enc.cliente || '—' %></td>
+            </tr>
+            <tr>
+              <td><strong>Giro / Tipo de carga:</strong></td>
+              <td><%= enc.tipo_carga || '—' %></td>
+              <td><strong>Concepto / Mercancía:</strong></td>
+              <td><%= enc.mercancia || '—' %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totales por ECC: misma lógica visual que el sencillo -->
+      <div class="row block">
+        <table class="w50">
+          <thead>
+            <tr>
+              <th style="width:50%;">Total Servicios</th>
+              <th style="width:50%;">Total Abonos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="right"><%= $money(enc.totalServicios || 0) %></td>
+              <td class="right"><%= $money(enc.totalAbonos || 0) %></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="w50">
+          <tbody>
+            <tr>
+              <th style="width:45%;">Saldo:</th>
+              <td class="right"><%= $money(enc.saldo || 0) %></td>
+            </tr>
+            <tr>
+              <th>Estatus:</th>
+              <td class="right"><%= enc.estatus || 'Pendiente' %></td>
+            </tr>
+            <tr>
+              <th>Fecha de Entrega:</th>
+              <td class="right"><%= $fechaLarga(enc.fecha_entrega) %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Nota: en el reporte filtrado, omitimos tablas de Servicios/Abonos por ECC para no alargar.
+           Si quieres, podemos hacer una variante "extendida" que incluya esas tablas por cada folio. -->
+     
+    </div>
+  <% }) %>
+ <div class="subtle">* Resumen generado automáticamente con filtros aplicados.</div>
 </body>
 </html>
