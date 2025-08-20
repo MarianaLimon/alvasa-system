@@ -162,7 +162,7 @@ const ListaProcesosOperativos = () => {
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
           />
-          <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+          <InputGroup.Text style={{ backgroundColor: '#17A2B8', color: 'white', border: '1px solid #17A2B8' }}>
             <BsSearch />
           </InputGroup.Text>
         </InputGroup>

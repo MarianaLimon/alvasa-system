@@ -6,27 +6,11 @@ body {
   padding: 0;
 }
 
-.titulo-principal {
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  color: #2b6aa1;
-  margin-bottom: 0;
-  margin-top: 2rem;
-}
-
-.subtitulo {
-  font-size: 2rem;
-  font-weight: normal;
-  color: #2b6aa1;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
 .uppercase {
   text-transform: uppercase;
 }
 
+/* ----- Sidebar ------ */
 /* ----- Sidebar ------ */
 
 .sidebar {
@@ -68,6 +52,7 @@ body {
   font-size: 1.2rem;
 }
 
+/* Hover del link */
 .sidebar-link:hover {
   background-color: #dfeafc;
   color: #5d4e8f;
@@ -77,15 +62,15 @@ body {
   border-bottom-left-radius: 1rem;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
+  margin-right: 0 !important;
 }
 
+/* Activo del link (Home) */
 .sidebar-link.active {
   background-color: #dfeafc;
   color: #5d4e8f;
   font-weight: bold;
-  /*border-left-color: #fff;*/
   padding-left: 1.5rem;
-
   border-top-left-radius: 1rem;
   border-bottom-left-radius: 1rem;
   border-top-right-radius: 0;
@@ -98,25 +83,106 @@ body {
   pointer-events: none;
 }
 
-.sidebar-link .icon {
-  fill: #ffffff !important; 
-}
-
-/* Icono en estado activo */
-.sidebar .sidebar-link.active .icon {
-  fill: #5d4e8f !important;
-  stroke: bold !important;
-}
-
-/* Icono en estado hover */
+/* iconos (react-icons) */
+.sidebar-link .icon { fill: #ffffff !important; }
+.sidebar .sidebar-link.active .icon,
 .sidebar .sidebar-link:hover .icon {
   fill: #5d4e8f !important;
   stroke: bold !important;
 }
 
-.nav{
-  padding: 2.5em 0 2.5em 2.5em;
+.nav { padding: 2.5em 0 2.5em 2.5em; }
+
+/* ===== Grupos ===== */
+
+.sidebar-group { margin-top: 0.25rem; }
+
+/* Botón del grupo: MISMAS DIMENSIONES que .sidebar-link */
+.sidebar-groupBtn{
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;      /* igual que el link */
+  border-left: 4px solid transparent;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  border-radius: 0;
+  transition: background-color .3s, padding-left .3s, color .3s;
 }
+.sidebar-groupBtn .icon{
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+  fill: #ffffff !important;
+}
+.sidebar-groupBtn .chev {
+  margin-left: auto;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* Hover del header del grupo (igual que link hover) */
+.sidebar-groupBtn:hover{
+  background-color: #dfeafc;
+  color: #5d4e8f;
+  font-weight: bold;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Header del grupo ACTIVO (cuando un hijo está activo) -> idéntico a Home activo */
+.sidebar-groupBtn.is-active{
+  background-color: #dfeafc;
+  color: #5d4e8f;
+  font-weight: bold;
+  padding-left: 1.5rem;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.sidebar-groupBtn.is-active .icon,
+.sidebar-groupBtn.is-active .chev{
+  color: #5d4e8f;
+  fill: #5d4e8f !important;
+  opacity: 1;
+}
+
+/* Colapsable de subitems */
+.sidebar-groupBody {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+.sidebar-groupBody.show { max-height: 500px; }
+
+/* Subitems: usan .sidebar-link pero con sangría propia */
+.sidebar-subitem{
+  padding-left: 2.5rem;  /* indent nivel 2 */
+  border-radius: .5rem;
+  margin-left: .25rem;
+  margin-right: .25rem;
+}
+
+/* Subitem ACTIVO con TRANSPARENCIA (sin el “pill” grande) */
+.sidebar .sidebar-groupBody .sidebar-subitem.active{
+  background-color: rgba(223, 234, 252, 0.47) !important;
+  color: #5d4e8f !important;
+  font-weight: 700;
+  padding-left: 2.5rem !important;
+  margin-right: 0 !important;
+}
+/* Icono del subitem en hover/activo */
+.sidebar-subitem:hover .icon,
+.sidebar-subitem.active .icon { color: #5d4e8f !important; }
+
+
+
 
 /* ------ Dashboard ------ */
 
@@ -213,83 +279,4 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-}
-
-
-
-/*    */
-
-/* === PAGOS A PROVEEDORES - GRUPOS EXPANDIBLES === */
-.card.pagos-grupo {
-  border: 1px solid #dee2e6;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  transition: box-shadow 0.3s ease;
-  background-color: white;
-}
-
-.card.pagos-grupo:hover {
-  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
-}
-
-.card.pagos-grupo .card-header {
-  background-color: #f0f2f5;
-  color: #5751ab;
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 1rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.3s ease;
-}
-
-.card.pagos-grupo .card-header:hover {
-  background-color: #e0e2e9;
-}
-
-.card.pagos-grupo .collapse-wrapper {
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-
-.card.pagos-grupo .collapse-wrapper.collapsed {
-  max-height: 0;
-}
-
-.card.pagos-grupo .collapse-wrapper.expanded {
-  max-height: 1000px; /* Suficiente para la mayoría de los casos */
-}
-
-.card.pagos-grupo table {
-  margin: 0;
-}
-
-.card.pagos-grupo .table th {
-  background-color: #f8f9fa;
-  color: #333;
-  text-align: left;
-}
-
-.card.pagos-grupo .table td, 
-.card.pagos-grupo .table th {
-  padding: 0.6rem 1rem;
-  vertical-align: middle;
-  font-size: 0.95rem;
-}
-
-.collapse-wrapper {
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-
-.collapse-wrapper.collapsed {
-  max-height: 0;
-}
-
-.collapse-wrapper.expanded {
-  max-height: 1000px;
 }
