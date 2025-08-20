@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {
-  Table,
-  Spinner,
-  Button,
-  Form,
-  Badge,
-  InputGroup,
-  Toast,
-  ToastContainer
-} from 'react-bootstrap';
+import { Table, Spinner, Button, Form, Badge, InputGroup, Toast, ToastContainer } from 'react-bootstrap';
 import { BsEye, BsPencil, BsTrash, BsPrinter, BsSearch } from 'react-icons/bs';
+import './styles/style-cotizaciones.css';
 import { useNavigate } from 'react-router-dom';
 
 const ListaCotizaciones = () => {
@@ -99,7 +91,8 @@ const ListaCotizaciones = () => {
   }
 
   return (
-    <div className="container mt-4 container-listacot">
+    <div className="container mt-4">
+      <h1 className='title-listacot'>Lista de Cotizaciones</h1>
       {/* Filtro y buscador */}
       <div className="d-flex mb-3 align-items-center justify-content-between">
         <div className="d-flex align-items-center">
@@ -123,7 +116,7 @@ const ListaCotizaciones = () => {
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
             />
-            <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+            <InputGroup.Text style={{ backgroundColor: '#17A2B8', color: 'white', border: '1px solid #17A2B8' }}>
               <BsSearch />
             </InputGroup.Text>
           </InputGroup>
@@ -137,7 +130,7 @@ const ListaCotizaciones = () => {
       
 
       {/* Tabla */}
-      <Table striped bordered hover responsive>
+      <Table className="tabla-cotizaciones">
         <thead>
           <tr>
             <th>Folio</th>

@@ -1,0 +1,132 @@
+.title-reg-po, .title-procesos{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Procesos */
+
+.accordion-button {
+  background: linear-gradient(90deg, #5d4e8f, #5d4e8fda) !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+.text-end, .total-servicios, .total-cargos-extra {
+  text-align: right !important;
+  font-size: 1.6rem;
+  color: #68c768;
+}
+
+.subform-title{
+  font-weight: bold !important;
+  font-size: 1.5rem;
+}
+
+.container-subform{
+  padding: 2rem 4rem;
+  background: #dfeafc;
+  color: #5d4e8f;
+  font-weight: 600;
+  border-radius: 20px;
+}
+
+.total-solapa{
+  margin-right: 1rem !important;
+  background-color: white !important;
+   color: #5d4e8f;
+   font-weight: bold !important;
+  font-size: 1rem;
+}
+
+.title-resumen{
+  font-size: 2rem;
+}
+
+
+/* ----- Procesos Operativos ----- */
+
+.title-section{
+  margin-top: 2em;
+  font-weight: bold;
+}
+
+.btn-drivelink{
+  border: solid 2px #21a768;
+  background-color: transparent;
+  color: #21a768 !important;
+  font-weight: bold;
+}
+.btn-drivelink:hover{
+  border: solid 2px #21a768;
+  background-color: #21a768;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+/* Fondo y texto del tooltip */
+.tooltip .tooltip-inner {
+  background-color: #5751AB !important; 
+  color: white;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Flecha del tooltip (parte visible) */
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: #5f27cd !important;
+}
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: #5f27cd !important;
+}
+
+
+/* Ver Asignacion */
+.thead-ver-asignacion th {
+   background-color: #5751AB;
+  color: #fff !important;
+  text-align: center;
+}
+
+
+.tabla-procesos {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: 1rem;
+}
+
+/* Encabezado */
+.tabla-procesos thead th {
+  background-color: #5751AB !important;
+  color: #fff !important;
+  padding: .7rem 1rem;
+  font-weight: 600;
+  text-align: left;
+  border: none;
+}
+
+/* Filas */
+.tabla-procesos tbody td {
+  background-color: #edf2ff;
+  color: #1a1a1a;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid #e0e6f3;
+  vertical-align: middle;
+  transition: background-color 0.25s ease;
+}
+.tabla-procesos tbody tr:hover td {
+  background-color: #dee6ff !important;
+}

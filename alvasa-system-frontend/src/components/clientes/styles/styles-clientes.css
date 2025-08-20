@@ -1,0 +1,129 @@
+.container-clientes{
+  
+  padding: 2rem;
+  border-radius: 15px;
+}
+
+.title-clientes{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-left: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.card-formulario {
+  background-color: #454084;; 
+  color: rgb(196, 196, 196);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.title-formulario-addcliente{
+  color: white;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: bold;
+}
+
+.title-formulario{
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Tabla de clientes */
+.tabla-clientes {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+   width: 100%;
+  table-layout: fixed;
+  margin-bottom: 0 !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Buscador */
+.buscador-clientes input {
+  border-radius: 10px;
+}
+
+/* Botones */
+.botones-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Encabezado */
+.tabla-clientes thead th {
+  background-color: #5751AB !important;
+  color: #fff !important;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.4);
+  padding-left: 1.5rem;
+}
+
+/* Filas */
+.tabla-clientes td {
+  background-color: #edf2ff !important;
+  color: #1a1a1a !important;
+  transition: background-color 0.3s ease;
+}
+.tabla-clientes tr:hover td {
+  background-color: #dee6ff !important;
+}
+
+
+/* === Ajustes de columnas (correo y acciones) === */
+
+/* Columna Email (4ª): ancho controlado + permite romper en cualquier punto */
+/* Evita desalineación por exceso de anchos */
+.tabla-clientes {
+  table-layout: fixed;     
+}
+
+/* No fuerces ancho en el TH de Email; solo controla el TD */
+.tabla-clientes th:nth-child(4) {
+  width: auto;             
+  max-width: none;
+  white-space: nowrap;    
+}
+.tabla-clientes td:nth-child(4) {
+  max-width: 34ch;         
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+/* Acciones más compactas para que no empuje columnas */
+.tabla-clientes th:nth-child(5),
+.tabla-clientes td:nth-child(5) {
+  width: 120px;            
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Centrado y tamaño de los botones */
+.botones-acciones {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .35rem;
+}
+.botones-acciones .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .3rem .45rem;
+  line-height: 1;          
+  font-size: 1rem;
+}
+
+/* Alineación vertical consistente en toda la tabla */
+.tabla-clientes th,
+.tabla-clientes td {
+  vertical-align: middle;
+}

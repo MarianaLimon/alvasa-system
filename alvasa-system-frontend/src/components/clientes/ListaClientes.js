@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, InputGroup } from 'react-bootstrap';
-import { BsSearch } from 'react-icons/bs';
+import { BsSearch, BsPencil, BsTrash } from 'react-icons/bs';
 import ModalEditarCliente from './ModalEditarCliente';
 
 const ListaClientes = () => {
@@ -46,12 +46,12 @@ const ListaClientes = () => {
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
-        <InputGroup.Text style={{ backgroundColor: '#3e3f42', color: 'white', border: '1px solid #555' }}>
+        <InputGroup.Text style={{ backgroundColor: '#17A2B8', color: 'white', border: '1px solid #17A2B8' }}>
           <BsSearch />
         </InputGroup.Text>
       </InputGroup>
 
-      <Table striped bordered hover responsive className="tabla-clientes">
+      <Table  className="tabla-clientes">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -70,8 +70,14 @@ const ListaClientes = () => {
               <td>{cliente.email}</td>
               <td>
                 <div className="botones-acciones">
-                  <Button variant="warning" size="sm" onClick={() => setClienteEditando(cliente)}>Editar</Button>
-                  <Button variant="danger" size="sm" onClick={() => eliminarCliente(cliente.id)}>Eliminar</Button>
+                  <Button size="sm" className="btn-warning btn-editar"
+                    onClick={() => setClienteEditando(cliente)} >
+                    <BsPencil />
+                  </Button>
+                  <Button size="sm" className="btn-danger btn-eliminar"
+                    onClick={() => eliminarCliente(cliente.id)} >
+                    <BsTrash />
+                  </Button>
                 </div>
               </td>
             </tr>

@@ -1,0 +1,137 @@
+/*  Tabla cotizaciones  */
+.container-cotizaciones{
+  margin: 0 5rem;
+  padding: 4rem;
+  border-radius: 20px;
+}
+
+.title-listacot{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* === Tabla Cotizaciones (look limpio, consistente con Clientes) === */
+.tabla-cotizaciones {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: 1rem;
+}
+
+/* Encabezado */
+.tabla-cotizaciones thead th {
+  background-color: #5751AB !important;
+  color: #fff !important;
+  padding: .7rem 1rem;
+  font-weight: 600;
+  text-align: left;
+  border: none;
+}
+
+/* Filas */
+.tabla-cotizaciones tbody td {
+  background-color: #edf2ff;
+  color: #1a1a1a;
+  padding: .65rem 1rem;
+  border-bottom: 1px solid #e0e6f3;
+  vertical-align: middle;
+  transition: background-color 0.25s ease;
+}
+.tabla-cotizaciones tbody tr:hover td {
+  background-color: #dee6ff !important;
+}
+
+/* Badges de estatus */
+.tabla-cotizaciones .badge {
+  padding: .35rem .6rem;
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: .78rem;
+}
+
+.badge.bg-warning { color:#000 !important; }
+.badge.bg-info    { background:#17A2B8 !important; }
+
+/* Columna de acciones */
+.tabla-cotizaciones td:last-child {
+  text-align: center;
+}
+.tabla-cotizaciones .botones-acciones {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .4rem;
+}
+.tabla-cotizaciones .botones-acciones .btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0;
+  font-size: 1rem;
+  border: 1px solid #d6dbe8;
+  background: #fff;
+  color: #5b647a;
+  transition: background 0.2s, color 0.2s;
+}
+.tabla-cotizaciones .botones-acciones .btn:hover {
+  transform: translateY(-1px);
+}
+
+/* colors según acción */
+.tabla-cotizaciones .btn.btn-info {
+  background:#17A2B8; color:#fff;
+}
+
+/* ----- Ver Cotizacion ----- */
+
+.detalle-card{
+  margin: 3rem 3rem 3rem 4rem;
+  padding: 2rem;
+}
+
+.detalle-title{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 3rem;
+}
+
+.detalle-title-datosgenerales, .detalle-title-resumen{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.separador-horizontal{
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.detalle-totalgral{
+  color: #21a768;
+  font-size: 1.8rem;
+}
+
+.detalle-propuesta{
+  color: #2193a7;
+  font-size: 1.4rem;
+}
+
+.detalle-ahorro{
+  color: #ee8936;
+  font-size: 1.4rem;
+}
+
+.detalle-subformulario{
+  color: #21a768;
+  font-size: 1.2rem;
+}
+

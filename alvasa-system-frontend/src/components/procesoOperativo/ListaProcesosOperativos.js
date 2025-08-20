@@ -110,7 +110,7 @@ const ListaProcesosOperativos = () => {
 
   return (
     <div className="container mt-4">
-
+      <h1 className='title-procesos'>Alta de Embarques</h1>
       {/* Fila de botones */}
       <div className="d-flex mb-3 gap-2">
         <Button variant="primary" onClick={() => navigate('/procesos-operativos/nuevo')}>
@@ -168,7 +168,7 @@ const ListaProcesosOperativos = () => {
         </InputGroup>
       </div>
 
-      <Table striped bordered hover responsive>
+      <Table className='tabla-procesos'>
         <thead>
           <tr>
             <th>Folio</th>

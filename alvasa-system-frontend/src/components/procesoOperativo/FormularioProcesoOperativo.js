@@ -4,6 +4,7 @@ import { BsSave, BsListUl } from 'react-icons/bs';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import './styles/style-procesos.css';
 
 import InformacionEmbarque from './InformacionEmbarque';
 import ProcesoRevalidacion from './ProcesoRevalidacion';
