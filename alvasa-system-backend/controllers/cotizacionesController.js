@@ -40,7 +40,48 @@ exports.crearCotizacion = (req, res) => {
 // ==============================
 // OBTENER TODAS LAS COTIZACIONES
 // ==============================
+// ==============================
+// OBTENER TODAS LAS COTIZACIONES (con filtros)
+// ==============================
 exports.obtenerTodas = (req, res) => {
+  const { q = '', status = '', desde = '', hasta = '' } = req.query;
+
+  const where = [];
+  const params = [];
+
+  // Texto: cliente, folio, empresa, mercancía (case-insensitive)
+  if (q) {
+    const like = `%${q.toLowerCase()}%`;
+    where.push(`(
+      LOWER(cli.nombre)  LIKE ?
+      OR LOWER(cot.folio)   LIKE ?
+      OR LOWER(cot.empresa) LIKE ?
+      OR LOWER(cot.mercancia) LIKE ?
+    )`);
+    params.push(like, like, like, like);
+  }
+
+  // Estatus exacto (si lo mandas del front)
+  if (status) {
+    where.push(`cot.estatus = ?`);
+    params.push(status);
+  }
+
+  // Fechas (usamos la columna de negocio 'cot.fecha')
+  // - Soporta: solo desde, solo hasta, o ambos
+  if (desde && hasta) {
+    where.push(`DATE(cot.fecha) BETWEEN ? AND ?`);
+    params.push(desde, hasta);
+  } else if (desde) {
+    where.push(`DATE(cot.fecha) >= ?`);
+    params.push(desde);
+  } else if (hasta) {
+    where.push(`DATE(cot.fecha) <= ?`);
+    params.push(hasta);
+  }
+
+  const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
   const sql = `
     SELECT 
       cot.id,
@@ -66,14 +107,19 @@ exports.obtenerTodas = (req, res) => {
       cot.fecha_creacion
     FROM cotizaciones cot
     LEFT JOIN clientes cli ON cot.cliente_id = cli.id
-    ORDER BY cot.fecha_creacion DESC
+    ${whereSQL}
+    ORDER BY cot.fecha DESC, cot.id DESC
   `;
 
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: 'Error al obtener cotizaciones' });
+  db.query(sql, params, (err, results) => {
+    if (err) {
+      console.error('Error al obtener cotizaciones:', err);
+      return res.status(500).json({ error: 'Error al obtener cotizaciones' });
+    }
     res.status(200).json(results);
   });
 };
+
 
 // ==============================
 // OBTENER COTIZACIÓN COMPLETA POR ID

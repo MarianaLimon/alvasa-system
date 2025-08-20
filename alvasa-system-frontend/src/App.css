@@ -2,7 +2,7 @@ body {
   background-color: #dfeafc; 
   color: white;
   font-family: 'Segoe UI', sans-serif;
-  margin: 0 3rem;
+  margin: 0 5rem;
   padding: 0;
 }
 
@@ -11,10 +11,8 @@ body {
 }
 
 /* ----- Sidebar ------ */
-/* ----- Sidebar ------ */
-
 .sidebar {
-  width: 18rem;
+  width: 20rem;
   min-height: 100vh;
   background-color: #5751ab;
   color: #fff;

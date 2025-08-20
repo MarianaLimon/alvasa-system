@@ -5,42 +5,66 @@ import { BsEye, BsPencil, BsTrash, BsPrinter, BsSearch } from 'react-icons/bs';
 import './styles/style-cotizaciones.css';
 import { useNavigate } from 'react-router-dom';
 
+const API = 'http://localhost:5050';
+
 const ListaCotizaciones = () => {
   const [cotizaciones, setCotizaciones]   = useState([]);
   const [loading, setLoading]             = useState(true);
   const [busqueda, setBusqueda]           = useState('');
   const [statusFilter, setStatusFilter]   = useState('');
+  const [desde, setDesde]                 = useState('');   // YYYY-MM-DD
+  const [hasta, setHasta]                 = useState('');   // YYYY-MM-DD
+
   const [showToast, setShowToast]         = useState(false);
   const [toastMsg, setToastMsg]           = useState('');
   const [toastVariant, setToastVariant]   = useState('success');
   const navigate = useNavigate();
 
+  // Cargar con filtros desde el backend
+  const cargarCotizaciones = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`${API}/cotizaciones`, {
+        params: {
+          q: busqueda || undefined,
+          status: statusFilter || undefined,
+          desde: desde || undefined,
+          hasta: hasta || undefined
+        }
+      });
+      setCotizaciones(data);
+    } catch (error) {
+      console.error('Error al obtener cotizaciones:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carga inicial
   useEffect(() => {
-    const obtenerCotizaciones = async () => {
-      try {
-        const { data } = await axios.get('http://localhost:5050/cotizaciones');
-        setCotizaciones(data);
-      } catch (error) {
-        console.error('Error al obtener cotizaciones:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    obtenerCotizaciones();
+    cargarCotizaciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Volver a cargar cuando cambian filtros
+  useEffect(() => {
+    // Opcional: pequeño debounce
+    const t = setTimeout(() => {
+      cargarCotizaciones();
+    }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busqueda, statusFilter, desde, hasta]);
 
   const manejarVer     = id => navigate(`/cotizaciones/${id}`);
   const manejarEditar  = id => navigate(`/cotizaciones/editar/${id}`);
   const manejarImprimir = id =>
-    window.open(
-      `http://localhost:5050/api/cotizaciones/${id}/pdf`,
-      '_blank'
-    );
+    window.open(`${API}/api/cotizaciones/${id}/pdf`, '_blank');
 
   const manejarEliminar = async id => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar esta cotización?')) return;
     try {
-      await axios.delete(`http://localhost:5050/cotizaciones/${id}`);
+      await axios.delete(`${API}/cotizaciones/${id}`);
       setCotizaciones(prev => prev.filter(c => c.id !== id));
       setToastVariant('success');
       setToastMsg('Cotización eliminada correctamente');
@@ -53,14 +77,13 @@ const ListaCotizaciones = () => {
     }
   };
 
-  const cotizacionesFiltradas = cotizaciones.filter(cot => {
-    const matchesStatus = statusFilter ? cot.estatus === statusFilter : true;
-    const matchesSearch  =
-      cot.cliente?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      cot.folio?.toLowerCase().includes(busqueda.toLowerCase())   ||
-      cot.empresa?.toLowerCase().includes(busqueda.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const limpiarFiltros = () => {
+    setBusqueda('');
+    setStatusFilter('');
+    setDesde('');
+    setHasta('');
+    cargarCotizaciones(); // vuelve a traer todas
+  };
 
   const renderBadgeEstatus = estatus => {
     const clases = {
@@ -93,12 +116,13 @@ const ListaCotizaciones = () => {
   return (
     <div className="container mt-4">
       <h1 className='title-listacot'>Lista de Cotizaciones</h1>
-      {/* Filtro y buscador */}
-      <div className="d-flex mb-3 align-items-center justify-content-between">
-        <div className="d-flex align-items-center">
+
+      {/* Filtros y buscador */}
+      <div className="d-flex mb-3 align-items-center justify-content-between flex-wrap gap-2">
+        <div className="d-flex align-items-center flex-wrap gap-2">
           <Form.Select
-            className="me-3"
-            style={{ width: '180px' }}
+            className="me-2"
+            style={{ width: '190px' }}
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
           >
@@ -109,10 +133,31 @@ const ListaCotizaciones = () => {
             <option value="Declinada">Declinada</option>
           </Form.Select>
 
+          {/* Fecha desde */}
+          <Form.Control
+            type="date"
+            className="me-2"
+            style={{ width: 180 }}
+            value={desde}
+            onChange={(e) => setDesde(e.target.value)}
+            placeholder="Desde"
+          />
+
+          {/* Fecha hasta */}
+          <Form.Control
+            type="date"
+            className="me-2"
+            style={{ width: 180 }}
+            value={hasta}
+            onChange={(e) => setHasta(e.target.value)}
+            placeholder="Hasta"
+          />
+
+          {/* Buscador */}
           <InputGroup className="w-auto buscador-cotizaciones">
             <Form.Control
               type="text"
-              placeholder="Buscar..."
+              placeholder="Buscar por cliente, folio, empresa o mercancía…"
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
             />
@@ -122,12 +167,16 @@ const ListaCotizaciones = () => {
           </InputGroup>
         </div>
 
-        <Button variant="success" onClick={() => navigate('/nuevacotizacion')}>
-          + Nueva Cotización
-        </Button>
-      </div>
 
-      
+        <div className="d-flex gap-2">
+          <Button variant="secondary" onClick={limpiarFiltros}>
+            Limpiar filtros
+          </Button>
+          <Button variant="success" onClick={() => navigate('/nuevacotizacion')}>
+            + Nueva Cotización
+          </Button>
+        </div>
+      </div>
 
       {/* Tabla */}
       <Table className="tabla-cotizaciones">
@@ -144,16 +193,17 @@ const ListaCotizaciones = () => {
           </tr>
         </thead>
         <tbody>
-          {cotizacionesFiltradas.map(cot => (
+          {cotizaciones.map(cot => (
             <tr key={cot.id}>
               <td>{cot.folio}</td>
               <td>{cot.cliente}</td>
               <td>{cot.empresa}</td>
               <td>{formatoFechaBonita(cot.fecha)}</td>
               <td>{cot.mercancia}</td>
-              <td>{typeof cot.monto_comisionista === 'number'
-                    ? `$${cot.monto_comisionista.toFixed(2)}`
-                    : cot.monto_comisionista || '—'
+              <td>{
+                typeof cot.monto_comisionista === 'number'
+                  ? `$${cot.monto_comisionista.toFixed(2)}`
+                  : cot.monto_comisionista || '—'
               }</td>
               <td>{renderBadgeEstatus(cot.estatus)}</td>
               <td className="text-center">
