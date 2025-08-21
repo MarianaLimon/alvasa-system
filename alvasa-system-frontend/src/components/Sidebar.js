@@ -8,7 +8,8 @@ import {
   BsClipboard,
   BsBoxSeam,
   BsBriefcase,
-  BsCashStack
+  BsCashStack,
+  BsDownload   // 👈 NUEVO
 } from 'react-icons/bs';
 
 const Sidebar = () => {
@@ -27,6 +28,7 @@ const Sidebar = () => {
     finanzas: [
       { to: '/pagos-proveedores',      label: 'Proveedores',        icon: <BsClipboard className="icon" /> },
       { to: '/estado-cuenta-clientes', label: 'Edo Cta Clientes',   icon: <BsClipboard className="icon" /> },
+      { to: '/data-export',            label: 'Data Export',        icon: <BsDownload  className="icon" /> },
     ]
   }), []);
 

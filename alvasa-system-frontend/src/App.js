@@ -20,7 +20,8 @@ import VerAsignacionCostos from './components/asignacionCostos/VerAsignacionCost
 import ListaPagosProveedores from './components/proveedores/ListaPagosProveedores';
 import ListaAbonos from './components/proveedores/ListaAbonos';
 import ListaEstadoCuentaClientes from './components/clientesEC/ListaEstadoCuentaClientes';
-import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes'; // ⬅️ NUEVO
+import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes'; 
+import DataExport from './components/dataexport/DataExport';
 
 function App() {
   return (
@@ -55,7 +56,10 @@ function App() {
 
             {/* Estado de cuenta clientes */}
             <Route path="/estado-cuenta-clientes" element={<ListaEstadoCuentaClientes />} />
-            <Route path="/estado-cuenta/abonos/:numeroEstado" element={<ListaAbonosClientes />} /> {/* ⬅️ NUEVO */}
+            <Route path="/estado-cuenta/abonos/:numeroEstado" element={<ListaAbonosClientes />} /> 
+            
+            {/* Data Export */}
+            <Route path="/data-export" element={<DataExport />} /> {/* ⬅️ NUEVO */}
           </Routes>
         </div>
       </div>
