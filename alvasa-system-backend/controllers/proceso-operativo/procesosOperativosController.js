@@ -8,6 +8,9 @@ const { sincronizarAADespacho, sincronizarForwarder } = require('../../utils/sin
 
 const { sincronizarECCDesdeProceso } = require('../../utils/sincronizarECCDatos');
 
+const { calcularEstatusYGuardar } = require('../../utils/estatusProceso');
+
+
 // Formatear fecha estilo MX
 function formatoFecha(date) {
   const f = new Date(date);
@@ -142,7 +145,15 @@ exports.crearProcesoOperativo = (req, res) => {
             if (subformErrors.length > 0) {
               return res.status(207).json({ message: 'Proceso principal guardado, pero hubo errores en subformularios.', errors: subformErrors });
             }
-            res.status(201).json({ message: 'Proceso operativo creado correctamente', id: procesoId });
+            
+            calcularEstatusYGuardar(procesoId)
+            .then((est) => {
+              res.status(201).json({ message: 'Proceso operativo creado correctamente', id: procesoId, estatus: est });
+            })
+            .catch(() => {
+              res.status(201).json({ message: 'Proceso operativo creado correctamente', id: procesoId });
+            });
+
           }
         });
       });
@@ -190,6 +201,8 @@ exports.obtenerProcesosOperativos = (req, res) => {
       ie.no_contenedor,
       ie.naviera,
       ie.pais_origen,
+      po.estatus,
+      po.estatus_codigo,
       CASE 
         WHEN ac.id IS NOT NULL THEN 1
         ELSE 0
@@ -259,7 +272,9 @@ exports.obtenerProcesoOperativoPorId = (req, res) => {
         consultasCompletadas++;
 
         if (consultasCompletadas === totalConsultas) {
-          res.json(datosCompletos);
+          calcularEstatusYGuardar(id)
+            .then(() => res.json(datosCompletos))
+            .catch(() => res.json(datosCompletos));
         }
       });
     }
@@ -386,14 +401,25 @@ exports.actualizarProcesoOperativo = (req, res) => {
               console.log('✅ Sincronización AA Despacho:', resultadoSync);
               console.log('✅ Sincronización Forwarder:', resultadoForwarder);
 
-              // sincroniza datos generales del ECC
               const resultadoECC = await sincronizarECCDesdeProceso(id);
               console.log('✅ Sincronización ECC (datos generales):', resultadoECC);
 
-               return res.status(200).json({
-                message: 'Proceso operativo y asignación actualizados correctamente. ' + resultadoSync + '. ' + 
-                resultadoForwarder + '. ECC:' + resultadoECC
-              });
+              // 🔹 Aquí llamamos al motor de estatus ANTES de responder
+              try {
+                const est = await calcularEstatusYGuardar(id);
+                return res.status(200).json({
+                  message: 'Proceso operativo y asignación actualizados correctamente. ' +
+                          resultadoSync + '. ' + resultadoForwarder + '. ECC:' + resultadoECC,
+                  estatus: est
+                });
+              } catch (e) {
+                console.warn('⚠️ No se pudo recalcular estatus al actualizar:', e);
+                return res.status(200).json({
+                  message: 'Proceso operativo y asignación actualizados, pero no se pudo recalcular estatus. ' +
+                          resultadoSync + '. ' + resultadoForwarder + '. ECC:' + resultadoECC
+                });
+              }
+
             } catch (syncError) {
               console.error('❌ Error al sincronizar subformularios:', syncError);
               return res.status(200).json({
@@ -401,6 +427,7 @@ exports.actualizarProcesoOperativo = (req, res) => {
                 error: syncError
               });
             }
+
           });
         }
       });

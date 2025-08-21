@@ -112,12 +112,19 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
           : 'Cotización actualizada correctamente ✅'
       );
 
-      setTimeout(() => navigate('/cotizaciones'), 1000);
+      // Obtenemos el id de la cotización recién guardada
+      const idCotizacion = modo === 'crear'
+        ? cotizacionCompleta?.id   // del insert
+        : id;                      // del useParams al editar
+
+      // Redirigir a ver la cotización
+      setTimeout(() => navigate(`/cotizaciones/${idCotizacion}`), 1000);
     } catch (error) {
       console.error('Error al guardar cotización:', error);
       toast.error('Hubo un error al guardar la cotización ❌');
     }
   };
+
 
 
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);

@@ -220,10 +220,10 @@ const ListaPagosProveedores = () => {
             Total en pesos: <span className="text-primary total-filter">${totalFiltradoPesos.toFixed(2)}</span>
           </div>
           <div className="totales-pagos-item">
-            Saldo total: <span className="text-danger total-filter">${totalFiltradoSaldo.toFixed(2)}</span>
+            Total abonado: <span className="text-success total-filter">${totalFiltradoAbonado.toFixed(2)}</span>
           </div>
           <div className="totales-pagos-item">
-            Total abonado: <span className="text-success total-filter">${totalFiltradoAbonado.toFixed(2)}</span>
+            Saldo total: <span className="text-danger total-filter">${totalFiltradoSaldo.toFixed(2)}</span>
           </div>
         </div>
       </div>

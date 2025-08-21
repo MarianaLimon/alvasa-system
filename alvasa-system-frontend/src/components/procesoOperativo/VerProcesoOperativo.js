@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Spinner, Button, Row, Col, Accordion, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { BsArrowLeft, BsPrinter, BsPencil, BsGoogle, BsEye } from 'react-icons/bs';
+import EstatusProcesoBadge from '../../components/procesoOperativo/EstatusProcesoBadge';
 
 const VerProcesoOperativo = () => {
   const { id } = useParams();
@@ -50,6 +51,20 @@ const VerProcesoOperativo = () => {
           <Row>
             <Col md={6}>
               <p className="detalle-title">Folio del Proceso Operativo: {proceso.folio_proceso}</p>
+            </Col>
+
+            {/* ⬇️ NUEVO: estatus, alineado a la derecha */}
+            <Col md={6} className="text-md-end">
+              <EstatusProcesoBadge
+                estatus={proceso.estatus}
+                estatusCodigo={proceso.estatus_codigo}
+              />
+              {/* (Opcional) “última actualización” del estatus */}
+              {proceso.estatus_actualizado && (
+                <div className="text-muted" style={{ fontSize: 12 }}>
+                  Actualizado: {formatoFecha(proceso.estatus_actualizado)}
+                </div>
+              )}
             </Col>
           </Row>
         </Card.Title>

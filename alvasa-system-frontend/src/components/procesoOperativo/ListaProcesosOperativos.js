@@ -4,6 +4,8 @@ import { Table, Button, Form, InputGroup, Toast, ToastContainer } from 'react-bo
 import { BsEye, BsPencil, BsSearch, BsPrinter } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import EstatusProcesoBadge from '../../components/procesoOperativo/EstatusProcesoBadge';
+
 
 const ListaProcesosOperativos = () => {
   const [procesos, setProcesos] = useState([]);
@@ -14,6 +16,7 @@ const ListaProcesosOperativos = () => {
   const [toastMsg, setToastMsg] = useState('');
   const [toastVariant, setToastVariant] = useState('success');
   const [filtroAsignacion, setFiltroAsignacion] = useState('');
+  const [filtroEstatus, setFiltroEstatus] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -69,6 +72,13 @@ const ListaProcesosOperativos = () => {
 
   const clientesUnicos = [...new Set(procesos.map(p => p.cliente).filter(Boolean))];
   const ejecutivosUnicos = [...new Set(procesos.map(p => p.ejecutivo_cuenta).filter(Boolean))];
+  const estatusOptions = [...new Map(
+    procesos
+      .filter(p => p.estatus) 
+      .map(p => [p.estatus, p.estatus_codigo || 0]) 
+  ).entries()]
+    .sort((a, b) => a[1] - b[1]) // orden por código
+    .map(([nombre]) => nombre);
 
   const procesosFiltrados = procesos.filter(proc => {
     const coincideTexto =
@@ -88,8 +98,12 @@ const ListaProcesosOperativos = () => {
           ? proc.tiene_asignacion === 1
           : proc.tiene_asignacion === 0;
 
-    return coincideTexto && coincideCliente && coincideEjecutivo && coincideAsignacion;
+    const coincideEstatus =
+      filtroEstatus === '' || proc.estatus === filtroEstatus;
+
+    return coincideTexto && coincideCliente && coincideEjecutivo && coincideAsignacion && coincideEstatus;
   });
+
 
   const formatoFechaBonita = (fechaStr) => {
     if (!fechaStr) return '—';
@@ -146,6 +160,17 @@ const ListaProcesosOperativos = () => {
         </Form.Select>
 
         <Form.Select
+          value={filtroEstatus}
+          onChange={e => setFiltroEstatus(e.target.value)}
+          className="w-auto"
+        >
+          <option value="">Todos los estatus</option>
+          {estatusOptions.map(es => (
+            <option key={es} value={es}>{es}</option>
+          ))}
+        </Form.Select>
+
+        <Form.Select
           value={filtroAsignacion}
           onChange={e => setFiltroAsignacion(e.target.value)}
           className="w-auto"
@@ -177,6 +202,7 @@ const ListaProcesosOperativos = () => {
             <th>Mercancía</th>
             <th>Contenedor</th>
             <th>Fecha</th>
+            <th>Estatus</th>
             <th>Acciones Proceso</th>
             <th>Acciones Costos</th>
           </tr>
@@ -190,6 +216,14 @@ const ListaProcesosOperativos = () => {
               <td>{proc.mercancia}</td>
               <td>{proc.no_contenedor}</td>
               <td>{formatoFechaBonita(proc.fecha_alta)}</td>
+
+              {/* Estatus */}
+              <td style={{ minWidth: 160 }}>
+                <EstatusProcesoBadge
+                  estatus={proc.estatus}
+                  estatusCodigo={proc.estatus_codigo}
+                />
+              </td>
 
               {/* Acciones del proceso */}
               <td className="text-center">
