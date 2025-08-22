@@ -92,8 +92,9 @@
 }
 
 /* Paletas (inspiradas en tu captura) */
-.export-btn.is-cyan   { background: #1497a8; }
+.export-btn.is-cyan   { background: rgb(230, 176, 41) }
 .export-btn.is-amber  { background: rgb(223, 107, 139)}
+.export-btn.is-coco  { background: #1497a8;}
 .export-btn.is-green  { background: #1d875b; }
 .export-btn.is-indigo { background: #5751AB; }
 

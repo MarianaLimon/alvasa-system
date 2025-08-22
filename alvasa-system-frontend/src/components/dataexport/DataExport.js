@@ -8,6 +8,8 @@ const API = process.env.REACT_APP_API || 'http://localhost:5050';
 const endpoints = {
   operaciones: `${API}/reportes/csv/operaciones-cargos-extra`,
   proveedores: `${API}/reportes/csv/pagos-proveedores`,
+  // 👇 NUEVO
+  proveedoresRealizados: `${API}/reportes/csv/pagos-proveedores-realizados`,
   clientesServicios: `${API}/reportes/csv/cobros-data-servicios`,
   clientesPagos: `${API}/reportes/csv/cobros-data-pagos`,
 };
@@ -57,12 +59,21 @@ export default function DataExport() {
           <Card className="export-card shadow-sm">
             <Card.Body>
               <h5 className="section-title">Pagos a Proveedores</h5>
-              <TileButton
-                href={endpoints.proveedores}
-                title="Descargar"
-                caption="CSV"
-                color="is-amber"
-              />
+              <div className="btn-grid-vertical">
+                <TileButton
+                  href={endpoints.proveedores}
+                  title="General (todos)"
+                  caption="CSV"
+                  color="is-amber"
+                />
+                {/* 👇 NUEVO botón */}
+                <TileButton
+                  href={endpoints.proveedoresRealizados}
+                  title="Solo pagos realizados"
+                  caption="CSV"
+                  color="is-coco"
+                />
+              </div>
             </Card.Body>
           </Card>
         </Col>
