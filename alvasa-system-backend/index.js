@@ -26,6 +26,8 @@ const abonosPagosRoutes = require('./routes/proveedores/abonosPagosRoutes');
 const listaEstadoCuentaCliente = require('./routes/clientesEC/estadoCuentaClientes');
 const abonosEstadoCuentaRoutes = require('./routes/clientesEC/abonosEstadoCuenta');
 const eccPdfRoutes = require('./routes/clientesEC/eccPdf');
+const reportes = require('./routes/reportes');
+
 
 const app = express();
 const port = 5050;
@@ -74,6 +76,8 @@ app.use('/estado-cuenta-clientes', listaEstadoCuentaCliente);
 app.use('/estado-cuenta/abonos', abonosEstadoCuentaRoutes);
 app.use('/abonos-estado-cuenta', abonosEstadoCuentaRoutes);
 app.use('/', eccPdfRoutes);
+app.use('/reportes', reportes);
+
 
 // ✅ Ruta de prueba
 app.get('/', (req, res) => {
