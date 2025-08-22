@@ -1,5 +1,10 @@
 const db = require('../config/db');
 const { toCsv } = require('../utils/toCsv');
+const {
+  buildPagosProveedoresUnionSQL,
+  buildPagosProveedoresUnionSQLLegacy,
+} = require('../utils/proveedoresUnion');
+
 
 // === CSV: Pagos de Clientes / Data servicios (1 fila = 1 servicio) ===
 exports.csvCobrosDataServicios = async (req, res) => {
@@ -25,15 +30,16 @@ exports.csvCobrosDataServicios = async (req, res) => {
         ec.estatus                           AS estatus
       FROM estado_cuenta_clientes ec
       LEFT JOIN servicios_estado_cuenta s
-        ON s.id_estado_cuenta = ec.id            -- << FK por ID numérico
+        ON s.id_estado_cuenta = ec.id_estado_cuenta      -- FK por folio EC-000X
       LEFT JOIN (
         SELECT id_estado_cuenta, SUM(abono) AS abonado_total
         FROM abonos_estado_cuenta
         GROUP BY id_estado_cuenta
-      ) ab ON ab.id_estado_cuenta = ec.id_estado_cuenta  -- aquí sí por folio (EC-000X)
+      ) ab ON ab.id_estado_cuenta = ec.id_estado_cuenta
       WHERE s.id IS NOT NULL
       ORDER BY ec.id_estado_cuenta ASC, s.id ASC
     `;
+
     const [rows] = await db.promise().query(sql);
 
     const columns = [
@@ -43,7 +49,7 @@ exports.csvCobrosDataServicios = async (req, res) => {
       { key: 'no_contenedor',         label: 'No. Contenedor' },
       { key: 'cliente',               label: 'Cliente' },
       { key: 'mercancia',             label: 'Mercancia' },
-      { key: 'tipo_carga',            label: 'tipo de carga' },
+      { key: 'tipo_carga',            label: 'Tipo de carga' },
       { key: 'fecha_entrega',         label: 'Fecha de entrega' },
       { key: 'servicio',              label: 'Servicio' },
       { key: 'giro',                  label: 'Giro' },
@@ -145,5 +151,56 @@ exports.csvOperacionesCargosExtra = async (req, res) => {
   } catch (err) {
     console.error('CSV operaciones stub error:', err);
     res.status(500).json({ msg: 'Error al generar CSV (operaciones)' });
+  }
+};
+
+exports.csvPagosProveedores = async (req, res) => {
+  try {
+    const { sql } = buildPagosProveedoresUnionSQL(); // ← versión que genera 1 fila por abono
+    const [rows] = await db.promise().query(sql);
+
+    const columns = [
+      // Servicio / contexto
+      { key: 'no_control',      label: 'No. Control' },
+      { key: 'ejecutivo',       label: 'Ejecutivo' },
+      { key: 'fecha',           label: 'Fecha' },
+      { key: 'cliente',         label: 'Cliente' },
+      { key: 'no_contenedor',   label: 'No. Contenedor' },
+      { key: 'giro',            label: 'Giro' },
+      { key: 'proveedor',       label: 'Proveedor' },
+      { key: 'concepto',        label: 'Concepto' },
+
+      // Importe del servicio (con conversión)
+      { key: 'monto_original',  label: 'Monto Original' },
+      { key: 'moneda',          label: 'Moneda' },
+      { key: 'tipo_cambio',     label: 'Tipo de Cambio' },
+      { key: 'monto_en_pesos',  label: 'Monto en Pesos' },
+
+      // Pago asociado (match folio+orden / fallback último por folio)
+      { key: 'pago_numero_control', label: 'Pago - Número Control' },
+      { key: 'pago_orden',          label: 'Pago - Orden' },
+      { key: 'pago_monto',          label: 'Pago - Monto' },
+      { key: 'pago_saldo',          label: 'Pago - Saldo' },
+      { key: 'pago_estatus',        label: 'Pago - Estatus' },
+
+      // Abonos (1 fila por abono)
+      { key: 'abono_monto',            label: 'Abono Monto' },
+      { key: 'abono_fecha_pago',       label: 'Abono - Fecha de Pago' },
+      { key: 'abono_tipo_transaccion', label: 'Abono - Tipo de Transacción' },
+
+      // Totales por control general (PAGO-00X)
+      { key: 'monto_total_en_pesos',  label: 'Monto Total en Pesos' },
+      { key: 'total_abonado',         label: 'Total Abonado' },
+      { key: 'saldo_total',           label: 'Saldo Total' },
+      { key: 'estatus_general',       label: 'Estatus General' },
+    ];
+
+    const csv = toCsv(rows ?? [], columns);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="pagos_proveedores.csv"');
+    res.status(200).send(csv);
+  } catch (err) {
+    console.error('CSV pagos proveedores error:', err);
+    res.status(500).json({ error: 'Error generando CSV' });
   }
 };
