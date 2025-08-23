@@ -12,6 +12,7 @@ const endpoints = {
   proveedoresRealizados: `${API}/reportes/csv/pagos-proveedores-realizados`,
   clientesServicios: `${API}/reportes/csv/cobros-data-servicios`,
   clientesPagos: `${API}/reportes/csv/cobros-data-pagos`,
+  procesosAsignacion: `${API}/reportes/csv/procesos-asignacion-detalle`,
 };
 
 function TileButton({ href, title, caption = 'CSV', color = 'is-cyan' }) {
@@ -45,8 +46,8 @@ export default function DataExport() {
             <Card.Body>
               <h5 className="section-title">Operaciones y cargos extra</h5>
               <TileButton
-                href={endpoints.operaciones}
-                title="Descargar"
+                href={endpoints.procesosAsignacion}
+                title="Procesos + Asignación (detalle)"
                 caption="CSV"
                 color="is-cyan"
               />
