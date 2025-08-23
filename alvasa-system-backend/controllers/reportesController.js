@@ -332,6 +332,7 @@ const N = (v) => {
 };
 
 // === CSV: PO (completo) + Asignación (solo generales, sin duplicar campos) ===
+// === CSV: PO (completo) + Asignación (generales + AA Despacho + Forwarder + Flete Terrestre con extras) ===
 exports.csvProcesosAsignacionDetalle = async (req, res) => {
   try {
     const { desde, hasta, folio, cliente, estatus } = req.query || {};
@@ -405,7 +406,89 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
 
         /* ===== ASIGNACIÓN (generales, sin duplicar lo de PO) ===== */
         ac.id           AS ac_id,
-        ac.cliente_id   AS ac_cliente_id
+        ac.cliente_id   AS ac_cliente_id,
+
+        /* ===== DESPACHO / COTIZACIÓN (4 primeros datos) ===== */
+        des.cotizacion_folio              AS ac_folio_cotizacion,
+        cot.monto_comisionista            AS ac_comision_intermediario,
+        des.facturacion                   AS ac_facturacion,
+        des.comision_socio                AS ac_comision_socio,
+
+        /* ===== AA DESPACHO ===== */
+        adc.aa_despacho        AS aa_proveedor,
+        adc.importacion_costo  AS aa_importacion_costo,
+        adc.importacion_venta  AS aa_importacion_venta,
+        adc.almacenajes_costo  AS aa_almacenajes_costo,
+        adc.almacenajes_venta  AS aa_almacenajes_venta,
+        adc.servicio_costo     AS aa_servicio_costo,
+        adc.servicio_venta     AS aa_servicio_venta,
+        adc.tipo_servicio1     AS aa_tipo_servicio1,
+        adc.costo_servicio1    AS aa_costo_servicio1,
+        adc.venta_servicio1    AS aa_venta_servicio1,
+        adc.tipo_servicio2     AS aa_tipo_servicio2,
+        adc.costo_servicio2    AS aa_costo_servicio2,
+        adc.venta_servicio2    AS aa_venta_servicio2,
+
+        /* ===== FORWARDER ===== */
+        fwc.forwarder               AS fwd_proveedor,
+        fwc.asignado_por            AS fwd_quien_pagamos,
+        fwc.consignatario           AS fwd_consignatario,
+        fwc.naviera                 AS fwd_naviera,
+
+        fwc.flete_internacional_costo AS fwd_flete_costo,
+        fwc.flete_internacional_venta AS fwd_flete_venta,
+        fwc.cargos_locales_costo      AS fwd_cargos_costo,
+        fwc.cargos_locales_venta      AS fwd_cargos_venta,
+        fwc.demoras_costo             AS fwd_demoras_costo,
+        fwc.demoras_venta             AS fwd_demoras_venta,
+
+        fwc.tipo_servicio_extra     AS fwd_extra_servicio,
+        fwc.costo_servicio_extra    AS fwd_extra_costo,
+        fwc.venta_servicio_extra    AS fwd_extra_venta,
+
+        fwc.abonado                 AS fwd_abonado,
+        fwc.fecha_abon              AS fwd_fecha_abono,
+        fwc.rembolsado              AS fwd_reembolsado,  -- ojo: 'rembolsado' en tu esquema
+        fwc.fecha_remb              AS fwd_fecha_reembolso,
+
+        /* ===== FLETE TERRESTRE ===== */
+        ftc.id                      AS ft_id,
+        ftc.proveedor              AS flete_proveedor,
+        ftc.flete                  AS flete_costo,
+        ftc.flete_venta            AS flete_venta,
+        ftc.estadia                AS flete_estadia_costo,
+        ftc.estadia_venta          AS flete_estadia_venta,
+        ftc.burreo                 AS flete_burreo_costo,
+        ftc.burreo_venta           AS flete_burreo_venta,
+        ftc.sobrepeso              AS flete_sobrepeso_costo,
+        ftc.sobrepeso_venta        AS flete_sobrepeso_venta,
+        ftc.apoyo                  AS flete_apoyo_costo,
+        ftc.apoyo_venta            AS flete_apoyo_venta,
+        ftc.pernocta               AS flete_pernocta_costo,
+        ftc.pernocta_venta         AS flete_pernocta_venta,
+
+        /* ===== CUSTODIA ===== */
+        ctc.custodia_proveedor           AS cust_proveedor,
+        ctc.custodia_costo               AS cust_costo,
+        ctc.custodia_venta               AS cust_venta,
+        ctc.custodia_pernocta_costo      AS cust_pernocta_costo,
+        ctc.custodia_pernocta_venta      AS cust_pernocta_venta,
+        ctc.custodia_falso_costo         AS cust_falso_costo,
+        ctc.custodia_falso_venta         AS cust_falso_venta,
+        ctc.custodia_cancelacion_costo   AS cust_cancelacion_costo,
+        ctc.custodia_cancelacion_venta   AS cust_cancelacion_venta,
+
+         /* ===== PAQUETERÍA ===== */
+        pc.empresa              AS paq_empresa,
+        pc.costo                AS paq_costo,
+        pc.venta                AS paq_venta,
+
+        /* ===== ASEGURADORA ===== */
+        aseg.aseguradora        AS aseg_aseguradora,
+        aseg.valor_mercancia    AS aseg_valor_mercancia,
+        aseg.costo              AS aseg_costo,
+        aseg.venta              AS aseg_venta
+
       FROM procesos_operativos po
       LEFT JOIN clientes c                 ON c.id = po.cliente_id
       LEFT JOIN informacion_embarque ie    ON ie.proceso_operativo_id = po.id
@@ -413,16 +496,62 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
       LEFT JOIN datos_pedimento dp         ON dp.proceso_operativo_id = po.id
       LEFT JOIN salida_retorno_contenedor sr ON sr.proceso_operativo_id = po.id
       LEFT JOIN asignacion_costos ac       ON ac.proceso_operativo_id = po.id
+      LEFT JOIN despacho_costos des        ON des.asignacion_id = ac.id
+      LEFT JOIN cotizaciones cot           ON cot.folio = des.cotizacion_folio
+      LEFT JOIN aa_despacho_costos adc     ON adc.asignacion_id = ac.id
+      LEFT JOIN forwarder_costos fwc       ON fwc.asignacion_id = ac.id
+      LEFT JOIN flete_terrestre_costos ftc ON ftc.asignacion_id = ac.id
+      LEFT JOIN custodia_costos ctc   ON ctc.asignacion_id = ac.id
+      LEFT JOIN paqueteria_costos   pc   ON pc.asignacion_id   = ac.id
+      LEFT JOIN aseguradora_costos  aseg ON aseg.asignacion_id = ac.id
+
       ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
       ORDER BY po.id ASC
     `;
 
+    // 1) Traemos todo lo base
     const [rowsRaw] = await db.promise().query(sql, params);
 
+    // 2) Cargamos EXTRAS de flete para todos los FTs presentes y los pivotamos (hasta 5 extras)
+    const ftIds = [...new Set((rowsRaw || []).map(r => r.ft_id).filter(Boolean))];
+    let extrasByFt = new Map();
+    if (ftIds.length) {
+      const [extras] = await db.promise().query(
+        `SELECT flete_terrestre_id, concepto, costo, venta
+         FROM extras_flete_terrestre
+         WHERE flete_terrestre_id IN (?)
+         ORDER BY id ASC`, [ftIds]
+      );
+      extrasByFt = extras.reduce((m, x) => {
+        const arr = m.get(x.flete_terrestre_id) || [];
+        arr.push(x);
+        m.set(x.flete_terrestre_id, arr);
+        return m;
+      }, new Map());
+    }
+
+    // 3) Formateamos filas
     const rows = (rowsRaw || []).map(r => {
       const links = r.links_drive
         ? String(r.links_drive).split('\n').map(s => s.trim()).filter(Boolean).join(' | ')
         : '';
+
+      const hasAA  = !!(r.aa_proveedor);
+      const hasFT  = !!(r.ft_id);
+
+      // Extras Flete (hasta 5)
+      const ex = extrasByFt.get(r.ft_id) || [];
+      const ex1 = ex[0] || {}, ex2 = ex[1] || {}, ex3 = ex[2] || {}, ex4 = ex[3] || {}, ex5 = ex[4] || {};
+
+      const hasCust =
+          r.cust_proveedor != null ||
+          r.cust_costo != null || r.cust_venta != null ||
+          r.cust_pernocta_costo != null || r.cust_pernocta_venta != null ||
+          r.cust_falso_costo != null || r.cust_falso_venta != null ||
+          r.cust_cancelacion_costo != null || r.cust_cancelacion_venta != null;
+
+      const hasPaq  = !!(r.paq_empresa || r.paq_costo || r.paq_venta);
+      const hasAseg = !!(r.aseg_aseguradora || r.aseg_costo || r.aseg_venta || r.aseg_valor_mercancia);
 
       return {
         // ===== PO (generales)
@@ -482,10 +611,128 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
         condiciones_contenedor: r.condiciones_contenedor || '',
         terminal_vacio: r.terminal_vacio || '',
 
-        // ===== Asignación (solo generales, sin duplicar)
+        // ===== Asignación (solo generales)
         ac_id: r.ac_id || '',
         ac_cliente_id: r.ac_cliente_id || '',
-        tiene_asignacion: r.ac_id ? 1 : 0
+        tiene_asignacion: r.ac_id ? 1 : 0,
+
+        // ===== Despacho/Cotización (4 datos)
+        ac_folio_cotizacion:        r.ac_folio_cotizacion || '',
+        ac_comision_intermediario:  N(r.ac_comision_intermediario),
+        ac_facturacion:             N(r.ac_facturacion),
+        ac_comision_socio:          N(r.ac_comision_socio),
+
+        // ===== AA Despacho (SERVICIO1-5)
+        aa_giro:                 hasAA ? 'AA Despacho' : '',
+        aa_proveedor:            r.aa_proveedor || '',
+        aa_servicio1:            hasAA ? 'Importación' : '',
+        aa_costo_importacion:    N(r.aa_importacion_costo),
+        aa_venta_importacion:    N(r.aa_importacion_venta),
+        aa_servicio2:            hasAA ? 'Almacenajes' : '',
+        aa_costo_almacenajes:    N(r.aa_almacenajes_costo),
+        aa_venta_almacenajes:    N(r.aa_almacenajes_venta),
+        aa_servicio3:            hasAA ? 'SERV. PRG. MO EJEC.' : '',
+        aa_costo_serv_prg_mo_ejec: N(r.aa_servicio_costo),
+        aa_venta_serv_prg_mo_ejec: N(r.aa_servicio_venta),
+        aa_servicio4:            r.aa_tipo_servicio1 || '',
+        aa_costo_servicio4:      N(r.aa_costo_servicio1),
+        aa_venta_servicio4:      N(r.aa_venta_servicio1),
+        aa_servicio5:            r.aa_tipo_servicio2 || '',
+        aa_costo_servicio5:      N(r.aa_costo_servicio2),
+        aa_venta_servicio5:      N(r.aa_venta_servicio2),
+
+        // ===== Forwarder (ya existía; no piden pivot extra múltiple)
+        fwd_proveedor:           r.fwd_proveedor || '',
+        fwd_quien_pagamos:       r.fwd_quien_pagamos || '',
+        fwd_consignatario:       r.fwd_consignatario || '',
+        fwd_naviera:             r.fwd_naviera || '',
+        fwd_flete_costo:         N(r.fwd_flete_costo),
+        fwd_flete_venta:         N(r.fwd_flete_venta),
+        fwd_cargos_costo:        N(r.fwd_cargos_costo),
+        fwd_cargos_venta:        N(r.fwd_cargos_venta),
+        fwd_demoras_costo:       N(r.fwd_demoras_costo),
+        fwd_demoras_venta:       N(r.fwd_demoras_venta),
+        fwd_extra_servicio:      r.fwd_extra_servicio || '',
+        fwd_extra_costo:         N(r.fwd_extra_costo),
+        fwd_extra_venta:         N(r.fwd_extra_venta),
+        fwd_abonado:             N(r.fwd_abonado),
+        fwd_fecha_abono:         fmtDMY(r.fwd_fecha_abono),
+        fwd_reembolsado:         N(r.fwd_reembolsado),
+        fwd_fecha_reembolso:     fmtDMY(r.fwd_fecha_reembolso),
+
+        // ===== Flete Terrestre (normales)
+        flete_giro:                hasFT ? 'Flete Terrestre' : '',
+        flete_proveedor:           r.flete_proveedor || '',
+        flete_costo:               N(r.flete_costo),
+        flete_venta:               N(r.flete_venta),
+        flete_estadia_costo:       N(r.flete_estadia_costo),
+        flete_estadia_venta:       N(r.flete_estadia_venta),
+        flete_burreo_costo:        N(r.flete_burreo_costo),
+        flete_burreo_venta:        N(r.flete_burreo_venta),
+        flete_sobrepeso_costo:     N(r.flete_sobrepeso_costo),
+        flete_sobrepeso_venta:     N(r.flete_sobrepeso_venta),
+        flete_apoyo_costo:         N(r.flete_apoyo_costo),
+        flete_apoyo_venta:         N(r.flete_apoyo_venta),
+        flete_pernocta_costo:      N(r.flete_pernocta_costo),
+        flete_pernocta_venta:      N(r.flete_pernocta_venta),
+
+        // ===== Flete Terrestre (EXTRAS: 5 pares servicio/costo/venta)
+        flete_extra1:              ex1.concepto || '',
+        flete_extra1_costo:        N(ex1.costo),
+        flete_extra1_venta:        N(ex1.venta),
+
+        flete_extra2:              ex2.concepto || '',
+        flete_extra2_costo:        N(ex2.costo),
+        flete_extra2_venta:        N(ex2.venta),
+
+        flete_extra3:              ex3.concepto || '',
+        flete_extra3_costo:        N(ex3.costo),
+        flete_extra3_venta:        N(ex3.venta),
+
+        flete_extra4:              ex4.concepto || '',
+        flete_extra4_costo:        N(ex4.costo),
+        flete_extra4_venta:        N(ex4.venta),
+
+        flete_extra5:              ex5.concepto || '',
+        flete_extra5_costo:        N(ex5.costo),
+        flete_extra5_venta:        N(ex5.venta),
+
+        // === CUSTODIA ===
+        cust_giro:                 hasCust ? 'Custodia' : '',
+        cust_proveedor:            r.cust_proveedor || '',
+
+        // SERVICIO1: Custodia
+        cust_servicio1:            hasCust ? 'Custodia' : '',
+        cust_costo_custodia:       N(r.cust_costo),
+        cust_venta_custodia:       N(r.cust_venta),
+
+        // SERVICIO2: Pernocta de Custodia
+        cust_servicio2:            hasCust ? 'Pernocta de Custodia' : '',
+        cust_costo_pernocta:       N(r.cust_pernocta_costo),
+        cust_venta_pernocta:       N(r.cust_pernocta_venta),
+
+        // SERVICIO3: Custodia en Falso
+        cust_servicio3:            hasCust ? 'Custodia en Falso' : '',
+        cust_costo_falso:          N(r.cust_falso_costo),
+        cust_venta_falso:          N(r.cust_falso_venta),
+
+        // SERVICIO4: Cancelación de Custodia
+        cust_servicio4:            hasCust ? 'Cancelación de Custodia' : '',
+        cust_costo_cancelacion:    N(r.cust_cancelacion_costo),
+        cust_venta_cancelacion:    N(r.cust_cancelacion_venta),
+
+        // ---- Paquetería
+        paq_giro:           hasPaq ? 'Paquetería' : '',
+        paq_empresa:        r.paq_empresa || '',
+        paq_costo:          N(r.paq_costo),
+        paq_venta:          N(r.paq_venta),
+
+        // ---- Aseguradora
+        aseg_giro:          hasAseg ? 'Aseguradora' : '',
+        aseg_aseguradora:   r.aseg_aseguradora || '',
+        aseg_valor_mercancia: N(r.aseg_valor_mercancia),
+        aseg_costo:         N(r.aseg_costo),
+        aseg_venta:         N(r.aseg_venta),
       };
     });
 
@@ -547,10 +794,125 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
       { key: 'condiciones_contenedor', label: 'Condiciones Contenedor' },
       { key: 'terminal_vacio',      label: 'Terminal Vacío' },
 
-      // Asignación (solo generales, sin duplicados)
+      // Asignación (solo generales)
       { key: 'ac_id',               label: 'AC ID' },
       { key: 'ac_cliente_id',       label: 'AC Cliente ID' },
       { key: 'tiene_asignacion',    label: 'Tiene Asignación' },
+
+      // Despacho/Cotización (4)
+      { key: 'ac_folio_cotizacion',       label: 'Folio Cotizacion' },
+      { key: 'ac_comision_intermediario', label: 'Comisión Intermediario' },
+      { key: 'ac_facturacion',            label: 'Facturación' },
+      { key: 'ac_comision_socio',         label: 'Comisión Socio' },
+
+      // AA Despacho
+      { key: 'aa_giro',                    label: 'Giro' },
+      { key: 'aa_proveedor',               label: 'Proveedor' },
+      { key: 'aa_servicio1',               label: 'SERVICIO1 - AA' },
+      { key: 'aa_costo_importacion',       label: 'costo-importacion' },
+      { key: 'aa_venta_importacion',       label: 'venta-importacion' },
+      { key: 'aa_servicio2',               label: 'SERVICIO2 - AA' },
+      { key: 'aa_costo_almacenajes',       label: 'costo-almacenajes' },
+      { key: 'aa_venta_almacenajes',       label: 'venta-almacenajes' },
+      { key: 'aa_servicio3',               label: 'SERVICIO3 - AA' },
+      { key: 'aa_costo_serv_prg_mo_ejec',  label: 'costo-serv. prg. mo ejec.' },
+      { key: 'aa_venta_serv_prg_mo_ejec',  label: 'venta-serv. prg. mo ejec.' },
+      { key: 'aa_servicio4',               label: 'SERVICIO4 - AA' },
+      { key: 'aa_costo_servicio4',         label: 'costo-servicio4' },
+      { key: 'aa_venta_servicio4',         label: 'venta-servicio4' },
+      { key: 'aa_servicio5',               label: 'SERVICIO5 - AA' },
+      { key: 'aa_costo_servicio5',         label: 'costo-servicio5' },
+      { key: 'aa_venta_servicio5',         label: 'venta-servicio5' },
+
+      // Forwarder (base + extra único)
+      { key: 'fwd_proveedor',              label: 'FW - Proveedor' },
+      { key: 'fwd_quien_pagamos',          label: 'FW - ¿A quién pagamos?' },
+      { key: 'fwd_consignatario',          label: 'FW - Consignatario' },
+      { key: 'fwd_naviera',                label: 'FW - Naviera' },
+      { key: 'fwd_flete_costo',            label: 'FW - Flete Intl (Costo)' },
+      { key: 'fwd_flete_venta',            label: 'FW - Flete Intl (Venta)' },
+      { key: 'fwd_cargos_costo',           label: 'FW - Cargos Locales (Costo)' },
+      { key: 'fwd_cargos_venta',           label: 'FW - Cargos Locales (Venta)' },
+      { key: 'fwd_demoras_costo',          label: 'FW - Demoras (Costo)' },
+      { key: 'fwd_demoras_venta',          label: 'FW - Demoras (Venta)' },
+      { key: 'fwd_extra_servicio',         label: 'FW - Servicio Extra' },
+      { key: 'fwd_extra_costo',            label: 'FW - Extra (Costo)' },
+      { key: 'fwd_extra_venta',            label: 'FW - Extra (Venta)' },
+      { key: 'fwd_abonado',                label: 'FW - Abonado' },
+      { key: 'fwd_fecha_abono',            label: 'FW - Fecha Abono' },
+      { key: 'fwd_reembolsado',            label: 'FW - Reembolsado' },
+      { key: 'fwd_fecha_reembolso',        label: 'FW - Fecha Reembolso' },
+
+      // Flete Terrestre (base)
+      { key: 'flete_giro',                 label: 'Giro FT' },
+      { key: 'flete_proveedor',            label: 'FT - Proveedor' },
+      { key: 'flete_costo',                label: 'FT - Flete (Costo)' },
+      { key: 'flete_venta',                label: 'FT - Flete (Venta)' },
+      { key: 'flete_estadia_costo',        label: 'FT - Estadia (Costo)' },
+      { key: 'flete_estadia_venta',        label: 'FT - Estadia (Venta)' },
+      { key: 'flete_burreo_costo',         label: 'FT - Burreo (Costo)' },
+      { key: 'flete_burreo_venta',         label: 'FT - Burreo (Venta)' },
+      { key: 'flete_sobrepeso_costo',      label: 'FT - Sobrepeso (Costo)' },
+      { key: 'flete_sobrepeso_venta',      label: 'FT - Sobrepeso (Venta)' },
+      { key: 'flete_apoyo_costo',          label: 'FT - Apoyo (Costo)' },
+      { key: 'flete_apoyo_venta',          label: 'FT - Apoyo (Venta)' },
+      { key: 'flete_pernocta_costo',       label: 'FT - Pernocta (Costo)' },
+      { key: 'flete_pernocta_venta',       label: 'FT - Pernocta (Venta)' },
+
+      // Flete Terrestre (EXTRAS 1..5)
+      { key: 'flete_extra1',               label: 'FT - Extra1 (Servicio)' },
+      { key: 'flete_extra1_costo',         label: 'FT - Extra1 (Costo)' },
+      { key: 'flete_extra1_venta',         label: 'FT - Extra1 (Venta)' },
+      { key: 'flete_extra2',               label: 'FT - Extra2 (Servicio)' },
+      { key: 'flete_extra2_costo',         label: 'FT - Extra2 (Costo)' },
+      { key: 'flete_extra2_venta',         label: 'FT - Extra2 (Venta)' },
+      { key: 'flete_extra3',               label: 'FT - Extra3 (Servicio)' },
+      { key: 'flete_extra3_costo',         label: 'FT - Extra3 (Costo)' },
+      { key: 'flete_extra3_venta',         label: 'FT - Extra3 (Venta)' },
+      { key: 'flete_extra4',               label: 'FT - Extra4 (Servicio)' },
+      { key: 'flete_extra4_costo',         label: 'FT - Extra4 (Costo)' },
+      { key: 'flete_extra4_venta',         label: 'FT - Extra4 (Venta)' },
+      { key: 'flete_extra5',               label: 'FT - Extra5 (Servicio)' },
+      { key: 'flete_extra5_costo',         label: 'FT - Extra5 (Costo)' },
+      { key: 'flete_extra5_venta',         label: 'FT - Extra5 (Venta)' },
+
+            // === Custodia ===
+      { key: 'cust_giro',                  label: 'Giro' },
+      { key: 'cust_proveedor',             label: 'Proveedor' },
+
+      { key: 'cust_servicio1',             label: 'SERVICIO1 - Custodia' },
+      { key: 'cust_costo_custodia',        label: 'costo-custodia' },
+      { key: 'cust_venta_custodia',        label: 'venta-custodia' },
+
+      { key: 'cust_servicio2',             label: 'SERVICIO2 - Custodia' },
+      { key: 'cust_costo_pernocta',        label: 'costo-pernocta custodia' },
+      { key: 'cust_venta_pernocta',        label: 'venta-pernocta custodia' },
+
+      { key: 'cust_servicio3',             label: 'SERVICIO3 - Custodia' },
+      { key: 'cust_costo_falso',           label: 'costo-custodia en falso' },
+      { key: 'cust_venta_falso',           label: 'venta-custodia en falso' },
+
+      { key: 'cust_servicio4',             label: 'SERVICIO4 - Custodia' },
+      { key: 'cust_costo_cancelacion',     label: 'costo-cancelación custodia' },
+      { key: 'cust_venta_cancelacion',     label: 'venta-cancelación custodia' },
+
+      { key: 'cust_servicio5',             label: 'SERVICIO5 - Custodia' },
+      { key: 'cust_costo_dias',            label: 'costo-días custodia' },
+      { key: 'cust_venta_dias',            label: 'venta-días custodia' },
+
+      // === Paquetería ===
+      { key: 'paq_giro',           label: 'Giro' },
+      { key: 'paq_empresa',        label: 'Paquetería - Empresa' },
+      { key: 'paq_costo',          label: 'Paquetería - Costo' },
+      { key: 'paq_venta',          label: 'Paquetería - Venta' },
+
+      // === Aseguradora ===
+      { key: 'aseg_giro',              label: 'Giro' },
+      { key: 'aseg_aseguradora',       label: 'Aseguradora - Nombre' },
+      { key: 'aseg_valor_mercancia',   label: 'Aseguradora - Valor Mercancía' },
+      { key: 'aseg_costo',             label: 'Aseguradora - Costo' },
+      { key: 'aseg_venta',             label: 'Aseguradora - Venta' },
+
     ];
 
     const fname = `po_asignacion_generales_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
@@ -564,6 +926,3 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al generar CSV PO+Asignación (generales)', error: err.message });
   }
 };
-
-// Alias por si más adelante usas el otro nombre
-exports.csvPOyAsignacionGenerales = exports.csvProcesosAsignacionDetalle;
