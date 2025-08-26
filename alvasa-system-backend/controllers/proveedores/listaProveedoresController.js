@@ -308,6 +308,24 @@ exports.obtenerListaPagosProveedores = async (req, res) => {
       pago.estatus = 'Pendiente';
     }
   }
+
+    // ⬇️ Ordenar del más reciente al más antiguo: PAGO-006-Z, ..., PAGO-006-A, PAGO-005-...
+    listaPagos.sort((a, b) => {
+      const rx = /^PAGO-(\d+)-([A-Z])$/;
+      const ma = a.numero_control.match(rx);
+      const mb = b.numero_control.match(rx);
+
+      if (ma && mb) {
+        const ga = parseInt(ma[1], 10);
+        const gb = parseInt(mb[1], 10);
+        if (gb !== ga) return gb - ga;          // Grupo: 006 > 005
+        return mb[2].localeCompare(ma[2]);      // Letra: Z > A
+      }
+
+      // Fallback: orden natural numérico
+      return b.numero_control.localeCompare(a.numero_control, 'es', { numeric: true });
+    });
+
     await actualizarTotalesPorGrupo(listaPagos);
     res.json(listaPagos);
 

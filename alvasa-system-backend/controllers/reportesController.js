@@ -293,9 +293,6 @@ exports.csvPagosRealizadosProveedores = async (req, res) => {
 };
 
 // === CSV: Procesos + Asignación (detalle completo por fila) ===
-//
-// === CSV: Procesos + Asignación + Costos (cada dato = 1 columna) ===
-
 // === helpers locales (fechas dd/mm/yyyy) — sin desfase de zona horaria ===
 const fmtDMY = (val) => {
   if (!val) return '';
@@ -331,7 +328,6 @@ const N = (v) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-// === CSV: PO (completo) + Asignación (solo generales, sin duplicar campos) ===
 // === CSV: PO (completo) + Asignación (generales + AA Despacho + Forwarder + Flete Terrestre con extras) ===
 exports.csvProcesosAsignacionDetalle = async (req, res) => {
   try {
@@ -487,7 +483,12 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
         aseg.aseguradora        AS aseg_aseguradora,
         aseg.valor_mercancia    AS aseg_valor_mercancia,
         aseg.costo              AS aseg_costo,
-        aseg.venta              AS aseg_venta
+        aseg.venta              AS aseg_venta,
+
+       /* ===== TOTALES ===== */
+      COALESCE(ppt_tot.total_costo_proveedor, 0) AS total_costo,
+      COALESCE(ecc_tot.total_venta_ecc, 0)       AS total_venta
+
 
       FROM procesos_operativos po
       LEFT JOIN clientes c                 ON c.id = po.cliente_id
@@ -504,6 +505,32 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
       LEFT JOIN custodia_costos ctc   ON ctc.asignacion_id = ac.id
       LEFT JOIN paqueteria_costos   pc   ON pc.asignacion_id   = ac.id
       LEFT JOIN aseguradora_costos  aseg ON aseg.asignacion_id = ac.id
+      
+      /* Total VENTA (ECC): último ECC por folio */
+      LEFT JOIN (
+        SELECT ec.folio_proceso, ec.total AS total_venta_ecc
+        FROM estado_cuenta_clientes ec
+        JOIN (
+          SELECT folio_proceso, MAX(id) AS max_id
+          FROM estado_cuenta_clientes
+          GROUP BY folio_proceso
+        ) ult ON ult.folio_proceso = ec.folio_proceso AND ult.max_id = ec.id
+      ) AS ecc_tot
+        ON ecc_tot.folio_proceso = po.folio_proceso
+
+      /* Total COSTO (PPT): último PPT por folio */
+      LEFT JOIN (
+        SELECT p1.folio_proceso, p1.monto_total_en_pesos AS total_costo_proveedor
+        FROM proveedores_pagos_totales p1
+        JOIN (
+          SELECT folio_proceso, MAX(id) AS max_id
+          FROM proveedores_pagos_totales
+          GROUP BY folio_proceso
+        ) last_p ON last_p.folio_proceso = p1.folio_proceso AND last_p.max_id = p1.id
+      ) AS ppt_tot
+        ON ppt_tot.folio_proceso = po.folio_proceso
+
+
 
       ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
       ORDER BY po.id ASC
@@ -733,6 +760,10 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
         aseg_valor_mercancia: N(r.aseg_valor_mercancia),
         aseg_costo:         N(r.aseg_costo),
         aseg_venta:         N(r.aseg_venta),
+
+        // ===== Totales
+        total_costo: N(r.total_costo),
+        total_venta: N(r.total_venta),
       };
     });
 
@@ -912,6 +943,10 @@ exports.csvProcesosAsignacionDetalle = async (req, res) => {
       { key: 'aseg_valor_mercancia',   label: 'Aseguradora - Valor Mercancía' },
       { key: 'aseg_costo',             label: 'Aseguradora - Costo' },
       { key: 'aseg_venta',             label: 'Aseguradora - Venta' },
+
+      // Totales
+      { key: 'total_costo', label: 'Total Costo (proveedores)' },
+      { key: 'total_venta', label: 'Total Venta (ECC)' },
 
     ];
 
