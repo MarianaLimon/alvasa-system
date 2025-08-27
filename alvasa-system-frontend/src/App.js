@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -20,54 +20,111 @@ import VerAsignacionCostos from './components/asignacionCostos/VerAsignacionCost
 import ListaPagosProveedores from './components/proveedores/ListaPagosProveedores';
 import ListaAbonos from './components/proveedores/ListaAbonos';
 import ListaEstadoCuentaClientes from './components/clientesEC/ListaEstadoCuentaClientes';
-import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes'; 
+import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes';
 import DataExport from './components/dataexport/DataExport';
 
-function App() {
+import { AuthProvider } from './components/usuarios/AuthContext';
+import Login from './components/usuarios/Login';
+import PrivateRoute from './components/usuarios/PrivateRoute';
+
+function Shell() {
+  const location = useLocation();
+  const hideSidebar = location.pathname === '/login';
+
   return (
-    <Router>
+    <>
       <div className="d-flex">
-        <Sidebar />
-        <div className="flex-grow-1" style={{ marginLeft: '250px', padding: '20px' }}>
+        {!hideSidebar && <Sidebar />}
+        <div className="flex-grow-1" style={{ marginLeft: hideSidebar ? 0 : '250px', padding: '20px' }}>
           <Routes>
-            <Route path="/" element={<Home />} />                                   
-            <Route path="/clientes" element={<Clientes />} />
+            {/* Pública */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Privadas (requieren sesión) */}
+            <Route path="/" element={
+              <PrivateRoute><Home /></PrivateRoute>
+            } />
+            <Route path="/clientes" element={
+              <PrivateRoute><Clientes /></PrivateRoute>
+            } />
 
             {/* Cotizaciones */}
-            <Route path="/cotizaciones" element={<ListaCotizaciones />} />
-            <Route path="/nuevacotizacion" element={<FormularioCotizacion />} />
-            <Route path="/cotizaciones/:id" element={<VerCotizacion />} />
-            <Route path="/cotizaciones/editar/:id" element={<FormularioCotizacion modo="editar" />} />
+            <Route path="/cotizaciones" element={
+              <PrivateRoute require="cotizaciones.read"><ListaCotizaciones /></PrivateRoute>
+            } />
+            <Route path="/nuevacotizacion" element={
+              <PrivateRoute require="cotizaciones.write"><FormularioCotizacion /></PrivateRoute>
+            } />
+            <Route path="/cotizaciones/:id" element={
+              <PrivateRoute require="cotizaciones.read"><VerCotizacion /></PrivateRoute>
+            } />
+            <Route path="/cotizaciones/editar/:id" element={
+              <PrivateRoute require="cotizaciones.write"><FormularioCotizacion modo="editar" /></PrivateRoute>
+            } />
 
             {/* Procesos operativos */}
-            <Route path="/procesos-operativos/nuevo" element={<FormularioProcesoOperativo />} />
-            <Route path="/procesos-operativos" element={<ListaProcesosOperativos />} />
-            <Route path="/procesos-operativos/:id" element={<VerProcesoOperativo />} />
-            <Route path="/procesos-operativos/editar/:id" element={<FormularioProcesoOperativo modo="editar" />} />
+            <Route path="/procesos-operativos/nuevo" element={
+              <PrivateRoute require="procesos.write"><FormularioProcesoOperativo /></PrivateRoute>
+            } />
+            <Route path="/procesos-operativos" element={
+              <PrivateRoute require="procesos.read"><ListaProcesosOperativos /></PrivateRoute>
+            } />
+            <Route path="/procesos-operativos/:id" element={
+              <PrivateRoute require="procesos.read"><VerProcesoOperativo /></PrivateRoute>
+            } />
+            <Route path="/procesos-operativos/editar/:id" element={
+              <PrivateRoute require="procesos.write"><FormularioProcesoOperativo modo="editar" /></PrivateRoute>
+            } />
 
             {/* Asignación de costos */}
-            <Route path="/asignacion-costos/nuevo" element={<FormularioAsignacionCostos modo="crear" />} />
-            <Route path="/asignacion-costos/editar/:folio" element={<FormularioAsignacionCostos modo="editar" />} />
-            <Route path="/asignacion-costos/ver/:folio" element={<VerAsignacionCostos />} />
+            <Route path="/asignacion-costos/nuevo" element={
+              <PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="crear" /></PrivateRoute>
+            } />
+            <Route path="/asignacion-costos/editar/:folio" element={
+              <PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="editar" /></PrivateRoute>
+            } />
+            <Route path="/asignacion-costos/ver/:folio" element={
+              <PrivateRoute require="asignacion_costos.read"><VerAsignacionCostos /></PrivateRoute>
+            } />
 
             {/* Pagos proveedores */}
-            <Route path="/pagos-proveedores" element={<ListaPagosProveedores />} />
-            <Route path="/pagos-proveedores/:numero_control" element={<ListaAbonos />} />
+            <Route path="/pagos-proveedores" element={
+              <PrivateRoute require="pagos_proveedores.read"><ListaPagosProveedores /></PrivateRoute>
+            } />
+            <Route path="/pagos-proveedores/:numero_control" element={
+              <PrivateRoute require="pagos_proveedores.read"><ListaAbonos /></PrivateRoute>
+            } />
 
             {/* Estado de cuenta clientes */}
-            <Route path="/estado-cuenta-clientes" element={<ListaEstadoCuentaClientes />} />
-            <Route path="/estado-cuenta/abonos/:numeroEstado" element={<ListaAbonosClientes />} /> 
-            
-            {/* Data Export */}
-            <Route path="/data-export" element={<DataExport />} /> {/* ⬅️ NUEVO */}
+            <Route path="/estado-cuenta-clientes" element={
+              <PrivateRoute require="estado_cuenta.read"><ListaEstadoCuentaClientes /></PrivateRoute>
+            } />
+            <Route path="/estado-cuenta/abonos/:numeroEstado" element={
+              <PrivateRoute require="estado_cuenta.read"><ListaAbonosClientes /></PrivateRoute>
+            } />
+
+            {/* Export */}
+            <Route path="/data-export" element={
+              <PrivateRoute require="reportes.export"><DataExport /></PrivateRoute>
+            } />
+
+            {/* 403 */}
+            <Route path="/403" element={<div>403 — Sin permisos</div>} />
           </Routes>
         </div>
       </div>
 
-      {/* Notificaciones Toastify */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-    </Router>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Shell />
+      </AuthProvider>
+    </Router>
+  );
+}

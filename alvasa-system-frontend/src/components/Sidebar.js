@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Nav } from 'react-bootstrap';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   BsCalculator,
   BsHouse,
@@ -9,16 +9,23 @@ import {
   BsBoxSeam,
   BsBriefcase,
   BsCashStack,
-  BsDownload   // 👈 NUEVO
+  BsDownload,
+  BsPersonCircle,
+  BsBoxArrowRight
 } from 'react-icons/bs';
+
+// 👇 Ajustados a tu estructura real
+import { useAuth } from './usuarios/AuthContext';
+import { logout } from './usuarios/auth';
 
 const Sidebar = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, setUser } = useAuth();
 
   const linkClass = ({ isActive }) =>
     isActive ? 'sidebar-link active' : 'sidebar-link';
 
-  // Menú agrupado con tus rutas reales
   const grupos = useMemo(() => ({
     operaciones: [
       { to: '/clientes',              label: 'Clientes',           icon: <BsPeople className="icon" /> },
@@ -34,21 +41,26 @@ const Sidebar = () => {
 
   const [open, setOpen] = useState({ operaciones: false, finanzas: false });
 
-  // Abre automáticamente el grupo donde estés (SIN función externa)
   useEffect(() => {
     setOpen({
       operaciones: grupos.operaciones.some(it => pathname.startsWith(it.to)),
       finanzas:    grupos.finanzas.some(it => pathname.startsWith(it.to)),
     });
-  }, [pathname, grupos]); // deps correctas; no habrá warning
+  }, [pathname, grupos]);
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
-    <div className="sidebar">
+    <div className="sidebar d-flex flex-column">
       <div className="sidebar-header">
         <h4>ALVASA SYSTEM</h4>
       </div>
 
-      <Nav className="flex-column nav">
+      <Nav className="flex-column nav flex-grow-1">
         {/* Home */}
         <NavLink to="/" className={linkClass} end>
           <BsHouse className="icon" /> Home
@@ -108,6 +120,26 @@ const Sidebar = () => {
           </div>
         </div>
       </Nav>
+
+      {/* === Usuario + Logout === */}
+      {user && (
+        <div className="sidebar-user mt-auto p-3 border-top">
+          <div className="d-flex align-items-center mb-2">
+            <BsPersonCircle size={22} style={{ marginRight: 8 }} />
+            <div>
+              <div className="fw-bold">{user?.nombre || 'Usuario'}</div>
+              <div className="small text-muted">{user?.email}</div>
+            </div>
+          </div>
+          <button
+            className="btn btn-sm btn-outline-light w-100 d-flex align-items-center justify-content-center"
+            onClick={handleLogout}
+          >
+            <BsBoxArrowRight style={{ marginRight: 6 }} />
+            Cerrar sesión
+          </button>
+        </div>
+      )}
     </div>
   );
 };
