@@ -180,7 +180,34 @@ body {
 .sidebar-subitem.active .icon { color: #5d4e8f !important; }
 
 
+.sidebar-header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4rem 3rem 3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
 
+.sidebar-header-user .user-name {
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.sidebar-header-user .user-email {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.85rem;
+}
+
+/* Línea arriba */
+.sidebar-header-user {
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Línea abajo */
+.sidebar-user {
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
 
 /* ------ Dashboard ------ */
 

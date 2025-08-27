@@ -2,6 +2,9 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { login } from "./auth";
+import { FaUserCircle } from "react-icons/fa"; // ícono de usuario
+
+import "./styles/login.css"; // importa los estilos
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,21 +27,14 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: 320,
-          display: "grid",
-          gap: 12,
-          padding: 24,
-          border: "1px solid #ccc",
-          borderRadius: 8,
-          background: "#fff",
-        }}
-      >
-        <h3 style={{ margin: 0 }}>Iniciar sesión</h3>
-        {error && <div style={{ color: "red" }}>{error}</div>}
+    <div className="login-wrapper">
+      <form className="login-card" onSubmit={handleSubmit}>
+        <div className="login-icon">
+          <FaUserCircle />
+        </div>
+        <h3 className="login-title">Iniciar Sesión</h3>
+
+        {error && <div className="login-error">{error}</div>}
 
         <input
           type="email"
