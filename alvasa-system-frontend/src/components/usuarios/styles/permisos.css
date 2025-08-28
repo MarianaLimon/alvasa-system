@@ -1,0 +1,88 @@
+.header-permisos{
+    margin-top: 4rem;
+    margin-bottom: 2rem !important;
+}
+
+.text-header{
+    color: #2b2828;
+    font-size: 16px;
+}
+
+.acordion-item{
+    background-color: #5751AB;
+}
+
+/* ==== Usuarios & Permisos – estilos ==== */
+
+/* Toolbar / buscador */
+.usuarios-toolbar .search-bar {
+  max-width: 480px;
+}
+.usuarios-toolbar .search-bar .form-control {
+  height: 40px;
+  border-right: none;
+  padding-left: 16px;
+}
+.usuarios-toolbar .search-bar .form-control::placeholder {
+  color: #9aa4b2;
+}
+.usuarios-toolbar .search-bar .search-btn.btn {
+  height: 40px;
+  padding: 0 14px;
+  background-color: #0fb9c6; 
+  border-color: #0fb9c6;
+}
+.usuarios-toolbar .search-bar .search-btn.btn:hover {
+  filter: brightness(0.95);
+}
+
+/* Accordion */
+.usuarios-accordion .accordion-item {
+  border: none;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.usuarios-accordion .accordion-button {
+  background: #5751ab !important; 
+  color: #fff;
+  font-weight: 600;
+}
+.usuarios-accordion .accordion-button.collapsed {
+  background: #5751ab !important;
+  color: #fff;
+}
+.usuarios-accordion .accordion-button:focus {
+  box-shadow: 0 0 0 0.15rem rgba(87, 81, 171, 0.35);
+}
+
+/* Flechita blanca y con aire respecto a los badges */
+.usuarios-accordion .accordion-button::after {
+  filter: invert(1) brightness(2); 
+  margin-left: 18px; 
+}
+.usuarios-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 14px;
+}
+
+/* Badges nuevos */
+.usuarios-accordion .rol-badge {
+  background-color: #cc6bce !important;
+  color: #fff;
+  font-weight: 700;
+  border: 0;
+}
+.usuarios-accordion .count-badge {
+  background-color: #2d2a6a;  /* índigo oscuro */
+  color: #fff;
+  font-weight: 600;
+  border: 0;
+}
+
+/* Cuerpo con un fondo clarito opcional */
+.usuarios-accordion .accordion-body {
+  background: #f7f7fb;
+}

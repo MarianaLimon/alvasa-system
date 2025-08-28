@@ -3,7 +3,8 @@ import { Nav } from 'react-bootstrap';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   BsCalculator, BsHouse, BsPeople, BsClipboard, BsBoxSeam,
-  BsBriefcase, BsCashStack, BsDownload, BsPersonCircle, BsBoxArrowRight
+  BsBriefcase, BsCashStack, BsDownload, BsPersonCircle, BsBoxArrowRight,
+  BsShieldLock
 } from 'react-icons/bs';
 
 import { useAuth } from './usuarios/AuthContext';
@@ -12,10 +13,15 @@ import { logout } from './usuarios/auth';
 const Sidebar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const { user, setUser, hasPermission } = useAuth() || {};
 
   const linkClass = ({ isActive }) =>
     isActive ? 'sidebar-link active' : 'sidebar-link';
+
+  // Helper: ¿puede ver módulo de usuarios?
+  const canSeeUsuarios =
+    (typeof hasPermission === 'function' && (hasPermission('USUARIOS_VER') || hasPermission('usuarios.read'))) ||
+    (user?.role === 'MASTER' || user?.rol === 'MASTER');
 
   const grupos = useMemo(() => ({
     operaciones: [
@@ -27,21 +33,26 @@ const Sidebar = () => {
       { to: '/pagos-proveedores',      label: 'Proveedores',      icon: <BsClipboard className="icon" /> },
       { to: '/estado-cuenta-clientes', label: 'Edo Cta Clientes', icon: <BsClipboard className="icon" /> },
       { to: '/data-export',            label: 'Data Export',      icon: <BsDownload  className="icon" /> },
-    ]
-  }), []);
+    ],
+    administracion: canSeeUsuarios ? [
+      { to: '/usuarios', label: 'Usuarios', icon: <BsShieldLock className="icon" /> },
+    ] : []
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [canSeeUsuarios]);
 
-  const [open, setOpen] = useState({ operaciones: false, finanzas: false });
+  const [open, setOpen] = useState({ operaciones: false, finanzas: false, administracion: false });
 
   useEffect(() => {
     setOpen({
-      operaciones: grupos.operaciones.some(it => pathname.startsWith(it.to)),
-      finanzas:    grupos.finanzas.some(it => pathname.startsWith(it.to)),
+      operaciones:   grupos.operaciones.some(it => pathname.startsWith(it.to)),
+      finanzas:      grupos.finanzas.some(it => pathname.startsWith(it.to)),
+      administracion: grupos.administracion.some(it => pathname.startsWith(it.to)),
     });
   }, [pathname, grupos]);
 
   const handleLogout = async () => {
     await logout();
-    setUser(null);
+    setUser?.(null);
     navigate('/login');
   };
 
@@ -54,6 +65,7 @@ const Sidebar = () => {
           <div className="user-meta">
             <div className="user-name">{user?.nombre || 'Usuario'}</div>
             <div className="user-email">{user?.email || '—'}</div>
+            <div className="user-role">{user?.role || user?.rol || '—'}</div>
           </div>
         </div>
       )}
@@ -117,6 +129,35 @@ const Sidebar = () => {
             ))}
           </div>
         </div>
+
+        {/* Administración (condicional por permisos) */}
+        {grupos.administracion.length > 0 && (
+          <div className="sidebar-group">
+            <button
+              type="button"
+              className={`sidebar-groupBtn ${open.administracion ? 'is-open' : ''} ${grupos.administracion.some(it => pathname.startsWith(it.to)) ? 'is-active' : ''}`}
+              onClick={() => setOpen(o => ({ ...o, administracion: !o.administracion }))}
+              aria-expanded={open.administracion}
+              aria-controls="grp-administracion"
+            >
+              <span className="icon"><BsShieldLock /></span>
+              <span className="lbl">Administración</span>
+              <span className="chev">{open.administracion ? '▾' : '▸'}</span>
+            </button>
+
+            <div id="grp-administracion" className={`sidebar-groupBody ${open.administracion ? 'show' : ''}`}>
+              {grupos.administracion.map(({ to, label, icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) => `sidebar-link sidebar-subitem ${isActive ? 'active' : ''}`}
+                >
+                  {icon} {label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        )}
       </Nav>
 
       {/* === Solo botón de logout abajo === */}

@@ -10,6 +10,13 @@ body {
   text-transform: uppercase;
 }
 
+.title{
+  color: #5d4e8f;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
 /* ----- Sidebar ------ */
 .sidebar {
   width: 20rem;
@@ -194,7 +201,7 @@ body {
   line-height: 1.1;
 }
 
-.sidebar-header-user .user-email {
+.sidebar-header-user .user-email, .sidebar-header-user .user-role {
   color: rgba(255,255,255,0.8);
   font-size: 0.85rem;
 }

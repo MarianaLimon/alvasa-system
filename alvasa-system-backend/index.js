@@ -34,6 +34,8 @@ const eccPdfRoutes = require('./routes/clientesEC/eccPdf');
 
 const reportes = require('./routes/reportes');
 
+const usuariosRoutes = require('./routes/usuarios/usuarios');
+
 // Rutas de autenticación por JWT en cookie
 const authRoutes = require('./routes/auth');
 
@@ -90,6 +92,7 @@ app.use('/abonos-estado-cuenta', abonosEstadoCuentaRoutes);
 
 app.use('/', eccPdfRoutes);
 app.use('/reportes', reportes);
+app.use('/api', usuariosRoutes);
 
 // ===== Ruta de prueba =====
 app.get('/', (req, res) => {

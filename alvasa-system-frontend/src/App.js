@@ -26,6 +26,7 @@ import DataExport from './components/dataexport/DataExport';
 import { AuthProvider } from './components/usuarios/AuthContext';
 import Login from './components/usuarios/Login';
 import PrivateRoute from './components/usuarios/PrivateRoute';
+import UsuariosPermisos from './components/usuarios/UsuariosPermisos';
 
 function Shell() {
   const location = useLocation();
@@ -107,6 +108,12 @@ function Shell() {
             <Route path="/data-export" element={
               <PrivateRoute require="reportes.export"><DataExport /></PrivateRoute>
             } />
+
+            {/* Dash Usuarios */}
+            <Route path="/usuarios" element={
+              <PrivateRoute require="usuarios.read"><UsuariosPermisos /></PrivateRoute>
+            } />
+
 
             {/* 403 */}
             <Route path="/403" element={<div>403 — Sin permisos</div>} />

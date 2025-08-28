@@ -2,15 +2,13 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { login } from "./auth";
-import { FaUserCircle } from "react-icons/fa"; // ícono de usuario
-
-import "./styles/login.css"; // importa los estilos
+import { FaUserCircle } from "react-icons/fa";
+import "./styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -19,8 +17,16 @@ export default function Login() {
     setError("");
     try {
       const { data } = await login(email, password);
-      setUser(data); // {id, nombre, email, role, permissions: []}
-      navigate("/"); // redirigir al dashboard raíz
+      // Si tu backend responde { user, token }, esto lo cubre.
+      setUser(data?.user ?? data);
+
+      // (Opcional) si usas token:
+      // if (data?.token) {
+      //   localStorage.setItem("token", data.token);
+      //   // config axios header aquí si lo usas
+      // }
+
+      navigate("/"); // dashboard
     } catch (err) {
       setError(err?.response?.data?.message || "Credenciales inválidas");
     }

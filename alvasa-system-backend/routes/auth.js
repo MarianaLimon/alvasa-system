@@ -3,9 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 
-// Helper para firmar token
-const sign = (payload) =>
-  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+const ROLE_ID_TO_NAME = { 1: 'MASTER', 2: 'ADMIN', 3: 'OPERADOR', 4: 'LECTURA' };
 
 // === LOGIN ===
 router.post('/login', async (req, res) => {
@@ -23,15 +21,24 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: 'Credenciales inválidas' });
 
-    const token = jwt.sign({ id: user.id, email: user.email, role_id: user.role_id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const role = ROLE_ID_TO_NAME[user.role_id] || 'OPERADOR';
+
+    // 🔹 Token con TODO lo que el front necesita (sin consultar permisos)
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role_id: user.role_id, role, nombre: user.nombre },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: false, // en prod con HTTPS => true
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ id: user.id, email: user.email, nombre: user.nombre, role_id: user.role_id });
+    // 🔹 Responde el usuario directo, igual a lo que /me regresará
+    res.json({ id: user.id, email: user.email, nombre: user.nombre, role_id: user.role_id, role });
   } catch (err) {
     console.error('Error en login:', err);
     res.status(500).json({ error: 'Error en login' });
@@ -45,6 +52,7 @@ router.get('/me', (req, res) => {
     if (!raw) return res.status(401).json({ error: 'No autenticado' });
 
     const payload = jwt.verify(raw, process.env.JWT_SECRET);
+    // payload ya trae { id, email, role_id, role, nombre }
     res.json({ ok: true, user: payload });
   } catch (err) {
     res.status(401).json({ error: 'Token inválido' });
