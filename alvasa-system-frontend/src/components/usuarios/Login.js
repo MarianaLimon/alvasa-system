@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import { login } from "./auth";
+import { login, me } from "./auth";
 import { FaUserCircle } from "react-icons/fa";
 import "./styles/login.css";
 
@@ -9,26 +9,30 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
     try {
-      const { data } = await login(email, password);
-      // Si tu backend responde { user, token }, esto lo cubre.
-      setUser(data?.user ?? data);
+      // 1) Autentica (guarda cookie/jwt en backend)
+      await login(email, password);
 
-      // (Opcional) si usas token:
-      // if (data?.token) {
-      //   localStorage.setItem("token", data.token);
-      //   // config axios header aquí si lo usas
-      // }
+      // 2) Trae perfil ya con { role, permissions } desde /auth/me
+      const { data } = await me();
 
-      navigate("/"); // dashboard
+      // 3) Hidrata el contexto ANTES de navegar
+      setUser(data);
+
+      // 4) Ahora sí navega: Sidebar ya sabe qué mostrar sin refrescar
+      navigate("/");
     } catch (err) {
       setError(err?.response?.data?.message || "Credenciales inválidas");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -48,6 +52,7 @@ export default function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={submitting}
         />
 
         <input
@@ -56,9 +61,12 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={submitting}
         />
 
-        <button type="submit">Entrar</button>
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Entrando..." : "Entrar"}
+        </button>
       </form>
     </div>
   );

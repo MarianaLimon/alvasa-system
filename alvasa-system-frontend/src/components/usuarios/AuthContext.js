@@ -6,19 +6,6 @@ export const AuthContext = createContext(null);
 export const ROLE_NAME_TO_ID = { MASTER: 1, ADMIN: 2, OPERADOR: 3, LECTURA: 4 };
 export const ROLE_ID_TO_NAME = { 1: "MASTER", 2: "ADMIN", 3: "OPERADOR", 4: "LECTURA" };
 
-// Permisos que el ADMIN NO debe tener (MASTER sí)
-const ADMIN_DENYLIST = [
-  "USUARIOS_CREAR",
-  "USUARIOS_EDITAR",
-  "USUARIOS_ELIMINAR",
-  "USUARIOS_ACTIVAR",
-  "USUARIOS_DESACTIVAR",
-  "USUARIOS_VER_CONFIG",
-  "ROLES_EDITAR",
-  "ROLES_CREAR",
-  "ROLES_ELIMINAR",
-];
-
 function normalizeUser(input) {
   if (!input) return null;
   const raw = input.user ?? input;
@@ -41,8 +28,13 @@ function normalizeUser(input) {
   const rawPerms = raw.permissions ?? raw.permisos ?? [];
   const permissions = Array.isArray(rawPerms)
     ? rawPerms
-        .map(p => typeof p === "string" ? p : (p?.code ?? p?.perm ?? p?.nombre ?? p?.clave))
+        .map(p =>
+          typeof p === "string"
+            ? p
+            : (p?.code ?? p?.perm ?? p?.nombre ?? p?.clave)
+        )
         .filter(Boolean)
+        .map(s => String(s).toUpperCase())
     : [];
 
   return { ...raw, role_id, role, permissions };
@@ -72,7 +64,7 @@ export function AuthProvider({ children }) {
     const role_id = user?.role_id ?? null;
 
     const isMaster = role === "MASTER" || role_id === 1;
-    const isAdmin  = role === "ADMIN"  || role_id === 2;
+    const isAdmin  = role === "ADMIN"  || role_id === 2; // <- ya no da permisos especiales
 
     const perms = Array.isArray(user?.permissions) ? user.permissions : [];
 
@@ -85,14 +77,13 @@ export function AuthProvider({ children }) {
       return wanted.includes(role);
     };
 
-    // Helper: ADMIN puede todo excepto denylist
-    const adminAllows = (code) => isAdmin && !ADMIN_DENYLIST.includes(String(code).toUpperCase());
-
+    // 🔑 Reglas finales:
+    // - MASTER: acceso total
+    // - ADMIN/otros: SOLO lo que venga en DB (perms[])
     const hasPermission = (code) => {
       if (!user) return false;
       const c = String(code).toUpperCase();
       if (isMaster) return true;
-      if (adminAllows(c)) return true;
       return perms.includes(c);
     };
 
@@ -100,7 +91,6 @@ export function AuthProvider({ children }) {
       if (!user) return false;
       if (isMaster) return true;
       const upper = codes.map(c => String(c).toUpperCase());
-      if (isAdmin && upper.some(c => !ADMIN_DENYLIST.includes(c))) return true;
       return upper.some(c => perms.includes(c));
     };
 
@@ -108,15 +98,9 @@ export function AuthProvider({ children }) {
       if (!user) return false;
       if (isMaster) return true;
       const upper = codes.map(c => String(c).toUpperCase());
-      if (isAdmin) {
-        // ADMIN debe tener todas las que NO estén en denylist; si alguna requerida está en denylist, falla
-        if (upper.some(c => ADMIN_DENYLIST.includes(c))) return false;
-        return true; // pasa todas las demás
-      }
       return upper.every(c => perms.includes(c));
     };
 
-    // Útil para la UI (mostrar/ocultar botones de Usuarios)
     const canManageUsers = isMaster; // solo MASTER
 
     return { hasRole, hasPermission, hasAny, hasAll, isMaster, isAdmin, canManageUsers };

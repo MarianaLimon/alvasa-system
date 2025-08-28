@@ -46,18 +46,44 @@ router.post('/login', async (req, res) => {
 });
 
 // === PERFIL / ME ===
-router.get('/me', (req, res) => {
+// routes/auth.js  (handler de GET /auth/me)
+router.get('/me', async (req, res) => {
   try {
     const raw = req.cookies?.token;
     if (!raw) return res.status(401).json({ error: 'No autenticado' });
 
     const payload = jwt.verify(raw, process.env.JWT_SECRET);
-    // payload ya trae { id, email, role_id, role, nombre }
-    res.json({ ok: true, user: payload });
+    // payload debe traer al menos: { id, email, role_id, role, nombre }
+
+    const [rows] = await db.promise().query(`
+      SELECT DISTINCT p.code
+      FROM (
+        SELECT rp.permission_id FROM us_role_permissions rp WHERE rp.role_id = ?
+        UNION
+        SELECT up.permission_id FROM us_user_permissions up WHERE up.user_id = ?
+      ) a
+      JOIN us_permissions p ON p.id = a.permission_id
+      LEFT JOIN us_user_denies d ON d.permission_id = a.permission_id AND d.user_id = ?
+      WHERE d.permission_id IS NULL
+      ORDER BY p.code
+    `, [payload.role_id, payload.id, payload.id]);
+
+    const permissions = rows.map(r => r.code); // p.ej. ['clients.read','procesos.read',...]
+
+    return res.json({
+      id: payload.id,
+      email: payload.email,
+      nombre: payload.nombre,
+      role_id: payload.role_id,
+      role: payload.role,
+      permissions, // <— CLAVE
+    });
   } catch (err) {
-    res.status(401).json({ error: 'Token inválido' });
+    console.error('GET /auth/me error:', err);
+    return res.status(401).json({ error: 'Token inválido' });
   }
 });
+
 
 // === LOGOUT ===
 router.post('/logout', (req, res) => {
