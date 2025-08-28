@@ -172,7 +172,7 @@ const ListaCotizaciones = () => {
           <Button variant="secondary" onClick={limpiarFiltros}>
             Limpiar filtros
           </Button>
-          <Button variant="success" onClick={() => navigate('/nuevacotizacion')}>
+          <Button id="btnNuevaCotizacion" variant="success" onClick={() => navigate('/nuevacotizacion')}>
             + Nueva Cotización
           </Button>
         </div>
@@ -210,7 +210,7 @@ const ListaCotizaciones = () => {
                 <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(cot.id)}>
                   <BsEye />
                 </Button>
-                <Button variant="warning" size="sm" className="me-2" onClick={() => manejarEditar(cot.id)}>
+                <Button variant="warning" size="sm" className="me-2 btn-editar-cotizacion" onClick={() => manejarEditar(cot.id)}>
                   <BsPencil />
                 </Button>
                 <Button
@@ -221,7 +221,7 @@ const ListaCotizaciones = () => {
                 >
                   <BsPrinter />
                 </Button>
-                <Button variant="danger" size="sm" onClick={() => manejarEliminar(cot.id)}>
+                <Button className="btn-eliminar-cotizacion" variant="danger" size="sm" onClick={() => manejarEliminar(cot.id)}>
                   <BsTrash />
                 </Button>
               </td>

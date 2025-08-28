@@ -50,7 +50,7 @@ const FormularioCliente = ({ onClienteAgregado }) => {
             <Form.Control type="email" name="email" value={cliente.email} onChange={handleChange} />
           </Form.Group>
           <div className="d-flex justify-content-center mt-3">
-            <Button type="submit" variant="success">
+            <Button type="submit" variant="success" id="btnAgregarCliente" className="tooltip-bottom" >
                 Agregar
             </Button>
             </div>

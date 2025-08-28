@@ -1,3 +1,4 @@
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,18 +24,26 @@ import ListaEstadoCuentaClientes from './components/clientesEC/ListaEstadoCuenta
 import ListaAbonosClientes from './components/clientesEC/ListaAbonosClientes';
 import DataExport from './components/dataexport/DataExport';
 
-import { AuthProvider } from './components/usuarios/AuthContext';
-import { useAuth } from './components/usuarios/AuthContext';
+// ⬇️ Auth centralizada (ya no en components/usuarios)
+import { AuthProvider, useAuth } from './components/usuarios/AuthContext';
 import Login from './components/usuarios/Login';
 import PrivateRoute from './components/usuarios/PrivateRoute';
 import UsuariosPermisos from './components/usuarios/UsuariosPermisos';
 
+// ⬇️ Hook que aplica permisos en el DOM según la ruta/rol
+import useApplyPermissions from './hooks/useApplyPermissions';
+
 function Shell() {
   const location = useLocation();
   const hideSidebar = location.pathname === '/login';
-  const { loading } = useAuth();
 
-   if (loading) return null; // o un spinner global
+  const { loading, user } = useAuth();   console.log('PERMS:', user?.role, user?.permissions);
+  const permissions = user?.permissions || [];
+  const isMaster = user?.role === 'MASTER';
+
+  useApplyPermissions({ permissions, isMaster, loading });
+
+  if (loading) return null; 
 
   return (
     <>
@@ -49,38 +58,92 @@ function Shell() {
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
 
             {/* Clientes */}
-            <Route path="/clientes" element={<PrivateRoute require="clients.read"><Clientes /></PrivateRoute>} />
+            <Route
+              path="/clientes"
+              element={<PrivateRoute require="clientes.read"><Clientes /></PrivateRoute>}
+            />
 
             {/* Cotizaciones */}
-            <Route path="/cotizaciones" element={<PrivateRoute require="cotizaciones.read"><ListaCotizaciones /></PrivateRoute>} />
-            <Route path="/cotizaciones/:id" element={<PrivateRoute require="cotizaciones.read"><VerCotizacion /></PrivateRoute>} />
-            <Route path="/nuevacotizacion" element={<PrivateRoute require="cotizaciones.write"><FormularioCotizacion /></PrivateRoute>} />
-            <Route path="/cotizaciones/editar/:id" element={<PrivateRoute require="cotizaciones.write"><FormularioCotizacion modo="editar" /></PrivateRoute>} />
+            <Route
+              path="/cotizaciones"
+              element={<PrivateRoute require="cotizaciones.read"><ListaCotizaciones /></PrivateRoute>}
+            />
+            <Route
+              path="/cotizaciones/:id"
+              element={<PrivateRoute require="cotizaciones.read"><VerCotizacion /></PrivateRoute>}
+            />
+            <Route
+              path="/nuevacotizacion"
+              element={<PrivateRoute require="cotizaciones.write"><FormularioCotizacion /></PrivateRoute>}
+            />
+            <Route
+              path="/cotizaciones/editar/:id"
+              element={<PrivateRoute require="cotizaciones.write"><FormularioCotizacion modo="editar" /></PrivateRoute>}
+            />
 
             {/* Procesos operativos */}
-            <Route path="/procesos-operativos" element={<PrivateRoute require="procesos.read"><ListaProcesosOperativos /></PrivateRoute>} />
-            <Route path="/procesos-operativos/:id" element={<PrivateRoute require="procesos.read"><VerProcesoOperativo /></PrivateRoute>} />
-            <Route path="/procesos-operativos/nuevo" element={<PrivateRoute require="procesos.write"><FormularioProcesoOperativo /></PrivateRoute>} />
-            <Route path="/procesos-operativos/editar/:id" element={<PrivateRoute require="procesos.write"><FormularioProcesoOperativo modo="editar" /></PrivateRoute>} />
+            <Route
+              path="/procesos-operativos"
+              element={<PrivateRoute require="procesos.read"><ListaProcesosOperativos /></PrivateRoute>}
+            />
+            <Route
+              path="/procesos-operativos/:id"
+              element={<PrivateRoute require="procesos.read"><VerProcesoOperativo /></PrivateRoute>}
+            />
+            <Route
+              path="/procesos-operativos/nuevo"
+              element={<PrivateRoute require="procesos.write"><FormularioProcesoOperativo /></PrivateRoute>}
+            />
+            <Route
+              path="/procesos-operativos/editar/:id"
+              element={<PrivateRoute require="procesos.write"><FormularioProcesoOperativo modo="editar" /></PrivateRoute>}
+            />
 
             {/* Asignación de costos */}
-            <Route path="/asignacion-costos/ver/:folio" element={<PrivateRoute require="asignacion_costos.read"><VerAsignacionCostos /></PrivateRoute>} />
-            <Route path="/asignacion-costos/nuevo" element={<PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="crear" /></PrivateRoute>} />
-            <Route path="/asignacion-costos/editar/:folio" element={<PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="editar" /></PrivateRoute>} />
+            <Route
+              path="/asignacion-costos/ver/:folio"
+              element={<PrivateRoute require="asignacion_costos.read"><VerAsignacionCostos /></PrivateRoute>}
+            />
+            <Route
+              path="/asignacion-costos/nuevo"
+              element={<PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="crear" /></PrivateRoute>}
+            />
+            <Route
+              path="/asignacion-costos/editar/:folio"
+              element={<PrivateRoute require="asignacion_costos.write"><FormularioAsignacionCostos modo="editar" /></PrivateRoute>}
+            />
 
             {/* Pagos proveedores */}
-            <Route path="/pagos-proveedores" element={<PrivateRoute require="pagos_proveedores.read"><ListaPagosProveedores /></PrivateRoute>} />
-            <Route path="/pagos-proveedores/:numero_control" element={<PrivateRoute require="pagos_proveedores.read"><ListaAbonos /></PrivateRoute>} />
+            <Route
+              path="/pagos-proveedores"
+              element={<PrivateRoute require="pagos_proveedores.read"><ListaPagosProveedores /></PrivateRoute>}
+            />
+            <Route
+              path="/pagos-proveedores/:numero_control"
+              element={<PrivateRoute require="pagos_proveedores.read"><ListaAbonos /></PrivateRoute>}
+            />
 
             {/* Estado de cuenta clientes */}
-            <Route path="/estado-cuenta-clientes" element={<PrivateRoute require="estado_cuenta.read"><ListaEstadoCuentaClientes /></PrivateRoute>} />
-            <Route path="/estado-cuenta/abonos/:numeroEstado" element={<PrivateRoute require="estado_cuenta.read"><ListaAbonosClientes /></PrivateRoute>} />
+            <Route
+              path="/estado-cuenta-clientes"
+              element={<PrivateRoute require="estado_cuenta.read"><ListaEstadoCuentaClientes /></PrivateRoute>}
+            />
+            <Route
+              path="/estado-cuenta/abonos/:numeroEstado"
+              element={<PrivateRoute require="estado_cuenta.read"><ListaAbonosClientes /></PrivateRoute>}
+            />
 
             {/* Reportes */}
-            <Route path="/data-export" element={<PrivateRoute require="reportes.export"><DataExport /></PrivateRoute>} />
+            <Route
+              path="/data-export"
+              element={<PrivateRoute require="reportes.export"><DataExport /></PrivateRoute>}
+            />
 
             {/* Usuarios */}
-            <Route path="/usuarios" element={<PrivateRoute require="usuarios.read"><UsuariosPermisos /></PrivateRoute>} />
+            <Route
+              path="/usuarios"
+              element={<PrivateRoute require="usuarios.read"><UsuariosPermisos /></PrivateRoute>}
+            />
 
             {/* 403 */}
             <Route path="/403" element={<div>403 — Sin permisos</div>} />

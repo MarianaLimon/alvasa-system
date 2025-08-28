@@ -284,7 +284,7 @@ const VerCotizacion = () => {
           <Button variant="primary" onClick={handlePrint}>
             <BsPrinter className="me-2" /> Imprimir
           </Button>
-          <Button variant="warning" onClick={() => {
+          <Button className='btn-editar-cotizacion tooltip-right' variant="warning" onClick={() => {
             const cotId = cotizacion?.id || id;
             navigate(`/cotizaciones/editar/${cotId}`);
           }}>

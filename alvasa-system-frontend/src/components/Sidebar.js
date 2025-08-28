@@ -21,10 +21,10 @@ const Sidebar = () => {
     (typeof hasPermission === 'function' && (hasPermission('USUARIOS_VER') || hasPermission('usuarios.read'))) ||
     (user?.role === 'MASTER' || user?.rol === 'MASTER');
 
-  // ⚠️ Hooks siempre se llaman, no retornamos antes
   const grupos = useMemo(() => ({
     operaciones: [
-      { to: '/clientes',            label: 'Clientes',          icon: <BsPeople className="icon" />,     perm: 'clients.read' },
+      // ⬇️ FIX: estaba 'clients.read' (en inglés). Debe ser 'clientes.read'
+      { to: '/clientes',            label: 'Clientes',          icon: <BsPeople className="icon" />,     perm: 'clientes.read' },
       { to: '/cotizaciones',        label: 'Cotizaciones',      icon: <BsCalculator className="icon" />, perm: 'cotizaciones.read' },
       { to: '/procesos-operativos', label: 'Alta de Embarques', icon: <BsBoxSeam className="icon" />,    perm: 'procesos.read' },
     ],
@@ -39,9 +39,9 @@ const Sidebar = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [canSeeUsuarios]);
 
-  const opsVisible = useMemo(() => grupos.operaciones.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
-  const finVisible = useMemo(() => grupos.finanzas.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
-  const admVisible = useMemo(() => grupos.administracion.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
+  const opsVisible  = useMemo(() => grupos.operaciones.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
+  const finVisible  = useMemo(() => grupos.finanzas.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
+  const admVisible  = useMemo(() => grupos.administracion.filter(it => hasPermission?.(it.perm)), [grupos, hasPermission]);
 
   const [open, setOpen] = useState({ operaciones: false, finanzas: false, administracion: false });
 
@@ -60,9 +60,7 @@ const Sidebar = () => {
   };
 
   return (
-    // 👇 en lugar de “early return”, ocultamos el contenido mientras carga
     <div className="sidebar d-flex flex-column" style={{ visibility: loading ? 'hidden' : 'visible' }}>
-      {/* Header usuario */}
       {user && (
         <div className="sidebar-header-user">
           <BsPersonCircle size={32} style={{ marginRight: 10 }} />
