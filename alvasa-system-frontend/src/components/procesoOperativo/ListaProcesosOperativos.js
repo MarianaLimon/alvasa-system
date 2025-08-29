@@ -127,10 +127,10 @@ const ListaProcesosOperativos = () => {
       <h1 className='title-procesos'>Alta de Embarques</h1>
       {/* Fila de botones */}
       <div className="d-flex mb-3 gap-2">
-        <Button variant="primary" onClick={() => navigate('/procesos-operativos/nuevo')}>
+        <Button id='btnNuevoProceso' className='tooltip-bottom' variant="primary" onClick={() => navigate('/procesos-operativos/nuevo')}>
           + Nuevo Proceso
         </Button>
-        <Button variant="success" onClick={() => navigate('/asignacion-costos/nuevo')}>
+        <Button id='btnNuevaAsignacion' className='tooltip-bottom' variant="success" onClick={() => navigate('/asignacion-costos/nuevo')}>
           + Asignar Costos
         </Button>
       </div>
@@ -227,77 +227,112 @@ const ListaProcesosOperativos = () => {
 
               {/* Acciones del proceso */}
               <td className="text-center">
-                <Button variant="primary" size="sm" className="me-2" onClick={() => manejarVer(proc.id)}><BsEye /></Button>
-                <Button variant="primary" size="sm" className="me-2" onClick={() => manejarEditar(proc.id)}><BsPencil /></Button>
-                <Button variant="secondary" size="sm" className="me-2" onClick={() => manejarImprimir(proc.id)}><BsPrinter /></Button>
+                <div className="botones-acciones">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="me-2 btn-ver-proceso tooltip-right"
+                    onClick={() => manejarVer(proc.id)}
+                  >
+                    <BsEye />
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="me-2 btn-editar-proceso tooltip-right"
+                    onClick={() => manejarEditar(proc.id)}
+                  >
+                    <BsPencil />
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="me-2 btn-imprimir-proceso tooltip-right"
+                    onClick={() => manejarImprimir(proc.id)}
+                  >
+                    <BsPrinter />
+                  </Button>
+                </div>
               </td>
 
               {/* Acciones de asignación de costos */}
               <td className="text-center">
-                {proc.tiene_asignacion ? (
-                  <>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => navigate(`/asignacion-costos/ver/${proc.folio_proceso}`)}
-                    >
-                      <BsEye />
-                    </Button>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => navigate(`/asignacion-costos/editar/${proc.folio_proceso}`)}
-                    >
-                      <BsPencil />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={async () => {
-                        try {
-                          const res = await axios.get(`http://localhost:5050/asignacion-costos/proceso/${proc.id}`);
-                          const asignacionId = res.data.id;
+                <div className="botones-acciones">
+                  {proc.tiene_asignacion ? (
+                    <>
+                      <Button
+                        variant="success"
+                        size="sm"
+                        className="me-2 btn-ver-asignacion tooltip-left"
+                        onClick={() => navigate(`/asignacion-costos/ver/${proc.folio_proceso}`)}
+                      >
+                        <BsEye />
+                      </Button>
 
-                          window.open(`http://localhost:5050/asignacion-costos/pdf/${asignacionId}`, '_blank');
-                        } catch (error) {
-                          console.error('Error al obtener ID de asignación:', error);
-                          setToastVariant('danger');
-                          setToastMsg('Error al generar PDF de asignación');
-                          setShowToast(true);
-                        }
-                      }}
-                    >
-                      <BsPrinter />
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
-                        <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsEye />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
-                        <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsPencil />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
-                      <span className="d-inline-block" style={{ opacity: 0.5 }}>
-                        <Button variant="secondary" size="sm" disabled style={{ pointerEvents: 'none' }}>
-                          <BsPrinter />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-                  </>
-                )}
+                      <Button
+                        variant="success"
+                        size="sm"
+                        className="me-2 btn-editar-asignacion tooltip-left"
+                        onClick={() => navigate(`/asignacion-costos/editar/${proc.folio_proceso}`)}
+                      >
+                        <BsPencil />
+                      </Button>
+
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="btn-exportar-asignacion tooltip-left"
+                        onClick={async () => {
+                          try {
+                            const res = await axios.get(`http://localhost:5050/asignacion-costos/proceso/${proc.id}`);
+                            const asignacionId = res.data.id;
+                            window.open(`http://localhost:5050/asignacion-costos/pdf/${asignacionId}`, '_blank');
+                          } catch (error) {
+                            console.error('Error al obtener ID de asignación:', error);
+                            setToastVariant('danger');
+                            setToastMsg('Error al generar PDF de asignación');
+                            setShowToast(true);
+                          }
+                        }}
+                      >
+                        <BsPrinter />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      {/* Tus OverlayTrigger para “sin asignación” se quedan igual */}
+                      <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
+                        <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
+                          <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
+                            <BsEye />
+                          </Button>
+                        </span>
+                      </OverlayTrigger>
+
+                      {/* Botón para crear asignación (protegido por permisos) */}
+                      <Button
+                        variant="success"
+                        size="sm"
+                        className="btn-editar-asignacion tooltip-right"
+                        onClick={() => navigate(`/asignacion-costos/nuevo?folio=${proc.folio_proceso}`)}
+                      >
+                        <BsPencil />
+                      </Button>
+
+                      <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
+                        <span className="d-inline-block ms-2" style={{ opacity: 0.5 }}>
+                          <Button variant="secondary" size="sm" disabled style={{ pointerEvents: 'none' }}>
+                            <BsPrinter />
+                          </Button>
+                        </span>
+                      </OverlayTrigger>
+                    </>
+                  )}
+                </div>
               </td>
+
             </tr>
           ))}
         </tbody>
