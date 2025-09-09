@@ -1,4 +1,3 @@
-// src/utils/permissions/config.js
 const permisosConfig = {
   '/clientes': [
     { selector: '#btnAgregarCliente',    perm: 'clientes.write',  tooltip: 'No puedes crear clientes, solicita los permisos' },
@@ -17,7 +16,7 @@ const permisosConfig = {
     { selector: '.btn-eliminar-abono',   perm: 'pagos_proveedores.delete' },
   ],
 
-  // 👇 ESTA pantalla es donde viven también los botones de asignación
+  // ESTA pantalla es donde viven también los botones de asignación
   '/procesos-operativos*': [
     // Procesos
     { selector: '#btnNuevoProceso',      perm: 'procesos.write',            tooltip: 'No puedes crear procesos' },
@@ -25,7 +24,7 @@ const permisosConfig = {
     { selector: '.btn-editar-proceso',   perm: 'procesos.write',            tooltip: 'No puedes editar procesos' },
     { selector: '.btn-eliminar-proceso', perm: 'procesos.delete',           tooltip: 'No puedes eliminar procesos' },
 
-    // 🔽 Asignación de costos (porque aquí están esos botones)
+    // Asignación de costos (porque aquí están esos botones)
     { selector: '#btnNuevaAsignacion',      perm: 'asignacion_costos.write',  tooltip: 'No puedes crear asignaciones' },
     { selector: '.btn-ver-asignacion',      perm: 'asignacion_costos.read',   tooltip: 'No puedes ver asignaciones' },
     { selector: '.btn-editar-asignacion',   perm: 'asignacion_costos.write',  tooltip: 'No puedes editar asignaciones' },

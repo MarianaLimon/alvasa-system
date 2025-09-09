@@ -206,7 +206,7 @@ const VerProcesoOperativo = () => {
             <Button variant="primary" onClick={manejarImprimir}>
               <BsPrinter className="me-2" /> Imprimir
             </Button>
-            <Button variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
+            <Button className="btn-editar-proceso tooltip-right" variant="warning" onClick={() => navigate(`/procesos-operativos/editar/${id}`)}>
               <BsPencil className="me-2" /> Editar proceso operativo
             </Button>
             

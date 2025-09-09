@@ -50,7 +50,7 @@
   padding: .35rem .6rem;
   font-weight: 600;
   border-radius: 999px;
-  font-size: .78rem;
+  font-size: .56rem;
 }
 
 .badge.bg-warning { color:#000 !important; }
@@ -59,7 +59,9 @@
 /* Columna de acciones */
 .tabla-cotizaciones td:last-child {
   text-align: center;
+  width: 12rem;
 }
+
 .tabla-cotizaciones .botones-acciones {
   display: flex;
   justify-content: center;

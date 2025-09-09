@@ -72,7 +72,7 @@ const manejarVerCotizacion = async () => {
                     <Button variant="primary" className="w-100" onClick={manejarImprimir}>
                     <BsPrinter className="me-2" /> Imprimir
                     </Button>
-                    <Button variant="success" className="w-100" onClick={() => navigate(`/asignacion-costos/editar/${folio}`)}>
+                    <Button variant="success" className="w-100 btn-editar-asignacion" onClick={() => navigate(`/asignacion-costos/editar/${folio}`)}>
                     <BsPencil className="me-2" /> Editar Costos
                     </Button>
                     <Button variant="info" className="w-100" onClick={() => navigate(`/procesos-operativos/${asignacion.proceso_operativo_id}`)}>

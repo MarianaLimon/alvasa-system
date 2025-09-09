@@ -63,10 +63,10 @@ const Sidebar = () => {
     <div className="sidebar d-flex flex-column" style={{ visibility: loading ? 'hidden' : 'visible' }}>
       {user && (
         <div className="sidebar-header-user">
-          <BsPersonCircle size={32} style={{ marginRight: 10 }} />
+          <BsPersonCircle size={35} style={{ marginRight: 10 }} />
           <div className="user-meta">
             <div className="user-name">{user?.nombre || 'Usuario'}</div>
-            <div className="user-email">{user?.email || '—'}</div>
+            {/* <div className="user-email">{user?.email || '—'}</div> */}
             <div className="user-role">{user?.role || user?.rol || '—'}</div>
           </div>
         </div>
