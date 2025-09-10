@@ -1,10 +1,10 @@
 // src/components/procesoOperativo/EstatusProcesoBadge.jsx
 export default function EstatusProcesoBadge({ estatus, estatusCodigo, total = 10 }) {
   const code = Number(estatusCodigo || 0);
-  const pct = Math.round((code / total) * 100);
+  // const pct = Math.round((code / total) * 100);
 
   // Color personalizado para la barra
-  const PROGRESS_COLOR = '#5751AB';
+  // const PROGRESS_COLOR = '#5751AB';
 
   // (opcional) tono del badge, lo dejo igual
   const tone =
@@ -14,22 +14,22 @@ export default function EstatusProcesoBadge({ estatus, estatusCodigo, total = 10
 
   return (
     <div>
-      <span className={`badge bg-${tone}`} style={{ fontSize: '0.9rem' }}>
+      <span className={`badge bg-${tone} estatus`} style={{ fontSize: '0.8rem' }}>
         {estatus || '—'}
       </span>
-      <div className="progress mt-2" style={{ height: 8 }}>
+      {/* <div className="progress mt-2" style={{ height: 8 }}>
         <div
           className="progress-bar"
           role="progressbar"
           style={{
             width: `${pct}%`,
-            backgroundColor: PROGRESS_COLOR   // 👈 aquí el color
+            backgroundColor: PROGRESS_COLOR  
           }}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

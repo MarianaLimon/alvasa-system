@@ -56,11 +56,11 @@
 .badge.bg-warning { color:#000 !important; }
 .badge.bg-info    { background:#17A2B8 !important; }
 
-/* Columna de acciones */
+/* Columna de acciones 
 .tabla-cotizaciones td:last-child {
   text-align: center;
   width: 12rem;
-}
+}*/
 
 .tabla-cotizaciones .botones-acciones {
   display: flex;

@@ -7,6 +7,7 @@
   border: 1px solid rgba(255,255,255,0.35);
   backdrop-filter: blur(8px) saturate(140%);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
+  font-size: .92rem;
 
   /* volumen muy discreto */
   box-shadow:
@@ -115,8 +116,8 @@ tr:hover td.fila-ec {
 
 .btn-limpiar-filtros, .btn-verpagos {
   border: 1px solid #17A2B8 !important;
-  color: #17A2B8;
-  background-color: transparent;
+  color: #17A2B8 !important;
+  background-color: transparent !important;
   transition: all 0.3s ease;
 }
 

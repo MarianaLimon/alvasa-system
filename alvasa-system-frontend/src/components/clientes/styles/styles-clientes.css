@@ -1,6 +1,5 @@
 .container-clientes{
-  
-  padding: 2rem;
+  padding: 0 1rem;
   border-radius: 15px;
 }
 
@@ -16,7 +15,7 @@
   background-color: #454084;; 
   color: rgb(196, 196, 196);
   border: none;
-  padding: 1rem 2rem;
+  padding: 1rem .8rem;
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
@@ -127,3 +126,8 @@
 .tabla-clientes td {
   vertical-align: middle;
 }
+
+#btnAgregarCliente{
+  padding: 8px 25px !important;
+}
+

@@ -250,7 +250,7 @@ const ListaPagosProveedores = () => {
                 <Card key={grupo} className="m-3">
                   <Card.Header
                     onClick={() => toggleGrupo(grupo)}
-                    style={{ cursor: 'pointer', background: '#5751AB', color: '#fff'}}
+                    style={{ cursor: 'pointer', background: '#5751AB', color: '#fff', fontSize: '.9rem'}}
                   >
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
@@ -265,14 +265,15 @@ const ListaPagosProveedores = () => {
                         <BsCalendar className="me-2" />
                         {fecha}
                         <span className="mx-3">|</span>
-                        <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(26, 224, 255)' }}>
-                          <BsCashStack className="me-1" />
-                          ${totalPesosGrupo.toFixed(2)}
-                        </span>
+                        <span className="fw-bold" style={{ fontSize: '1.1rem', color: 'rgb(26, 224, 255)' }}>
+                        <BsCashStack className="me-1" />
+                        ${totalPesosGrupo.toFixed(2)}
+                      </span>
                       </div>
+                      
                       <div className="d-flex align-items-center gap-3">
                         Saldo total:
-                        <span className="fw-bold" style={{ fontSize: '1.2rem', color: '#ffc107' }}>
+                        <span className="fw-bold" style={{ fontSize: '1.1rem', color: '#ffc107' }}>
                            ${saldoGrupo.toFixed(2)}
                         </span>
                         <span className={`badge ${estatusGrupo === 'Saldado' ? 'bg-success' : 'bg-warning text-dark'}`}>
@@ -288,7 +289,7 @@ const ListaPagosProveedores = () => {
                     <Table bordered responsive className="mb-0 custom-pagos-table">
                       <thead>
                         <tr className="listapagos-titles">
-                          <th># Control</th>
+                          <th style={{ minWidth: 120 }}># Control</th>
                           <th>Giro</th>
                           <th>Proveedor</th>
                           <th>Concepto de Pago</th>
@@ -442,7 +443,7 @@ const ListaPagosProveedores = () => {
 
                                     <td>
                                         <button
-                                        className="btn btn-sm btn-success me-1"
+                                        className="btn btn-sm btn-success me-1 btn-action mb-1"
                                         onClick={() =>
                                             abrirModalPago(pago.numero_control, parseFloat(pago.saldo))
                                         }
@@ -450,7 +451,7 @@ const ListaPagosProveedores = () => {
                                         Pagar
                                         </button>
                                         <button
-                                        className="btn btn-sm btn-outline-primary"
+                                        className="btn btn-sm btn-primary btn-action mb-1"
                                         onClick={() =>
                                             navigate(`/pagos-proveedores/${pago.numero_control}`)
                                         }

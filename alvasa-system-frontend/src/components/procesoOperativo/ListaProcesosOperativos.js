@@ -215,10 +215,10 @@ const ListaProcesosOperativos = () => {
               <td>{proc.ejecutivo_cuenta || '—'}</td>
               <td>{proc.mercancia}</td>
               <td>{proc.no_contenedor}</td>
-              <td>{formatoFechaBonita(proc.fecha_alta)}</td>
+              <td style={{ minWidth: 150 }}>{formatoFechaBonita(proc.fecha_alta)}</td>
 
               {/* Estatus */}
-              <td style={{ minWidth: 160 }}>
+              <td>
                 <EstatusProcesoBadge
                   estatus={proc.estatus}
                   estatusCodigo={proc.estatus_codigo}
@@ -226,12 +226,12 @@ const ListaProcesosOperativos = () => {
               </td>
 
               {/* Acciones del proceso */}
-              <td className="text-center">
+              <td className="text-center" >
                 <div className="botones-acciones">
                   <Button
                     variant="primary"
                     size="sm"
-                    className="me-2 btn-ver-proceso tooltip-right"
+                    className="me-2 btn-ver-proceso btn-action tooltip-right"
                     onClick={() => manejarVer(proc.id)}
                   >
                     <BsEye />
@@ -240,7 +240,7 @@ const ListaProcesosOperativos = () => {
                   <Button
                     variant="primary"
                     size="sm"
-                    className="me-2 btn-editar-proceso tooltip-right"
+                    className="me-2 btn-editar-proceso btn-action tooltip-right"
                     onClick={() => manejarEditar(proc.id)}
                   >
                     <BsPencil />
@@ -249,7 +249,7 @@ const ListaProcesosOperativos = () => {
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="me-2 btn-imprimir-proceso tooltip-right"
+                    className="me-2 btn-imprimir-proceso btn-action tooltip-right"
                     onClick={() => manejarImprimir(proc.id)}
                   >
                     <BsPrinter />
@@ -265,7 +265,7 @@ const ListaProcesosOperativos = () => {
                       <Button
                         variant="success"
                         size="sm"
-                        className="me-2 btn-ver-asignacion tooltip-left"
+                        className="me-2 btn-ver-asignacion btn-action tooltip-left"
                         onClick={() => navigate(`/asignacion-costos/ver/${proc.folio_proceso}`)}
                       >
                         <BsEye />
@@ -274,7 +274,7 @@ const ListaProcesosOperativos = () => {
                       <Button
                         variant="success"
                         size="sm"
-                        className="me-2 btn-editar-asignacion tooltip-left"
+                        className="me-2 btn-editar-asignacion btn-action tooltip-left"
                         onClick={() => navigate(`/asignacion-costos/editar/${proc.folio_proceso}`)}
                       >
                         <BsPencil />
@@ -283,7 +283,7 @@ const ListaProcesosOperativos = () => {
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="btn-exportar-asignacion tooltip-left"
+                        className="btn-exportar-asignacion btn-action tooltip-left"
                         onClick={async () => {
                           try {
                             const res = await axios.get(`http://localhost:5050/asignacion-costos/proceso/${proc.id}`);

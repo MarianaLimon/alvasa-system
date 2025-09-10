@@ -104,14 +104,14 @@ const CardEstadoCuentaCliente = ({ data, onCambioAbonos }) => {
             <BsCalendar className="me-2" />
             {formatearFecha(fechaEntrega)}
             <span className="mx-3">|</span>
-            <span className="fw-bold" style={{ fontSize: '1.2rem', color: 'rgb(244, 100, 140)' }}>
+            <span className="fw-bold" style={{ fontSize: '1.1rem', color: 'rgb(244, 100, 140)' }}>
               <BsCashStack className="me-1" />
               ${formatoPesos(total)}
             </span>
           </div>
           <div className="d-flex align-items-center gap-3">
             Saldo:
-            <span className="fw-bold" style={{ fontSize: '1.2rem', color: '#ffc107' }}>
+            <span className="fw-bold" style={{ fontSize: '1.1rem', color: '#ffc107' }}>
               ${formatoPesos(saldo)}
             </span>
             <span className={`badge bg-${colorEstatus}`}>{estatus}</span>

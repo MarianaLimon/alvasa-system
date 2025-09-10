@@ -1,20 +1,35 @@
 const mysql = require('mysql2');
+require('dotenv').config();
 
-const connection = mysql.createConnection({
-  host: '127.0.0.1',      // La dirección de tu base de datos (en este caso, localhost)
-  user: 'root',           // Tu usuario de MySQL
-  password: 'ojitoS15.92', // Tu contraseña de MySQL
-  database: 'alvasa_system' // El nombre de tu base de datos
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'alvasa_system',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  multipleStatements: true,
 });
 
-// Verificación de la conexión
-connection.connect((err) => {
+// ⬇ Log temporal solo para verificar
+console.log('DB cfg =>', {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  name: process.env.DB_NAME,
+  hasPass: !!process.env.DB_PASSWORD
+});
+
+// Verificación inicial
+pool.getConnection((err, conn) => {
   if (err) {
-    console.error('❌ Error al conectar a la base de datos:', err);
-    return;
+    console.error('❌ Error al conectar a la base de datos:', err.message);
+  } else {
+    console.log('✅ Conexión establecida con la base de datos MySQL');
+    conn.release();
   }
-  console.log('✅ Conectado a la base de datos MySQL');
 });
 
-// Exporta la conexión para usarla en otros archivos
-module.exports = connection;
+module.exports = pool;

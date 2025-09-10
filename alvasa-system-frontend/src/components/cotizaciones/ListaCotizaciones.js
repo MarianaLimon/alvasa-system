@@ -167,15 +167,18 @@ const ListaCotizaciones = () => {
           </InputGroup>
         </div>
 
-
         <div className="d-flex gap-2">
           <Button variant="secondary" onClick={limpiarFiltros}>
             Limpiar filtros
           </Button>
+          
+        </div>
+      </div>
+
+      <div className="d-flex mb-3 align-items-center justify-content-between flex-wrap gap-2">
           <Button id="btnNuevaCotizacion" variant="success" onClick={() => navigate('/nuevacotizacion')}>
             + Nueva Cotización
           </Button>
-        </div>
       </div>
 
       {/* Tabla */}
@@ -207,21 +210,21 @@ const ListaCotizaciones = () => {
               }</td>
               <td>{renderBadgeEstatus(cot.estatus)}</td>
               <td className="text-center">
-                <Button variant="info" size="sm" className="me-2" onClick={() => manejarVer(cot.id)}>
+                <Button variant="info" size="sm" className="me-2 btn-action" onClick={() => manejarVer(cot.id)}>
                   <BsEye />
                 </Button>
-                <Button variant="warning" size="sm" className="me-2 btn-editar-cotizacion" onClick={() => manejarEditar(cot.id)}>
+                <Button variant="warning" size="sm" className="me-2 btn-editar-cotizacion btn-action" onClick={() => manejarEditar(cot.id)}>
                   <BsPencil />
                 </Button>
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="me-2"
+                  className="me-2 btn-action"
                   onClick={() => manejarImprimir(cot.id)}
                 >
                   <BsPrinter />
                 </Button>
-                <Button className="btn-eliminar-cotizacion" variant="danger" size="sm" onClick={() => manejarEliminar(cot.id)}>
+                <Button className="btn-eliminar-cotizacion btn-action" variant="danger" size="sm" onClick={() => manejarEliminar(cot.id)}>
                   <BsTrash />
                 </Button>
               </td>

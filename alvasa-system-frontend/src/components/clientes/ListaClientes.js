@@ -70,11 +70,11 @@ const ListaClientes = () => {
               <td>{cliente.email}</td>
               <td>
                 <div className="botones-acciones">
-                  <Button size="sm" className="btn-warning btn-editar btn-editar-cliente"
+                  <Button size="sm" className="btn-warning btn-editar btn-editar-cliente btn-action"
                     onClick={() => setClienteEditando(cliente)} >
                     <BsPencil />
                   </Button>
-                  <Button size="sm" className="btn-danger btn-eliminar btn-eliminar-cliente"
+                  <Button size="sm" className="btn-danger btn-eliminar btn-eliminar-cliente btn-action"
                     onClick={() => eliminarCliente(cliente.id)} >
                     <BsTrash />
                   </Button>

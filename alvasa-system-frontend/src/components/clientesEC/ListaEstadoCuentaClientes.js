@@ -1,4 +1,3 @@
-// src/components/estadoCuenta/ListaEstadoCuentaClientes.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card } from 'react-bootstrap';
@@ -127,9 +126,9 @@ const ListaEstadoCuentaClientes = () => {
         {filtrados.length > 0 ? (
           filtrados.map((cliente) => (
             <CardEstadoCuentaCliente
-              key={cliente.id_estado_cuenta}   // clave estable
+              key={cliente.id_estado_cuenta}   
               data={cliente}
-              onCambioAbonos={onCambioAbonos}  // 👈 pasa el callback al card
+              onCambioAbonos={onCambioAbonos}  
             />
           ))
         ) : (

@@ -90,7 +90,7 @@ async function calcularEstatusYGuardar(procesoId) {
 
   // 9
   if (!isPresent(r.entrega)) return await guardar(procesoId, code, name);
-  code = 9; name = 'Entregado Cliente';
+  code = 9; name = 'Entregado\nCliente';
 
   // 10
   if (isPresent(r.entrega_vacio)) { code = 10; name = 'Entregado Vacio'; }

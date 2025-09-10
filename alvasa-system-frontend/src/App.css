@@ -192,7 +192,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4rem 3rem 3rem;
+  padding: 2rem 3rem;
   border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 
@@ -225,7 +225,7 @@ body {
 /* ------ Dashboard ------ */
 
 .container-cards{
-  margin-top: 5rem;
+  margin-top: 2rem;
 }
 
 .dashboard-card {
@@ -244,10 +244,10 @@ body {
 }
 
 .dashboard-card-key-number{
-  font-size: 3rem;
+  font-size: 2.3rem;
   color: #6c757d;
   text-align: center;
-  margin: 0 1rem;
+  margin: 0;
 }
 
 .dashboard-card-title{
@@ -256,7 +256,7 @@ body {
 }
 
 .dashboard-card-number{
-  font-size: 3rem;
+  font-size: 2.3rem;
   color: #6c757d;
   text-align: right;
   margin: 0 1rem;
@@ -522,4 +522,78 @@ body {
 
   /* anula cualquier flecha previa basada en borders */
   border: none !important;
+}
+
+
+/* === BOTONES GLOBALES (estilo export) === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0 !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .3px;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .15);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  padding: 7px 18px !important;
+}
+
+.btn-action{
+  padding: 6px !important;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px rgba(0,0,0,.18);
+  filter: brightness(1.03);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+
+/* Colores de marca (puedes copiarlos de tus export-btn) */
+.btn-primary {
+  background: #5751AB !important; /* Indigo */
+  color: #fff !important;
+}
+
+.btn-success {
+  background: #1d875b !important; /* Green */
+  color: #fff !important;
+}
+
+.btn-danger {
+  background: rgb(223, 107, 139) !important; /* Amber/Rosa */
+  color: #fff !important;
+}
+
+.btn-warning {
+  background: rgb(230, 176, 41) !important; /* Cyan/Amarillo */
+  color: #fff !important;
+}
+
+.btn-info {
+  background: #1497a8 !important; /* Coco */
+  color: #fff !important;
+}
+
+/* Variante “outline” coherente */
+.btn-outline-primary {
+  border: 2px solid #5751AB !important;
+  color: #5751AB !important;
+  background: transparent !important;
+}
+.btn-outline-primary:hover {
+  background: #5751AB !important;
+  color: #fff !important;
+}
+
+
+.estatus {
+  white-space: pre-line; /* convierte \n en salto */
 }
