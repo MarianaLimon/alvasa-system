@@ -158,3 +158,13 @@ tr:hover td.fila-pago {
 .collapse-wrapper.expanded {
   max-height: 1000px;
 }
+
+.card-gral-proveedores{
+  border-radius: 20px;
+  padding-top: 1rem;
+}
+
+.btn-buscar{
+  background-color: rgb(23, 162, 184);
+  color: #fff;
+}

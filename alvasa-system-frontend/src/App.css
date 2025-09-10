@@ -593,6 +593,16 @@ body {
   color: #fff !important;
 }
 
+.btn-outline-secondary {
+  border: 2px solid #17A2B8 !important;
+  color: #17A2B8 !important;
+  background: transparent !important;
+}
+.btn-outline-secondary:hover {
+  background: #17A2B8 !important;
+  color: #fff !important;
+}
+
 
 .estatus {
   white-space: pre-line; /* convierte \n en salto */

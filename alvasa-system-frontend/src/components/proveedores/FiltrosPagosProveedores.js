@@ -90,11 +90,11 @@ const FiltrosPagosProveedores = ({
       </InputGroup>
 
       <div className="d-flex gap-2">
-  <Button variant="outline-secondary" onClick={onLimpiarFiltros}>
-    Limpiar filtros
-  </Button>
-  
-</div>
+        <Button className="btn-outline-secondary" onClick={onLimpiarFiltros}>
+          Limpiar filtros
+        </Button>
+        
+      </div>
 
     </div>
   );

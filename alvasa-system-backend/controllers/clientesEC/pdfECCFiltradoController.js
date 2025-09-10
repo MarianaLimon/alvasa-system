@@ -57,7 +57,7 @@ const logo = (() => {
 
 exports.generarPDFECCFiltrado = async (req, res) => {
   try {
-    const { cliente, estatus, desde, hasta } = req.query;
+    const { cliente, estatus, desde, hasta, q } = req.query;
 
     // ---- Filtros sobre ECC (campos reales)
     const where = [];
@@ -66,6 +66,20 @@ exports.generarPDFECCFiltrado = async (req, res) => {
     if (estatus) { where.push('ecc.estatus = ?');        params.push(estatus); }
     if (desde)   { where.push('ecc.fecha_entrega >= ?'); params.push(desde); }
     if (hasta)   { where.push('ecc.fecha_entrega <= ?'); params.push(hasta); }
+
+    if (q && q.trim()) {
+      const like = `%${q.trim()}%`;
+      where.push(`(
+          ecc.cliente LIKE ?
+          OR ecc.id_estado_cuenta LIKE ?
+          OR ecc.folio_proceso LIKE ?
+          OR ecc.contenedor LIKE ?
+          OR ecc.tipo_carga LIKE ?
+          OR ecc.mercancia LIKE ?
+          OR ecc.estatus LIKE ?
+      )`);
+      params.push(like, like, like, like, like, like, like);
+    }
 
     const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : '';
 

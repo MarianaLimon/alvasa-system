@@ -63,7 +63,7 @@ const FiltrosEstadoCuentaClientes = ({
 
       {/* Botones */}
       <div className="d-flex gap-2 align-items-center">
-        <Button className="btn-limpiar-filtros" onClick={onLimpiarFiltros}>
+        <Button className="btn-limpiar-filtros btn-outline-secondary" onClick={onLimpiarFiltros}>
           Limpiar filtros
         </Button>
         <Button className="btn-generar-pdf" onClick={onImprimir}>
