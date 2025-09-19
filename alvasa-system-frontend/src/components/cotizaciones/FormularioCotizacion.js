@@ -165,7 +165,6 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     }
   };
 
-
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);
   const handleCargosChange = (datosCargos) => setCargos(datosCargos);
   const handleImpuestosChange = (datosImpuestos) => setImpuestos(datosImpuestos);
