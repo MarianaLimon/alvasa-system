@@ -1,16 +1,67 @@
 const db = require('../config/db');
 
 // ==============================
-// CREAR COTIZACIÓN
+// CREAR COTIZACIÓN (robusto)
 // ==============================
+// controllers/cotizacionesController.js
+
 exports.crearCotizacion = (req, res) => {
-  const {
-    folio, cliente_id, empresa, fecha, mercancia, regimen, aduana, tipo_envio,
-    cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta, total,
-    ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
-    flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
-    flete_seguro_mercancia = false, incoterm, costo_despacho
-  } = req.body;
+  // ── Helpers de normalización ────────────────────────────────────────────
+  const toStr = v => (v === '' || v === undefined || v === null) ? null : String(v);
+  const toNum = v => {
+    if (v === '' || v === undefined || v === null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const toInt = v => {
+    if (v === '' || v === undefined || v === null) return null;
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : null;
+  };
+  const toDate = v => {
+    if (!v) return null;                      // si viene vacío, manda NULL
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;     // evita "Incorrect date value: ''"
+  };
+  const toBool01 = v => (v ? 1 : 0);          // MySQL espera 0/1
+
+  // ── Body ────────────────────────────────────────────────────────────────
+  const b = req.body || {};
+
+  const folio                 = toStr(b.folio);
+  const cliente_id            = toInt(b.cliente_id);          // FK: requerido
+  const empresa               = toStr(b.empresa);
+  const fecha                 = toDate(b.fecha);
+  const mercancia             = toStr(b.mercancia);
+  const regimen               = toStr(b.regimen);
+  const aduana                = toStr(b.aduana);
+  const tipo_envio            = toStr(b.tipo_envio);
+  const cantidad              = toNum(b.cantidad);
+  const estatus               = toStr(b.estatus);
+  const fraccion_igi          = toStr(b.fraccion_igi);
+  const monto_comisionista    = toNum(b.monto_comisionista);
+  const notas                 = toStr(b.notas);
+  const propuesta             = toNum(b.propuesta);
+  const total                 = toNum(b.total);
+  const ahorro                = toNum(b.ahorro);
+
+  const flete_origen_destino  = toStr(b.flete_origen_destino);
+  const flete_concepto_1      = toStr(b.flete_concepto_1);
+  const flete_valor_1         = toNum(b.flete_valor_1);
+  const flete_concepto_2      = toStr(b.flete_concepto_2);
+  const flete_valor_2         = toNum(b.flete_valor_2);
+  const flete_concepto_3      = toStr(b.flete_concepto_3);
+  const flete_valor_3         = toNum(b.flete_valor_3);
+  const flete_total           = toNum(b.flete_total);
+
+  const flete_seguro_mercancia = toBool01(b.flete_seguro_mercancia);
+  const incoterm               = toStr(b.incoterm);
+  const costo_despacho         = toNum(b.costo_despacho);
+
+  // Valida mínimos (ajusta si necesitas más)
+  if (!cliente_id) {
+    return res.status(400).json({ error: 'cliente_id es requerido' });
+  }
 
   const sql = `
     INSERT INTO cotizaciones (
@@ -21,25 +72,43 @@ exports.crearCotizacion = (req, res) => {
       flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
       flete_seguro_mercancia, incoterm, costo_despacho
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 
-  db.query(sql, [
+  const params = [
     folio, cliente_id, empresa, fecha, mercancia, regimen, aduana,
-    tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista, notas, propuesta,
-    total, ahorro, flete_origen_destino, flete_concepto_1, flete_valor_1,
+    tipo_envio, cantidad, estatus, fraccion_igi, monto_comisionista,
+    notas, propuesta, total, ahorro,
+    flete_origen_destino, flete_concepto_1, flete_valor_1,
     flete_concepto_2, flete_valor_2, flete_concepto_3, flete_valor_3, flete_total,
     flete_seguro_mercancia, incoterm, costo_despacho
-  ], (err, result) => {
-    if (err) return res.status(500).json({ error: 'Error al guardar cotización' });
-    res.status(201).json({ message: 'Cotización guardada', id: result.insertId });
+  ];
+
+  // Mantiene callback-style como ya usas en el resto del proyecto
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error('❌ Error al guardar cotización:', err.sqlMessage || err);
+      return res.status(500).json({
+        error: 'Error al guardar cotización',
+        detail: err.sqlMessage || String(err)
+      });
+    }
+    // el front espera { id }
+    const newId = (result && (result.insertId ?? result.id)) || null;
+    return res.status(201).json({
+      ok: true,
+      message: 'Cotización guardada',
+      id: newId,                 // <-- por si el front usa .id
+      insertId: newId,           // <-- por si usa .insertId
+      cotizacionId: newId,       // <-- por si usa .cotizacionId
+      id_cotizacion: newId,      // <-- por si usa snake_case
+      folio: folio || null
+    });
+
   });
 };
 
 
-// ==============================
-// OBTENER TODAS LAS COTIZACIONES
-// ==============================
 // ==============================
 // OBTENER TODAS LAS COTIZACIONES (con filtros)
 // ==============================

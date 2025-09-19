@@ -17,8 +17,10 @@ exports.registrarAbonoEstadoCuenta = async (req, res) => {
     return res.status(400).json({ mensaje: 'El abono debe ser un número mayor a 0.' });
   }
 
-  const conn = db.promise();
+  let conn;
   try {
+    // ⚠️ Requiere que config/db.js exporte un pool de mysql2/promise
+    conn = await db.getConnection();
     await conn.beginTransaction();
 
     // Lock del estado
@@ -94,9 +96,11 @@ exports.registrarAbonoEstadoCuenta = async (req, res) => {
     });
 
   } catch (error) {
-    try { await conn.rollback(); } catch {}
-    console.error('❌ Error en registrarAbonoEstadoCuenta:', error);
+    if (conn) { try { await conn.rollback(); } catch {} }
+    console.error('❌ Error en registrarAbonoEstadoCuenta:', error?.sqlMessage || error);
     return res.status(500).json({ mensaje: 'Error al registrar abono.' });
+  } finally {
+    if (conn) conn.release();
   }
 };
 

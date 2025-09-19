@@ -87,10 +87,21 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
     );
   };
 
+  // helper robusto: toma el id ya venga en resp o en resp.data
+  const pickId = (obj) => (
+    obj?.cotizacionCompleta?.id ??
+    obj?.cotizacion?.id ??
+    obj?.id ??
+    obj?.insertId ??
+    obj?.cotizacionId ??
+    obj?.id_cotizacion ??
+    null
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { cotizacionCompleta } = await guardarCotizacion({
+      const resp = await guardarCotizacion({
         modo,
         form,
         resumen,
@@ -104,27 +115,55 @@ const FormularioCotizacion = ({ onCotizacionGuardada, modo = 'crear', datosInici
         id,
       });
 
-      if (onCotizacionGuardada) onCotizacionGuardada(cotizacionCompleta);
+      // normaliza por si guardarCotizacion devuelve un Axios response
+      const data = resp?.data ?? resp;
 
-      toast.success(
-        modo === 'crear'
-          ? 'Cotización guardada correctamente ✅'
-          : 'Cotización actualizada correctamente ✅'
-      );
+      if (onCotizacionGuardada && data?.cotizacionCompleta) {
+        onCotizacionGuardada(data.cotizacionCompleta);
+      }
 
-      // Obtenemos el id de la cotización recién guardada
-      const idCotizacion = modo === 'crear'
-        ? cotizacionCompleta?.id   // del insert
-        : id;                      // del useParams al editar
+      // 1) intenta resolver el id de distintas formas
+      let idCotizacion = (modo === 'crear')
+        ? (pickId(data) ?? pickId(resp))
+        : id;
 
-      // Redirigir a ver la cotización
-      setTimeout(() => navigate(`/cotizaciones/${idCotizacion}`), 1000);
+      // 2) Fallback: si aún no hay id, pide la lista y usa la más reciente (id más alto)
+      if (!idCotizacion) {
+        try {
+          const r = await fetch('/cotizaciones');
+          if (r.ok) {
+            const lista = await r.json();
+            if (Array.isArray(lista) && lista.length) {
+              idCotizacion = lista.reduce(
+                (max, it) => (it?.id > max ? it.id : max),
+                lista[0]?.id ?? 0
+              );
+            }
+          }
+        } catch (e) {
+          console.warn('Fallback /cotizaciones falló:', e);
+        }
+      }
+
+      // 3) Navegación
+      if (modo === 'crear') {
+        if (idCotizacion) {
+          toast.success('Cotización guardada correctamente ✅');
+          navigate(`/cotizaciones/${idCotizacion}`);
+        } else {
+          // evita /undefined
+          toast.warn('Cotización guardada correctamente');
+          navigate('/cotizaciones');
+        }
+      } else {
+        toast.success('Cotización actualizada correctamente ✅');
+        navigate(`/cotizaciones/${id}`);
+      }
     } catch (error) {
       console.error('Error al guardar cotización:', error);
       toast.error('Hubo un error al guardar la cotización ❌');
     }
   };
-
 
 
   const handleFleteChange = (datosFlete) => setFlete(datosFlete);

@@ -305,7 +305,7 @@ const ListaProcesosOperativos = () => {
                       {/* Tus OverlayTrigger para “sin asignación” se quedan igual */}
                       <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
                         <span className="d-inline-block me-2" style={{ opacity: 0.5 }}>
-                          <Button variant="success" size="sm" disabled style={{ pointerEvents: 'none' }}>
+                          <Button variant="success" className='btn-action' size="sm" disabled style={{ pointerEvents: 'none' }}>
                             <BsEye />
                           </Button>
                         </span>
@@ -315,7 +315,7 @@ const ListaProcesosOperativos = () => {
                       <Button
                         variant="success"
                         size="sm"
-                        className="btn-editar-asignacion tooltip-right"
+                        className="btn-editar-asignacion tooltip-right btn-action"
                         onClick={() => navigate(`/asignacion-costos/nuevo?folio=${proc.folio_proceso}`)}
                       >
                         <BsPencil />
@@ -323,7 +323,7 @@ const ListaProcesosOperativos = () => {
 
                       <OverlayTrigger placement="top" overlay={renderTooltip('Sin asignación de costos')}>
                         <span className="d-inline-block ms-2" style={{ opacity: 0.5 }}>
-                          <Button variant="secondary" size="sm" disabled style={{ pointerEvents: 'none' }}>
+                          <Button variant="secondary" size="sm" className='btn-action' disabled style={{ pointerEvents: 'none' }}>
                             <BsPrinter />
                           </Button>
                         </span>
