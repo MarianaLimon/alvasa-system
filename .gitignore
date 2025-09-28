@@ -1,9 +1,32 @@
-alvasa-system-frontend.zip
-*.zip
-# No subir binarios/paquetes
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Archivos de entorno
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+
+# Editor y sistema
+.vscode/
+.idea/
+.DS_Store
+
+# Backups y dumps
+*.sql
+*.dump
+*.tgz
+
+# Archivos comprimidos
 *.zip
 
-# Evitar nombres reservados de Windows
+# Nombres reservados de Windows (precaución)
 NUL
 CON
 PRN
@@ -26,4 +49,3 @@ LPT6
 LPT7
 LPT8
 LPT9
-*.zip
